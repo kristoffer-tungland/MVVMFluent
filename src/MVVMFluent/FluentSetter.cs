@@ -15,7 +15,7 @@
         private global::System.Action<T> _onChanged;
         private global::System.Action<T, T> _onChangedOldNew;
 
-        private global::System.Collections.Generic.IEnumerable<global::System.Windows.Input.ICommand> _commandsToReevaluate;
+        private global::System.Collections.Generic.IEnumerable<IFluentCommand> _commandsToReevaluate;
         private global::System.Collections.Generic.IEnumerable<string> _propertiesToNotify;
 
         private bool _valueChanged = false;
@@ -102,7 +102,7 @@
         /// </summary>
         /// <param name="commands">The commands to reevaluate.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> Notify(params global::System.Windows.Input.ICommand[] commands)
+        internal FluentSetter<T> Notify(params IFluentCommand[] commands)
         {
             _commandsToReevaluate = commands;
             return this;
@@ -142,10 +142,7 @@
                 {
                     foreach (var command in _commandsToReevaluate)
                     {
-                        if (command is IFluentCommand cmd)
-                        {
-                            cmd.RaiseCanExecuteChanged();
-                        }
+                        command.RaiseCanExecuteChanged();
                     }
                 }
 

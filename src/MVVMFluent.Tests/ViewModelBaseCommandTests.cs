@@ -130,7 +130,7 @@ public class ViewModelBaseCommandTests
             get => Get<int>();
             set => When(value).Notify(Command).Set();
         }
-        public ICommand Command => Do(() => { }).If(canExecute);
+        public IFluentCommand Command => Do(() => { }).If(canExecute);
     }
 
     [Fact]

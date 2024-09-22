@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.Windows.Input;
 
 namespace MVVMFluent.Demo;
 
@@ -13,9 +12,9 @@ internal class MainViewModel : ViewModelBase
         set => When(value).Notify(OkCommand, HelpCommand).Set();
     }
 
-    public ICommand OkCommand => Do(() => ShowDialog(Input)).If(() => !string.IsNullOrWhiteSpace(Input));
+    public Command OkCommand => Do(() => ShowDialog(Input)).If(() => !string.IsNullOrWhiteSpace(Input));
 
-    public ICommand HelpCommand => Do<string>(ShowDialog);
+    public Command<string> HelpCommand => Do<string>(ShowDialog);
 
     private void ShowDialog(string? input)
     {
