@@ -127,7 +127,7 @@ public class MyViewModel : ViewModelBase
     }
 }
 ```
-In this example, if the `Counter` property hasn’t been set before, the Get(10) will return 10 as the default value.
+In this example, if the `Counter` property hasnâ€™t been set before, the Get(10) will return 10 as the default value.
 
 ### Disposal Management
 MVVMFluent provides built-in `Dispose` functionality for cleaning up resources like commands and property stores when a `ViewModelBase` is no longer needed.
@@ -167,7 +167,7 @@ public class MyViewModel : ViewModelBase
 
     public int Counter
     {
-        get => Get(0);
+        get => Get(10);
         set => Set(value);
     }
 
