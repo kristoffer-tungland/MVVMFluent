@@ -1,0 +1,36 @@
+﻿<Window x:Class="MVVMFluent.Demo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MVVMFluent.Demo"
+        mc:Ignorable="d" FontSize="16"
+        d:DataContext="{d:DesignInstance local:MainViewModel}"
+        Title="MVVMFluent Demo" Height="250" Width="600">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBox Grid.Row="0" VerticalAlignment="Center" Padding="10" Margin="10"
+                 Text="{Binding Input, UpdateSourceTrigger=PropertyChanged}" 
+                 IsEnabled="{Binding Enable}" />
+
+        <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" LastChildFill="True">
+            <Button DockPanel.Dock="Right"  Padding="15,0" Margin="10" 
+                    Content="Ok" IsDefault="True"
+                    Command="{Binding OkCommand}" />
+            
+            <Button DockPanel.Dock="Right"  Padding="15,0" Margin="10"
+                    Content="Help"
+                    Command="{Binding HelpCommand}" CommandParameter="This is the help" />
+
+            <CheckBox DockPanel.Dock="Left" Padding="10" Margin="10,5"
+                      VerticalAlignment="Center" VerticalContentAlignment="Center"
+                      Content="Enable"
+                      IsChecked="{Binding Enable}" />
+        </DockPanel>
+
+    </Grid>
+</Window>
