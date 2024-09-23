@@ -9,14 +9,14 @@
         private T _newValue;
         private T _oldValue;
 
-        private global::System.Action<T> _onChanging;
-        private global::System.Action<T, T> _onChangingOldNew;
+        private global::System.Action<T>? _onChanging;
+        private global::System.Action<T, T>? _onChangingOldNew;
 
-        private global::System.Action<T> _onChanged;
-        private global::System.Action<T, T> _onChangedOldNew;
+        private global::System.Action<T>? _onChanged;
+        private global::System.Action<T, T>? _onChangedOldNew;
 
-        private global::System.Collections.Generic.IEnumerable<IFluentCommand> _commandsToReevaluate;
-        private global::System.Collections.Generic.IEnumerable<string> _propertiesToNotify;
+        private global::System.Collections.Generic.IEnumerable<IFluentCommand>? _commandsToReevaluate;
+        private global::System.Collections.Generic.IEnumerable<string>? _propertiesToNotify;
 
         private bool _valueChanged = false;
 

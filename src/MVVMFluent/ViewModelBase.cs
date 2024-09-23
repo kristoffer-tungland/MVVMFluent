@@ -2,12 +2,12 @@
 {
     internal abstract partial class ViewModelBase : global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
     {
-        private readonly global::System.Collections.Generic.Dictionary<string, object> _propertyStore = new global::System.Collections.Generic.Dictionary<string, object>();
+        private readonly global::System.Collections.Generic.Dictionary<string, object?> _propertyStore = new global::System.Collections.Generic.Dictionary<string, object?>();
         private readonly global::System.Collections.Generic.Dictionary<string, IFluentCommand> _commandStore = new global::System.Collections.Generic.Dictionary<string, IFluentCommand>();
 
         private bool _disposed = false;
 
-        public event global::System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Sets the value of a property and notifies that the property has changed.
@@ -15,8 +15,11 @@
         /// <typeparam name="T">The type of the property.</typeparam>
         /// <param name="value">The new value to set.</param>
         /// <param name="propertyName">The name of the property being set.</param>
-        protected internal void Set<T>(T value, [global::System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        protected internal void Set<T>(T value, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
+            if (propertyName == null)
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
             var setter = new FluentSetter<T>(this, propertyName, _propertyStore);
             setter.When(value).Set();
         }
@@ -28,8 +31,11 @@
         /// <param name="value">The new value to set.</param>
         /// <param name="propertyName">The name of the property being set.</param>
         /// <returns>The fluent setter instance.</returns>
-        protected internal FluentSetter<T> When<T>(T value, [global::System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        protected internal FluentSetter<T> When<T>(T value, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
+            if (propertyName == null)
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
             var setter = new FluentSetter<T>(this, propertyName, _propertyStore);
             return setter.When(value);
         }
@@ -41,11 +47,14 @@
         /// <param name="defaultValue">The default value to return if the property is not set.</param>
         /// <param name="propertyName">The name of the property being retrieved.</param>
         /// <returns>The value of the property.</returns>
-        protected internal T Get<T>(T defaultValue = default, [global::System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        protected internal T? Get<T>(T? defaultValue = default, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
+            if (propertyName == null)
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to get.");
+
             if (_propertyStore.TryGetValue(propertyName, out var value))
             {
-                return (T)value;
+                return (T?)value;
             }
 
             _propertyStore.Add(propertyName, defaultValue);
@@ -58,19 +67,57 @@
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
         /// <returns>A command instance.</returns>
-        protected internal Command Do(global::System.Action execute, [global::System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        protected internal Command Do(global::System.Action execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             return Do(_ => execute(), propertyName);
         }
 
-        protected internal Command Do(global::System.Action<object> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        protected internal Command Do(global::System.Action<object?> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
+            if (propertyName == null)
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
                 command = Command.Do(execute);
                 _commandStore.Add(propertyName, command);
             }
             return (Command)command;
+        }
+
+        protected internal AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        {
+            return Do(_ => execute(), propertyName);
+        }
+
+        protected internal Command Cancel(IAsyncFluentCommand command, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        {
+            if (propertyName == null)
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
+            if (!_commandStore.TryGetValue(propertyName, out var cancelCommand))
+            {
+                cancelCommand = Command.Do(() => command.Cancel()).If(() => command.IsRunning);
+                command.CanExecuteChanged += (s, e) => cancelCommand.RaiseCanExecuteChanged();
+
+                _commandStore.Add(propertyName, cancelCommand);
+            }
+
+            return (Command)cancelCommand;
+        }
+
+        protected internal AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        {
+            if (propertyName == null)
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
+            if (!_commandStore.TryGetValue(propertyName, out var command))
+            {
+                command = AsyncCommand.Do(execute);
+                _commandStore.Add(propertyName, command);
+            }
+
+            return (AsyncCommand)command;
         }
 
         /// <summary>
@@ -80,8 +127,11 @@
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
         /// <returns>A command instance.</returns>
-        protected internal Command<T> Do<T>(global::System.Action<T> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        protected internal Command<T> Do<T>(global::System.Action<T> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
+            if (propertyName == null)
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
                 command = Command<T>.Do(execute);
@@ -94,8 +144,11 @@
         /// Raises the PropertyChanged event for the specified property.
         /// </summary>
         /// <param name="propertyName">The name of the property that changed.</param>
-        internal void OnPropertyChanged([global::System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        internal void OnPropertyChanged([global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
+            if (propertyName == null)
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to notify.");
+
             PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
         }
 

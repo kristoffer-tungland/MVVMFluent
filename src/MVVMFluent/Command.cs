@@ -1,6 +1,6 @@
 ﻿namespace MVVMFluent
 {
-    internal interface IFluentCommand : global::System.Windows.Input.ICommand
+    internal interface IFluentCommand : global::System.Windows.Input.ICommand, global::System.IDisposable
     {
         void RaiseCanExecuteChanged();
     }
@@ -11,23 +11,19 @@
     /// </summary>
     internal class Command : IFluentCommand, global::System.IDisposable
     {
-        private global::System.Action<object> _execute;
-        private global::System.Func<object, bool> _canExecute;
+        private global::System.Action<object?>? _execute;
+        private global::System.Func<object, bool>? _canExecute;
         private bool _disposed = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Command"/> class with the specified execute action.
         /// </summary>
-        /// <param name="execute">The action to execute when the command is invoked.</param>
-        protected Command(global::System.Action<object> execute)
-        {
-            _execute = execute;
-        }
+        protected Command() {}
 
         /// <summary>
         /// Occurs when the ability to execute the command changes.
         /// </summary>
-        public event global::System.EventHandler CanExecuteChanged;
+        public event global::System.EventHandler? CanExecuteChanged;
 
         /// <summary>
         /// Creates a new <see cref="Command"/> instance with the specified action.
@@ -44,9 +40,13 @@
         /// </summary>
         /// <param name="execute">The action to execute.</param>
         /// <returns>A new <see cref="Command"/> instance.</returns>
-        internal static Command Do(global::System.Action<object> execute)
+        internal static Command Do(global::System.Action<object?> execute)
         {
-            var command = new Command(execute);
+            var command = new Command
+            {
+                _execute = execute
+            };
+
             return command;
         }
 
@@ -84,6 +84,9 @@
         /// <param name="parameter">The parameter to pass to the execute action.</param>
         public void Execute(object parameter)
         {
+            if (_execute == null)
+                throw new global::System.InvalidOperationException("No execute action has been set for this command.");
+
             if (CanExecute(parameter))
                 _execute?.Invoke(parameter);
         }
@@ -139,8 +142,8 @@
     /// <typeparam name="T">The type of the parameter used by the command.</typeparam>
     internal class Command<T> : IFluentCommand, global::System.IDisposable
     {
-        private global::System.Action<T> _execute;
-        private global::System.Func<T, bool> _canExecute;
+        private global::System.Action<T>? _execute;
+        private global::System.Func<T, bool>? _canExecute;
         private bool _disposed = false;
 
         /// <summary>
@@ -155,7 +158,7 @@
         /// <summary>
         /// Occurs when the ability of the command to execute has changed.
         /// </summary>
-        public event global::System.EventHandler CanExecuteChanged;
+        public event global::System.EventHandler? CanExecuteChanged;
 
         /// <summary>
         /// Creates a new command with the specified execute action.

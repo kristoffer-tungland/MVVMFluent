@@ -6,30 +6,58 @@
         xmlns:local="clr-namespace:MVVMFluent.Demo"
         mc:Ignorable="d" FontSize="16"
         d:DataContext="{d:DesignInstance local:MainViewModel}"
-        Title="MVVMFluent Demo" Height="250" Width="600">
+        Title="MVVMFluent Demo" Height="250" Width="650">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBox Grid.Row="0" VerticalAlignment="Center" Padding="10" Margin="10"
+        <Button HorizontalAlignment="Right" Padding="15,0" Margin="10"
+                    Content="Help"
+                    Command="{Binding HelpCommand}" CommandParameter="This is the help" />
+
+        <TextBox Grid.Row="1" VerticalAlignment="Center" Padding="10" Margin="10"
                  Text="{Binding Input, UpdateSourceTrigger=PropertyChanged}" 
                  IsEnabled="{Binding Enable}" />
 
-        <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" LastChildFill="True">
+        <ProgressBar Grid.Row="2" VerticalAlignment="Center" Padding="10" Margin="10"
+                     Value="{Binding Progress}" Minimum="0" Maximum="100" Height="10">
+            <ProgressBar.Style>
+                <Style TargetType="ProgressBar">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding AsyncCommand.IsRunning}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ProgressBar.Style>
+        </ProgressBar>
+
+        <DockPanel Grid.Row="3" HorizontalAlignment="Stretch" LastChildFill="True">
             <Button DockPanel.Dock="Right"  Padding="15,0" Margin="10" 
                     Content="Ok" IsDefault="True"
                     Command="{Binding OkCommand}" />
-            
+
             <Button DockPanel.Dock="Right"  Padding="15,0" Margin="10"
-                    Content="Help"
-                    Command="{Binding HelpCommand}" CommandParameter="This is the help" />
+                    Content="Async"
+                    Command="{Binding AsyncCommand}" />
+
+            <Button DockPanel.Dock="Right"  Padding="15,0" Margin="10"
+                    Content="Cancel"
+                    Command="{Binding CancelAsyncCommand}" />
 
             <CheckBox DockPanel.Dock="Left" Padding="10" Margin="10,5"
                       VerticalAlignment="Center" VerticalContentAlignment="Center"
                       Content="Enable"
                       IsChecked="{Binding Enable}" />
+
+            <CheckBox DockPanel.Dock="Left" Padding="10" Margin="10,5"
+                      VerticalAlignment="Center" VerticalContentAlignment="Center"
+                      Content="Throw Exception"
+                      IsChecked="{Binding ThrowException}" />
         </DockPanel>
 
     </Grid>
