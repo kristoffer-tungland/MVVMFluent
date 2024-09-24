@@ -14,12 +14,10 @@ internal class MainViewModel : ViewModelBase
 
     public Command OkCommand => Do(() => ShowDialog(Input)).If(() => !string.IsNullOrWhiteSpace(Input));
 
-
     public bool ThrowException { get => Get(false); set => Set(value); }
     public int Progress { get => Get(0); set => Set(value); }
-    public Command CancelAsyncCommand => Cancel(AsyncCommand);
 
-    public AsyncCommand AsyncCommand => Do(ShowDialogAsync).If(() => !string.IsNullOrWhiteSpace(Input)).OnException(ex => MessageBox.Show(ex.Message));
+    public AsyncCommand AsyncCommand => Do(ShowDialogAsync).If(() => !string.IsNullOrWhiteSpace(Input)).OnException(ex => MessageBox.Show(ex.Message)).ConfigureAwait(false);
 
     private async Task ShowDialogAsync()
     {

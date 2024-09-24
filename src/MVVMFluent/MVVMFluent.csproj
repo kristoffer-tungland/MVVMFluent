@@ -5,6 +5,7 @@
     <langversion>9</langversion>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <NuSpecFile>MVVMFluent.nuspec</NuSpecFile>
   </PropertyGroup>
     
       

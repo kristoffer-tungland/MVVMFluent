@@ -27,7 +27,7 @@ public class ViewModelBaseCommandTests
         Assert.True(didExecute);
     }
 
-    class CommandParameterTestViewModel(Action<object> execute) : ViewModelBase
+    class CommandParameterTestViewModel(Action<object?> execute) : ViewModelBase
     {
         public ICommand Command => Do(execute);
     }
@@ -36,7 +36,7 @@ public class ViewModelBaseCommandTests
     internal void DoWithParameter()
     {
         object? parameter = null;
-        void execute(object obj)
+        void execute(object? obj)
         {
             parameter = obj;
         }
@@ -87,7 +87,7 @@ public class ViewModelBaseCommandTests
         Assert.False(didExecute);
     }
 
-    class CommandIfParameterTestViewModel(Action<object> execute, Func<object, bool> canExecute) : ViewModelBase
+    class CommandIfParameterTestViewModel(Action<object?> execute, Func<object, bool> canExecute) : ViewModelBase
     {
         public ICommand Command => Do(execute).If(canExecute);
     }
@@ -96,7 +96,7 @@ public class ViewModelBaseCommandTests
     internal void DoIfWithParameter()
     {
         object? parameter = null;
-        void execute(object obj) => parameter = obj;
+        void execute(object? obj) => parameter = obj;
         var viewModel = new CommandIfParameterTestViewModel(execute, _ => true);
         viewModel.Command.Execute("Test");
         Assert.Equal("Test", parameter);
@@ -106,7 +106,7 @@ public class ViewModelBaseCommandTests
     internal void DoIfWithParameter_WhenCanExecuteIsFalse_CannotExecute()
     {
         bool canExecute(object obj) => false;
-        void execute(object obj) { }
+        void execute(object? obj) { }
         var viewModel = new CommandIfParameterTestViewModel(execute, canExecute);
         var result = viewModel.Command.CanExecute(null);
         Assert.False(result);
@@ -117,7 +117,7 @@ public class ViewModelBaseCommandTests
     {
         bool canExecute(object obj) => false;
         var didExecute = false;
-        void execute(object obj) => didExecute = true;
+        void execute(object? obj) => didExecute = true;
         var viewModel = new CommandIfParameterTestViewModel(execute, canExecute);
         viewModel.Command.Execute("Test");
         Assert.False(didExecute);

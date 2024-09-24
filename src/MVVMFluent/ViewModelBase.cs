@@ -72,54 +72,6 @@
             return Do(_ => execute(), propertyName);
         }
 
-        protected internal Command Do(global::System.Action<object?> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
-        {
-            if (propertyName == null)
-                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
-
-            if (!_commandStore.TryGetValue(propertyName, out var command))
-            {
-                command = Command.Do(execute);
-                _commandStore.Add(propertyName, command);
-            }
-            return (Command)command;
-        }
-
-        protected internal AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
-        {
-            return Do(_ => execute(), propertyName);
-        }
-
-        protected internal Command Cancel(IAsyncFluentCommand command, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
-        {
-            if (propertyName == null)
-                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
-
-            if (!_commandStore.TryGetValue(propertyName, out var cancelCommand))
-            {
-                cancelCommand = Command.Do(() => command.Cancel()).If(() => command.IsRunning);
-                command.CanExecuteChanged += (s, e) => cancelCommand.RaiseCanExecuteChanged();
-
-                _commandStore.Add(propertyName, cancelCommand);
-            }
-
-            return (Command)cancelCommand;
-        }
-
-        protected internal AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
-        {
-            if (propertyName == null)
-                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
-
-            if (!_commandStore.TryGetValue(propertyName, out var command))
-            {
-                command = AsyncCommand.Do(execute);
-                _commandStore.Add(propertyName, command);
-            }
-
-            return (AsyncCommand)command;
-        }
-
         /// <summary>
         /// Creates a command that can execute the specified action with a parameter.
         /// </summary>
@@ -138,6 +90,51 @@
                 _commandStore.Add(propertyName, command);
             }
             return (Command<T>)command;
+        }
+
+        protected internal Command Do(global::System.Action<object?> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        {
+            if (propertyName == null)
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
+            if (!_commandStore.TryGetValue(propertyName, out var command))
+            {
+                command = Command.Do(execute);
+                _commandStore.Add(propertyName, command);
+            }
+            return (Command)command;
+        }
+
+        protected internal AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        {
+            return Do(_ => execute(), propertyName);
+        }
+
+        protected internal AsyncCommand<T> Do<T>(global::System.Func<T, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        {
+            if (propertyName == null)
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
+            if (!_commandStore.TryGetValue(propertyName, out var command))
+            {
+                command = AsyncCommand<T>.Do(execute);
+                _commandStore.Add(propertyName, command);
+            }
+            return (AsyncCommand<T>)command;
+        }
+
+        protected internal AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        {
+            if (propertyName == null)
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
+            if (!_commandStore.TryGetValue(propertyName, out var command))
+            {
+                command = AsyncCommand.Do(execute);
+                _commandStore.Add(propertyName, command);
+            }
+
+            return (AsyncCommand)command;
         }
 
         /// <summary>

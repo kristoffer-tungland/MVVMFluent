@@ -150,16 +150,13 @@
         /// Initializes a new instance of the <see cref="Command{T}"/> class with the specified execute action.
         /// </summary>
         /// <param name="execute">The action to execute when the command is invoked.</param>
-        protected Command(global::System.Action<T> execute)
-        {
-            _execute = execute;
-        }
+        protected Command() {}
 
         /// <summary>
         /// Occurs when the ability of the command to execute has changed.
         /// </summary>
         public event global::System.EventHandler? CanExecuteChanged;
-
+        
         /// <summary>
         /// Creates a new command with the specified execute action.
         /// </summary>
@@ -167,7 +164,10 @@
         /// <returns>A new instance of <see cref="Command{T}"/>.</returns>
         internal static Command<T> Do(global::System.Action<T> execute)
         {
-            return new Command<T>(execute);
+            return new Command<T>
+            {
+                _execute = execute
+            };
         }
 
         /// <summary>

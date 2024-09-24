@@ -4,16 +4,16 @@
     {
         private readonly ViewModelBase _viewModel;
         private readonly string _propertyName;
-        private readonly global::System.Collections.Generic.Dictionary<string, object> _propertyStore;
+        private readonly global::System.Collections.Generic.Dictionary<string, object?> _propertyStore;
 
-        private T _newValue;
-        private T _oldValue;
+        private T? _newValue;
+        private T? _oldValue;
 
-        private global::System.Action<T>? _onChanging;
-        private global::System.Action<T, T>? _onChangingOldNew;
+        private global::System.Action<T?>? _onChanging;
+        private global::System.Action<T?, T?>? _onChangingOldNew;
 
-        private global::System.Action<T>? _onChanged;
-        private global::System.Action<T, T>? _onChangedOldNew;
+        private global::System.Action<T?>? _onChanged;
+        private global::System.Action<T?, T?>? _onChangedOldNew;
 
         private global::System.Collections.Generic.IEnumerable<IFluentCommand>? _commandsToReevaluate;
         private global::System.Collections.Generic.IEnumerable<string>? _propertiesToNotify;
@@ -26,7 +26,7 @@
         /// <param name="viewModel">The view model to which the property belongs.</param>
         /// <param name="propertyName">The name of the property being set.</param>
         /// <param name="propertyStore">The backing store for the properties.</param>
-        internal FluentSetter(ViewModelBase viewModel, string propertyName, global::System.Collections.Generic.Dictionary<string, object> propertyStore)
+        internal FluentSetter(ViewModelBase viewModel, string propertyName, global::System.Collections.Generic.Dictionary<string, object?> propertyStore)
         {
             _viewModel = viewModel;
             _propertyName = propertyName;
@@ -45,11 +45,11 @@
             // Get the old value from the backing store
             if (_propertyStore.TryGetValue(_propertyName, out var storedValue))
             {
-                _oldValue = (T)storedValue;
+                _oldValue = (T?)storedValue;
             }
 
             // Check if the value has changed
-            _valueChanged = !global::System.Collections.Generic.EqualityComparer<T>.Default.Equals(_oldValue, _newValue);
+            _valueChanged = !global::System.Collections.Generic.EqualityComparer<T?>.Default.Equals(_oldValue, _newValue);
             return this;
         }
 
@@ -58,7 +58,7 @@
         /// </summary>
         /// <param name="action">The action to execute before changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> OnChanging(global::System.Action<T> action)
+        internal FluentSetter<T> OnChanging(global::System.Action<T?> action)
         {
             _onChanging = action;
             return this;
@@ -69,7 +69,7 @@
         /// </summary>
         /// <param name="action">The action to execute before changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> OnChanging(global::System.Action<T, T> action)
+        internal FluentSetter<T> OnChanging(global::System.Action<T?, T?> action)
         {
             _onChangingOldNew = action;
             return this;
@@ -80,7 +80,7 @@
         /// </summary>
         /// <param name="action">The action to execute after changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> OnChanged(global::System.Action<T> action)
+        internal FluentSetter<T> OnChanged(global::System.Action<T?> action)
         {
             _onChanged = action;
             return this;
@@ -91,7 +91,7 @@
         /// </summary>
         /// <param name="action">The action to execute after changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> OnChanged(global::System.Action<T, T> action)
+        internal FluentSetter<T> OnChanged(global::System.Action<T?, T?> action)
         {
             _onChangedOldNew = action;
             return this;

@@ -41,13 +41,13 @@
                     Content="Ok" IsDefault="True"
                     Command="{Binding OkCommand}" />
 
-            <Button DockPanel.Dock="Right"  Padding="15,0" Margin="10"
+            <Button DockPanel.Dock="Right" Padding="15,0" Margin="10"
                     Content="Async"
                     Command="{Binding AsyncCommand}" />
 
-            <Button DockPanel.Dock="Right"  Padding="15,0" Margin="10"
+            <Button DockPanel.Dock="Right" Padding="15,0" Margin="10"
                     Content="Cancel"
-                    Command="{Binding CancelAsyncCommand}" />
+                    Command="{Binding AsyncCommand.CandelCommand}" />
 
             <CheckBox DockPanel.Dock="Left" Padding="10" Margin="10,5"
                       VerticalAlignment="Center" VerticalContentAlignment="Center"
