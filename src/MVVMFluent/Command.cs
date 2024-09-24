@@ -8,6 +8,13 @@
 
     /// <summary>
     /// Represents a command that can be executed and has an associated execution condition.
+    /// <example>
+    /// <code lang="csharp">
+    /// public Command OkCommand => Do(() => MessageBox.Show("OK")).If(() => CanOk);
+    /// 
+    /// public bool CanOk { get => Get(true); set => Set(value); }
+    /// </code>
+    /// </example>
     /// </summary>
     internal class Command : IFluentCommand, global::System.IDisposable
     {
@@ -18,7 +25,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="Command"/> class with the specified execute action.
         /// </summary>
-        protected Command() {}
+        protected Command() { }
 
         /// <summary>
         /// Occurs when the ability to execute the command changes.
@@ -138,6 +145,13 @@
 
     /// <summary>
     /// Represents a command that can be executed with a parameter of type <typeparamref name="T"/>.
+    /// <example>
+    /// <code lang="csharp">
+    /// public Command OkCommand => Do&lt;string&gt;(str => MessageBox.Show(str)).If(str => CanOk(str));
+    /// 
+    /// public bool CanOk(string str) => !string.IsNullOrWhiteSpace(str);
+    /// </code>
+    /// </example>
     /// </summary>
     /// <typeparam name="T">The type of the parameter used by the command.</typeparam>
     internal class Command<T> : IFluentCommand, global::System.IDisposable
@@ -150,13 +164,13 @@
         /// Initializes a new instance of the <see cref="Command{T}"/> class with the specified execute action.
         /// </summary>
         /// <param name="execute">The action to execute when the command is invoked.</param>
-        protected Command() {}
+        protected Command() { }
 
         /// <summary>
         /// Occurs when the ability of the command to execute has changed.
         /// </summary>
         public event global::System.EventHandler? CanExecuteChanged;
-        
+
         /// <summary>
         /// Creates a new command with the specified execute action.
         /// </summary>
@@ -236,6 +250,9 @@
 
             if (disposing)
             {
+                // Unsubscribe from CanExecuteChanged event
+                CanExecuteChanged = null;
+
                 // Additional cleanup (if needed)
                 _execute = null;
                 _canExecute = null;

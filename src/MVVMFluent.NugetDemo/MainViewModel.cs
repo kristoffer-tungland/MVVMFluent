@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace MVVMFluent.Demo;
+namespace MVVMFluent.NugetDemo;
 
 internal class MainViewModel : ViewModelBase
 {
@@ -36,7 +36,7 @@ internal class MainViewModel : ViewModelBase
                 return;
 
             await Task.Delay(50);
-            AsyncCommand.ReportProgress(i+1, 100);
+            AsyncCommand.ReportProgress(i + 1, 100);
 
             if (AsyncCommand.Progress == 50 && ThrowException)
                 throw new Exception("Something went wrong");

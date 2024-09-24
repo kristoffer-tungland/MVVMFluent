@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace MVVMFluent
 {
@@ -12,6 +13,29 @@ namespace MVVMFluent
         /// </summary>
         bool IsRunning { get; }
 
+        /// <summary>
+        /// Gets or sets the current progress of the command.
+        /// </summary>
+        int Progress { get; set; }
+
+        /// <summary>
+        /// Sets the current progress of the command.
+        /// </summary>
+        void ReportProgress(int progress);
+
+        /// <summary>
+        /// Reports the progress of the command.
+        /// </summary>
+        void ReportProgress(int current, int total);
+
+        /// <summary>
+        /// Gets the command to cancel the current operation.
+        /// </summary>
+        Command CancelCommand { get; }
+
+        /// <summary>
+        /// Indicates whether the command is requested to be cancelled.
+        /// </summary>
         bool IsCancellationRequested { get; }
 
         /// <summary>
@@ -31,9 +55,20 @@ namespace MVVMFluent
         void Cancel();
     }
 
-
     /// <summary>
     /// Represents an asynchronous command that supports cancellation and tracks execution state.
+    /// <example>
+    /// <code lang="csharp">
+    /// public AsyncCommand OkCommand => Do(async () => await Task.Delay(1000)).If(() => CanOk).OnException(ex => MessageBox.Show(ex.Message)).ConfigureAwait(false);
+    /// 
+    /// public bool CanOk { get => Get(true); set => Set(value); }
+    /// </code>
+    /// <code lang="xaml">
+    /// &lt;Button Content=&quot;Run&quot; Command=&quot;{Binding AsyncCommand}&quot; /&gt;
+    /// &lt;ProgressBar Visibility = &quot;{Binding AsyncCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}&quot; /&gt;
+    /// &lt;Button Content=&quot;Cancel&quot; Command=&quot;{Binding AsyncCommand.CancelCommand}&quot; /&gt;
+    /// </code>
+    /// </example>
     /// </summary>
     internal class AsyncCommand : IAsyncFluentCommand, global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
     {
@@ -44,31 +79,34 @@ namespace MVVMFluent
         private global::System.Action<global::System.Exception>? _onException;
         private bool _continueOnCapturedContext = true;
         private bool _disposed;
+        private Command? _cancelCommand;
+        private int _progress = 0;
 
         /// <summary>
         /// Event raised when the ability to execute changes.
         /// </summary>
         public event global::System.EventHandler? CanExecuteChanged;
 
-        private Command? _cancelCommand;
+        /// <summary>
+        /// Event raised when a property changes.
+        /// </summary>
+        public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 
-        public Command CandelCommand
+        /// <summary>
+        /// Gets the command to cancel the current operation.
+        /// </summary>
+        public Command CancelCommand
         {
             get
             {
                 if (_cancelCommand == null)
                 {
-                    _cancelCommand = Command.Do(() => Cancel()).If(() => IsRunning);
+                    _cancelCommand = Command.Do(() => Cancel()).If(() => IsRunning && _cts?.IsCancellationRequested == false);
                     PropertyChanged += (s, e) => _cancelCommand.RaiseCanExecuteChanged();
                 }
                 return _cancelCommand;
             }
         }
-
-        /// <summary>
-        /// Event raised when a property changes.
-        /// </summary>
-        public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Gets whether the command is currently executing.
@@ -85,6 +123,34 @@ namespace MVVMFluent
                     RaiseCanExecuteChanged();
                 }
             }
+        }
+
+        public int Progress
+        {
+            get => _progress;
+            set
+            {
+                if (_progress != value)
+                {
+                    _progress = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the current progress of the command.
+        /// </summary>
+        public void ReportProgress(int progress) => Progress = progress;
+
+        /// <summary>
+        /// Reports the progress of the command.
+        /// </summary>
+        /// <param name="current">The current iten processed.</param>
+        /// <param name="total">Total number of items to process.</param>
+        public void ReportProgress(int current, int total)
+        {
+            ReportProgress((int)((double)current / total * 100));
         }
 
         /// <summary>
@@ -119,6 +185,7 @@ namespace MVVMFluent
             if (CanExecute(parameter))
             {
                 IsRunning = true;
+                Progress = 0;
                 _cts = new global::System.Threading.CancellationTokenSource();
 
                 try
@@ -127,6 +194,7 @@ namespace MVVMFluent
                 }
                 finally
                 {
+                    Progress = 0;
                     IsRunning = false;
                     _cts.Dispose();
                     _cts = null;
@@ -152,14 +220,6 @@ namespace MVVMFluent
             {
                 _cts.Cancel();
             }
-        }
-
-        /// <summary>
-        /// Raises the <see cref="CanExecuteChanged"/> event.
-        /// </summary>
-        public void RaiseCanExecuteChanged()
-        {
-            CanExecuteChanged?.Invoke(this, global::System.EventArgs.Empty);
         }
 
         /// <summary>
@@ -242,6 +302,11 @@ namespace MVVMFluent
         }
 
         /// <summary>
+        /// Raises the <see cref="CanExecuteChanged"/> event.
+        /// </summary>
+        public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, global::System.EventArgs.Empty);
+
+        /// <summary>
         /// Releases resources used by the command.
         /// </summary>
         public void Dispose()
@@ -254,22 +319,34 @@ namespace MVVMFluent
         /// Disposes the command and any related resources.
         /// </summary>
         /// <param name="disposing">Whether the method is called from <see cref="Dispose()"/>.</param>
-        protected virtual void Dispose(bool disposing)
+        protected internal virtual void Dispose(bool disposing)
         {
             if (!_disposed)
             {
                 if (disposing)
                 {
-                    _cts?.Dispose();
                     _execute = null;
                     _canExecute = null;
                     _onException = null;
                     _continueOnCapturedContext = false;
-                    PropertyChanged = null;
+
                     CanExecuteChanged = null;
+                    PropertyChanged = null;
+                    _cts?.Dispose();
+                    _cts = null;
+                    _cancelCommand?.Dispose();
+                    _cancelCommand = null;
                 }
                 _disposed = true;
             }
+        }
+
+        /// <summary>
+        /// Finalizer for the <see cref="AsyncCommand"/> class.
+        /// </summary>
+        ~AsyncCommand()
+        {
+            Dispose(false);
         }
     }
 
@@ -284,6 +361,24 @@ namespace MVVMFluent
         /// </summary>
         bool IsRunning { get; }
 
+        /// <summary>
+        /// Gets or sets the current progress of the command.
+        /// </summary>
+        int Progress { get; set; }
+
+        /// <summary>
+        /// Sets the current progress of the command.
+        /// </summary>
+        void ReportProgress(int progress);
+
+        /// <summary>
+        /// Reports the progress of the command.
+        /// </summary>
+        void ReportProgress(int current, int total);
+
+        /// <summary>
+        /// Indicates whether the command is requested to be cancelled.
+        /// </summary>
         bool IsCancellationRequested { get; }
 
         /// <summary>
@@ -305,6 +400,24 @@ namespace MVVMFluent
 
     /// <summary>
     /// Represents an asynchronous command that supports cancellation and tracks execution state, with a generic parameter.
+    /// <example>
+    /// <code lang="csharp">
+    /// public AsyncCommand OkCommand => Do&lt;string&gt;(Ok).If(() => CanOk).OnException(ex => MessageBox.Show(ex.Message)).ConfigureAwait(true);
+    /// 
+    /// public async Task Ok(string input)
+    /// {
+    ///    await Task.Delay(1000);
+    ///    MessageBox.Show(input);
+    /// }
+    /// 
+    /// public bool CanOk { get => Get(true); set => Set(value); }
+    /// </code>
+    /// <code lang="xaml">
+    /// &lt;Button Content=&quot;Run&quot; Command=&quot;{Binding AsyncCommand}&quot; /&gt;
+    /// &lt;ProgressBar Visibility = &quot;{Binding AsyncCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}&quot; /&gt;
+    /// &lt;Button Content=&quot;Cancel&quot; Command=&quot;{Binding AsyncCommand.CancelCommand}&quot; /&gt;
+    /// </code>
+    /// </example>
     /// </summary>
     internal class AsyncCommand<T> : IAsyncFluentCommand, global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
     {
@@ -315,6 +428,8 @@ namespace MVVMFluent
         private global::System.Action<global::System.Exception>? _onException;
         private bool _continueOnCapturedContext = true;
         private bool _disposed;
+        private Command? _cancelCommand;
+        private int _progress = 0;
 
         /// <summary>
         /// Event raised when the ability to execute changes.
@@ -325,6 +440,22 @@ namespace MVVMFluent
         /// Event raised when a property changes.
         /// </summary>
         public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// Gets the command to cancel the current operation.
+        /// </summary>
+        public Command CancelCommand
+        {
+            get
+            {
+                if (_cancelCommand == null)
+                {
+                    _cancelCommand = Command.Do(() => Cancel()).If(() => IsRunning && _cts?.IsCancellationRequested == false);
+                    PropertyChanged += (s, e) => _cancelCommand.RaiseCanExecuteChanged();
+                }
+                return _cancelCommand;
+            }
+        }
 
         /// <summary>
         /// Gets whether the command is currently executing.
@@ -341,6 +472,34 @@ namespace MVVMFluent
                     RaiseCanExecuteChanged();
                 }
             }
+        }
+
+        public int Progress
+        {
+            get => _progress;
+            set
+            {
+                if (_progress != value)
+                {
+                    _progress = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the current progress of the command.
+        /// </summary>
+        public void ReportProgress(int progress) => Progress = progress;
+
+        /// <summary>
+        /// Reports the progress of the command.
+        /// </summary>
+        /// <param name="current">The current iten processed.</param>
+        /// <param name="total">Total number of items to process.</param>
+        public void ReportProgress(int current, int total)
+        {
+            ReportProgress((int)((double)current / total * 100));
         }
 
         /// <summary>
@@ -417,14 +576,6 @@ namespace MVVMFluent
         }
 
         /// <summary>
-        /// Raises the <see cref="CanExecuteChanged"/> event.
-        /// </summary>
-        public void RaiseCanExecuteChanged()
-        {
-            CanExecuteChanged?.Invoke(this, global::System.EventArgs.Empty);
-        }
-
-        /// <summary>
         /// Creates an asynchronous command with the specified execute action.
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
@@ -484,6 +635,11 @@ namespace MVVMFluent
         }
 
         /// <summary>
+        /// Raises the <see cref="CanExecuteChanged"/> event.
+        /// </summary>
+        public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, global::System.EventArgs.Empty);
+
+        /// <summary>
         /// Releases resources used by the command.
         /// </summary>
         public void Dispose()
@@ -496,22 +652,33 @@ namespace MVVMFluent
         /// Disposes the command and any related resources.
         /// </summary>
         /// <param name="disposing">Whether the method is called from <see cref="Dispose()"/>.</param>
-        protected virtual void Dispose(bool disposing)
+        protected internal virtual void Dispose(bool disposing)
         {
             if (!_disposed)
             {
                 if (disposing)
                 {
-                    _cts?.Dispose();
                     _execute = null;
                     _canExecute = null;
                     _onException = null;
                     _continueOnCapturedContext = false;
-                    PropertyChanged = null;
+
                     CanExecuteChanged = null;
+                    PropertyChanged = null;
+                    _cts?.Dispose();
+                    _cancelCommand?.Dispose();
+                    _cancelCommand = null;
                 }
                 _disposed = true;
             }
+        }
+
+        /// <summary>
+        /// Finalizer for the <see cref="AsyncCommand"/> class.
+        /// </summary>
+        ~AsyncCommand()
+        {
+            Dispose(false);
         }
     }
 }
