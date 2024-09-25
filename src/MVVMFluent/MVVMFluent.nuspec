@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>MVVMFluent</id>
-    <version>0.0.1-alfa3</version>
+    <version>0.0.1-alfa6</version>
     <!-- 👇 Indicates the package is only used at build time, not deploy time -->
     <developmentDependency>true</developmentDependency>
     <authors>Kristoffer Tungland</authors>

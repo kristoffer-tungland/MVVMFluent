@@ -1,11 +1,9 @@
-﻿using System.Threading.Tasks;
-
-namespace MVVMFluent
+﻿namespace MVVMFluent
 {
     /// <summary>
     /// Defines an asynchronous fluent command that supports cancellation and tracking of execution state.
     /// </summary>
-    internal interface IAsyncFluentCommand : IFluentCommand, global::System.IDisposable
+    public interface IAsyncFluentCommand : IFluentCommand, global::System.IDisposable
     {
         /// <summary>
         /// Indicates whether the command is currently executing.
@@ -69,7 +67,7 @@ namespace MVVMFluent
     /// </code>
     /// </example>
     /// </summary>
-    internal class AsyncCommand : IAsyncFluentCommand, global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
+    public class AsyncCommand : IAsyncFluentCommand, global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
     {
         private global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task>? _execute;
         private global::System.Func<object?, bool>? _canExecute;
@@ -80,6 +78,11 @@ namespace MVVMFluent
         private bool _disposed;
         private Command? _cancelCommand;
         private int _progress = 0;
+
+        protected AsyncCommand(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute)
+        {
+            _execute = execute;
+        }
 
         /// <summary>
         /// Event raised when the ability to execute changes.
@@ -226,7 +229,7 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
         /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
-        internal static AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute)
+        public static AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute)
         {
             return Do((_, _) => execute());
         }
@@ -236,13 +239,9 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
         /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
-        internal static AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute)
+        public static AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute)
         {
-            var command = new AsyncCommand
-            {
-                _execute = (o, _) => execute(o)
-            };
-            return command;
+            return new AsyncCommand((o, _) => execute(o));
         }
 
         /// <summary>
@@ -250,13 +249,9 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
         /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
-        internal static AsyncCommand Do(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute)
+        public static AsyncCommand Do(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute)
         {
-            var command = new AsyncCommand
-            {
-                _execute = execute
-            };
-            return command;
+            return new AsyncCommand(execute);
         }
 
         /// <summary>
@@ -264,7 +259,7 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="canExecute">The condition function.</param>
         /// <returns>The updated command instance.</returns>
-        internal AsyncCommand If(global::System.Func<bool> canExecute)
+        public AsyncCommand If(global::System.Func<bool> canExecute)
         {
             return If(_ => canExecute());
         }
@@ -274,7 +269,7 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="canExecute">The condition function.</param>
         /// <returns>The updated command instance.</returns>
-        internal AsyncCommand If(global::System.Func<object?, bool> canExecute)
+        public AsyncCommand If(global::System.Func<object?, bool> canExecute)
         {
             _canExecute = canExecute;
             return this;
@@ -285,7 +280,7 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="onException">The action to handle exceptions.</param>
         /// <returns>The updated command instance.</returns>
-        internal AsyncCommand OnException(global::System.Action<global::System.Exception> onException)
+        public AsyncCommand OnException(global::System.Action<global::System.Exception> onException)
         {
             _onException = onException;
             return this;
@@ -296,7 +291,7 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="continueOnCapturedContext">Whether to continue on captured context.</param>
         /// <returns>The updated command instance.</returns>
-        internal AsyncCommand ConfigureAwait(bool continueOnCapturedContext)
+        public AsyncCommand ConfigureAwait(bool continueOnCapturedContext)
         {
             _continueOnCapturedContext = continueOnCapturedContext;
             return this;
@@ -306,7 +301,7 @@ namespace MVVMFluent
         /// Raises the <see cref="PropertyChanged"/> event for the specified property.
         /// </summary>
         /// <param name="propertyName">The name of the property.</param>
-        internal void OnPropertyChanged([global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected void OnPropertyChanged([global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Property name cannot be null.");
@@ -364,54 +359,6 @@ namespace MVVMFluent
     }
 
     /// <summary>
-    /// Defines an asynchronous fluent command that supports cancellation and tracking of execution state with a generic parameter.
-    /// </summary>
-    /// <typeparam name="T">The type of the command parameter.</typeparam>
-    internal interface IAsyncFluentCommand<T> : IFluentCommand, global::System.IDisposable
-    {
-        /// <summary>
-        /// Indicates whether the command is currently executing.
-        /// </summary>
-        bool IsRunning { get; }
-
-        /// <summary>
-        /// Gets or sets the current progress of the command.
-        /// </summary>
-        int Progress { get; set; }
-
-        /// <summary>
-        /// Sets the current progress of the command.
-        /// </summary>
-        void ReportProgress(int progress);
-
-        /// <summary>
-        /// Reports the progress of the command.
-        /// </summary>
-        void ReportProgress(int current, int total);
-
-        /// <summary>
-        /// Indicates whether the command is requested to be cancelled.
-        /// </summary>
-        bool IsCancellationRequested { get; }
-
-        /// <summary>
-        /// Provides the cancellation token source used to cancel the current operation.
-        /// </summary>
-        global::System.Threading.CancellationTokenSource? CancellationTokenSource { get; }
-
-        /// <summary>
-        /// Executes the command asynchronously.
-        /// </summary>
-        /// <param name="parameter">The parameter of type <typeparamref name="T"/> for the command execution.</param>
-        global::System.Threading.Tasks.Task ExecuteAsync(T parameter);
-
-        /// <summary>
-        /// Cancels the current operation if it is running.
-        /// </summary>
-        void Cancel();
-    }
-
-    /// <summary>
     /// Represents an asynchronous command that supports cancellation and tracks execution state, with a generic parameter.
     /// <example>
     /// <code lang="csharp">
@@ -432,7 +379,7 @@ namespace MVVMFluent
     /// </code>
     /// </example>
     /// </summary>
-    internal class AsyncCommand<T> : IAsyncFluentCommand, global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
+    public class AsyncCommand<T> : IAsyncFluentCommand, global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
     {
         private global::System.Func<T?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task>? _execute;
         private global::System.Func<T?, bool>? _canExecute;
@@ -443,6 +390,11 @@ namespace MVVMFluent
         private bool _disposed;
         private Command? _cancelCommand;
         private int _progress = 0;
+
+        protected AsyncCommand(global::System.Func<T?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute)
+        {
+            _execute = execute;
+        }
 
         /// <summary>
         /// Event raised when the ability to execute changes.
@@ -593,13 +545,9 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
         /// <returns>An instance of <see cref="AsyncCommand{T}"/>.</returns>
-        internal static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.Tasks.Task> execute)
+        public static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.Tasks.Task> execute)
         {
-            var command = new AsyncCommand<T>
-            {
-                _execute = (o, _) => execute(o)
-            };
-            return command;
+            return new AsyncCommand<T>((o, _) => execute(o));
         }
 
         /// <summary>
@@ -607,13 +555,9 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
         /// <returns>An instance of <see cref="AsyncCommand{T}"/>.</returns>
-        internal static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.CancellationToken, System.Threading.Tasks.Task> execute)
+        public static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.CancellationToken, System.Threading.Tasks.Task> execute)
         {
-            var command = new AsyncCommand<T>
-            {
-                _execute = (o, t) => execute(o, t)
-            };
-            return command;
+            return new AsyncCommand<T>((o, t) => execute(o, t));
         }
 
         /// <summary>
@@ -621,7 +565,7 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="canExecute">The condition function.</param>
         /// <returns>The updated command instance.</returns>
-        internal AsyncCommand<T> If(global::System.Func<T?, bool> canExecute)
+        public AsyncCommand<T> If(global::System.Func<T?, bool> canExecute)
         {
             _canExecute = canExecute;
             return this;
@@ -632,7 +576,7 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="onException">The action to handle exceptions.</param>
         /// <returns>The updated command instance.</returns>
-        internal AsyncCommand<T> OnException(global::System.Action<global::System.Exception> onException)
+        public AsyncCommand<T> OnException(global::System.Action<global::System.Exception> onException)
         {
             _onException = onException;
             return this;
@@ -643,7 +587,7 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="continueOnCapturedContext">Whether to continue on captured context.</param>
         /// <returns>The updated command instance.</returns>
-        internal AsyncCommand<T> ConfigureAwait(bool continueOnCapturedContext)
+        public AsyncCommand<T> ConfigureAwait(bool continueOnCapturedContext)
         {
             _continueOnCapturedContext = continueOnCapturedContext;
             return this;
@@ -653,7 +597,7 @@ namespace MVVMFluent
         /// Raises the <see cref="PropertyChanged"/> event for the specified property.
         /// </summary>
         /// <param name="propertyName">The name of the property.</param>
-        internal void OnPropertyChanged([global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected void OnPropertyChanged([global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Property name cannot be null.");

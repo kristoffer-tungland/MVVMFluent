@@ -1,10 +1,9 @@
 ﻿namespace MVVMFluent
 {
-    internal interface IFluentCommand : global::System.Windows.Input.ICommand, global::System.IDisposable
+    public interface IFluentCommand : global::System.Windows.Input.ICommand, global::System.IDisposable
     {
         void RaiseCanExecuteChanged();
     }
-
 
     /// <summary>
     /// Represents a command that can be executed and has an associated execution condition.
@@ -16,7 +15,7 @@
     /// </code>
     /// </example>
     /// </summary>
-    internal class Command : IFluentCommand, global::System.IDisposable
+    public class Command : IFluentCommand, global::System.IDisposable
     {
         private global::System.Action<object?>? _execute;
         private global::System.Func<object, bool>? _canExecute;
@@ -25,7 +24,10 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="Command"/> class with the specified execute action.
         /// </summary>
-        protected Command() { }
+        protected Command(global::System.Action<object?> execute)
+        {
+            _execute = execute;
+        }
 
         /// <summary>
         /// Occurs when the ability to execute the command changes.
@@ -37,7 +39,7 @@
         /// </summary>
         /// <param name="execute">The action to execute.</param>
         /// <returns>A new <see cref="Command"/> instance.</returns>
-        internal static Command Do(global::System.Action execute)
+        public static Command Do(global::System.Action execute)
         {
             return Do(_ => execute());
         }
@@ -47,14 +49,9 @@
         /// </summary>
         /// <param name="execute">The action to execute.</param>
         /// <returns>A new <see cref="Command"/> instance.</returns>
-        internal static Command Do(global::System.Action<object?> execute)
+        public static Command Do(global::System.Action<object?> execute)
         {
-            var command = new Command
-            {
-                _execute = execute
-            };
-
-            return command;
+            return new Command(execute);
         }
 
         /// <summary>
@@ -62,7 +59,7 @@
         /// </summary>
         /// <param name="canExecute">A function that determines if the command can execute.</param>
         /// <returns>The current <see cref="Command"/> instance.</returns>
-        internal Command If(global::System.Func<bool> canExecute)
+        public Command If(global::System.Func<bool> canExecute)
         {
             return If(_ => canExecute());
         }
@@ -72,7 +69,7 @@
         /// </summary>
         /// <param name="canExecute">A function that determines if the command can execute based on the provided parameter.</param>
         /// <returns>The current <see cref="Command"/> instance.</returns>
-        internal Command If(global::System.Func<object, bool> canExecute)
+        public Command If(global::System.Func<object, bool> canExecute)
         {
             _canExecute = canExecute;
             return this;
@@ -154,7 +151,7 @@
     /// </example>
     /// </summary>
     /// <typeparam name="T">The type of the parameter used by the command.</typeparam>
-    internal class Command<T> : IFluentCommand, global::System.IDisposable
+    public class Command<T> : IFluentCommand, global::System.IDisposable
     {
         private global::System.Action<T>? _execute;
         private global::System.Func<T, bool>? _canExecute;
@@ -164,7 +161,10 @@
         /// Initializes a new instance of the <see cref="Command{T}"/> class with the specified execute action.
         /// </summary>
         /// <param name="execute">The action to execute when the command is invoked.</param>
-        protected Command() { }
+        protected Command(global::System.Action<T> execute)
+        {
+            _execute = execute;
+        }
 
         /// <summary>
         /// Occurs when the ability of the command to execute has changed.
@@ -176,12 +176,9 @@
         /// </summary>
         /// <param name="execute">The action to execute when the command is invoked.</param>
         /// <returns>A new instance of <see cref="Command{T}"/>.</returns>
-        internal static Command<T> Do(global::System.Action<T> execute)
+        public static Command<T> Do(global::System.Action<T> execute)
         {
-            return new Command<T>
-            {
-                _execute = execute
-            };
+            return new Command<T>(execute);
         }
 
         /// <summary>
@@ -189,7 +186,7 @@
         /// </summary>
         /// <param name="canExecute">A function that returns a boolean indicating whether the command can execute.</param>
         /// <returns>The current <see cref="Command{T}"/> instance for fluent chaining.</returns>
-        internal Command<T> If(global::System.Func<bool> canExecute)
+        public Command<T> If(global::System.Func<bool> canExecute)
         {
             return If(_ => canExecute());
         }
@@ -199,7 +196,7 @@
         /// </summary>
         /// <param name="canExecute">A function that determines whether the command can execute based on the provided parameter.</param>
         /// <returns>The current <see cref="Command{T}"/> instance for fluent chaining.</returns>
-        internal Command<T> If(global::System.Func<T, bool> canExecute)
+        public Command<T> If(global::System.Func<T, bool> canExecute)
         {
             _canExecute = canExecute;
             return this;

@@ -12,7 +12,7 @@
     /// </code>
     /// </example>
     /// </summary>
-    internal abstract partial class ViewModelBase : global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
+    public abstract partial class ViewModelBase : global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
     {
         protected readonly global::System.Collections.Generic.Dictionary<string, object?> _fieldStore = new global::System.Collections.Generic.Dictionary<string, object?>();
         protected readonly global::System.Collections.Generic.Dictionary<string, IFluentCommand> _commandStore = new global::System.Collections.Generic.Dictionary<string, IFluentCommand>();

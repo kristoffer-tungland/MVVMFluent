@@ -1,6 +1,6 @@
 ﻿namespace MVVMFluent
 {
-    internal class FluentSetter<T>
+    public class FluentSetter<T>
     {
         private readonly ViewModelBase _viewModel;
         private readonly string _propertyName;
@@ -26,7 +26,7 @@
         /// <param name="viewModel">The view model to which the property belongs.</param>
         /// <param name="propertyName">The name of the property being set.</param>
         /// <param name="propertyStore">The backing store for the properties.</param>
-        internal FluentSetter(ViewModelBase viewModel, string propertyName, global::System.Collections.Generic.Dictionary<string, object?> propertyStore)
+        public FluentSetter(ViewModelBase viewModel, string propertyName, global::System.Collections.Generic.Dictionary<string, object?> propertyStore)
         {
             _viewModel = viewModel;
             _propertyName = propertyName;
@@ -38,7 +38,7 @@
         /// </summary>
         /// <param name="newValue">The new value to set.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> When(T newValue)
+        public FluentSetter<T> When(T newValue)
         {
             _newValue = newValue;
 
@@ -58,7 +58,7 @@
         /// </summary>
         /// <param name="action">The action to execute before changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> OnChanging(global::System.Action<T?> action)
+        public FluentSetter<T> OnChanging(global::System.Action<T?> action)
         {
             _onChanging = action;
             return this;
@@ -69,7 +69,7 @@
         /// </summary>
         /// <param name="action">The action to execute before changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> OnChanging(global::System.Action<T?, T?> action)
+        public FluentSetter<T> OnChanging(global::System.Action<T?, T?> action)
         {
             _onChangingOldNew = action;
             return this;
@@ -80,7 +80,7 @@
         /// </summary>
         /// <param name="action">The action to execute after changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> OnChanged(global::System.Action<T?> action)
+        public FluentSetter<T> OnChanged(global::System.Action<T?> action)
         {
             _onChanged = action;
             return this;
@@ -91,7 +91,7 @@
         /// </summary>
         /// <param name="action">The action to execute after changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> OnChanged(global::System.Action<T?, T?> action)
+        public FluentSetter<T> OnChanged(global::System.Action<T?, T?> action)
         {
             _onChangedOldNew = action;
             return this;
@@ -102,7 +102,7 @@
         /// </summary>
         /// <param name="commands">The commands to reevaluate.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> Notify(params IFluentCommand[] commands)
+        public FluentSetter<T> Notify(params IFluentCommand[] commands)
         {
             _commandsToReevaluate = commands;
             return this;
@@ -113,7 +113,7 @@
         /// </summary>
         /// <param name="propertyNames">The names of the properties to notify.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> Notify(params string[] propertyNames)
+        public FluentSetter<T> Notify(params string[] propertyNames)
         {
             _propertiesToNotify = propertyNames;
             return this;
@@ -122,7 +122,7 @@
         /// <summary>
         /// Commits the value change and runs the configured logic.
         /// </summary>
-        internal void Set()
+        public void Set()
         {
             if (_valueChanged)
             {
