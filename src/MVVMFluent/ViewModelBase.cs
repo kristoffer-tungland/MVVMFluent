@@ -203,7 +203,7 @@
             global::System.GC.SuppressFinalize(this);
         }
 
-        protected internal virtual void Dispose(bool disposing)
+        protected void Dispose(bool disposing)
         {
             if (_disposed)
                 return;
@@ -221,10 +221,14 @@
 
                 _commandStore.Clear();
                 _fieldStore.Clear();
+
+                DisposeInternal();
             }
 
             _disposed = true;
         }
+
+        protected virtual void DisposeInternal() {}
 
         /// <summary>
         /// Finalizer for the <see cref="ViewModelBase"/> class.
