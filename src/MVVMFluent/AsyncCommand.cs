@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace MVVMFluent
 {
@@ -72,7 +71,7 @@ namespace MVVMFluent
     /// </summary>
     internal class AsyncCommand : IAsyncFluentCommand, global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
     {
-        private global::System.Func<object?, global::System.Threading.Tasks.Task>? _execute;
+        private global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task>? _execute;
         private global::System.Func<object?, bool>? _canExecute;
         private bool _isRunning;
         private global::System.Threading.CancellationTokenSource? _cts;
@@ -190,7 +189,7 @@ namespace MVVMFluent
 
                 try
                 {
-                    await _execute(parameter);
+                    await _execute(parameter, _cts.Token);
                 }
                 finally
                 {
@@ -229,7 +228,7 @@ namespace MVVMFluent
         /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
         internal static AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute)
         {
-            return Do(_ => execute());
+            return Do((_, _) => execute());
         }
 
         /// <summary>
@@ -238,6 +237,20 @@ namespace MVVMFluent
         /// <param name="execute">The action to execute asynchronously.</param>
         /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
         internal static AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute)
+        {
+            var command = new AsyncCommand
+            {
+                _execute = (o, _) => execute(o)
+            };
+            return command;
+        }
+
+        /// <summary>
+        /// Creates an asynchronous command with the specified execute action.
+        /// </summary>
+        /// <param name="execute">The action to execute asynchronously.</param>
+        /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
+        internal static AsyncCommand Do(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute)
         {
             var command = new AsyncCommand
             {
@@ -421,7 +434,7 @@ namespace MVVMFluent
     /// </summary>
     internal class AsyncCommand<T> : IAsyncFluentCommand, global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
     {
-        private global::System.Func<T?, global::System.Threading.Tasks.Task>? _execute;
+        private global::System.Func<T?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task>? _execute;
         private global::System.Func<T?, bool>? _canExecute;
         private bool _isRunning;
         private global::System.Threading.CancellationTokenSource? _cts;
@@ -532,7 +545,7 @@ namespace MVVMFluent
             ExecuteAsync(parameter).RunWithExceptionHandling(ex => _onException?.Invoke(ex), _continueOnCapturedContext);
         }
 
-        public Task ExecuteAsync(object? parameter)
+        public global::System.Threading.Tasks.Task ExecuteAsync(object? parameter)
         {
             return ExecuteAsync((T?)parameter);
         }
@@ -553,7 +566,7 @@ namespace MVVMFluent
 
                 try
                 {
-                    await _execute(parameter);
+                    await _execute(parameter, _cts.Token);
                 }
                 finally
                 {
@@ -584,7 +597,21 @@ namespace MVVMFluent
         {
             var command = new AsyncCommand<T>
             {
-                _execute = execute
+                _execute = (o, _) => execute(o)
+            };
+            return command;
+        }
+
+        /// <summary>
+        /// Creates an asynchronous command with the specified execute action.
+        /// </summary>
+        /// <param name="execute">The action to execute asynchronously.</param>
+        /// <returns>An instance of <see cref="AsyncCommand{T}"/>.</returns>
+        internal static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.CancellationToken, System.Threading.Tasks.Task> execute)
+        {
+            var command = new AsyncCommand<T>
+            {
+                _execute = (o, t) => execute(o, t)
             };
             return command;
         }
