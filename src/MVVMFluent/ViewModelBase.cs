@@ -14,8 +14,8 @@
     /// </summary>
     internal abstract partial class ViewModelBase : global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
     {
-        private readonly global::System.Collections.Generic.Dictionary<string, object?> _fieldStore = new global::System.Collections.Generic.Dictionary<string, object?>();
-        private readonly global::System.Collections.Generic.Dictionary<string, IFluentCommand> _commandStore = new global::System.Collections.Generic.Dictionary<string, IFluentCommand>();
+        protected readonly global::System.Collections.Generic.Dictionary<string, object?> _fieldStore = new global::System.Collections.Generic.Dictionary<string, object?>();
+        protected readonly global::System.Collections.Generic.Dictionary<string, IFluentCommand> _commandStore = new global::System.Collections.Generic.Dictionary<string, IFluentCommand>();
 
         private bool _disposed = false;
 
