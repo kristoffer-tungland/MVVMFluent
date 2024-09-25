@@ -27,7 +27,7 @@
         /// <typeparam name="T">The type of the property.</typeparam>
         /// <param name="value">The new value to set.</param>
         /// <param name="propertyName">The name of the property being set.</param>
-        protected internal void Set<T>(T value, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected void Set<T>(T value, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
@@ -43,7 +43,7 @@
         /// <param name="value">The new value to set.</param>
         /// <param name="propertyName">The name of the property being set.</param>
         /// <returns>The fluent setter instance.</returns>
-        protected internal FluentSetter<T> When<T>(T value, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected virtual FluentSetter<T> When<T>(T value, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
@@ -59,7 +59,7 @@
         /// <param name="defaultValue">The default value to return if the property is not set.</param>
         /// <param name="propertyName">The name of the property being retrieved.</param>
         /// <returns>The value of the property.</returns>
-        protected internal T? Get<T>(T? defaultValue = default, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected T? Get<T>(T? defaultValue = default, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to get.");
@@ -86,7 +86,7 @@
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
         /// <returns>A command instance.</returns>
-        protected internal Command Do(global::System.Action execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected Command Do(global::System.Action execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             return Do(_ => execute(), propertyName);
         }
@@ -105,7 +105,7 @@
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
         /// <returns>A command instance.</returns>
-        protected internal Command<T> Do<T>(global::System.Action<T> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected Command<T> Do<T>(global::System.Action<T> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
@@ -119,7 +119,7 @@
         }
 
         
-        protected internal Command Do(global::System.Action<object?> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected Command Do(global::System.Action<object?> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
@@ -150,12 +150,12 @@
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
         /// <returns>An asynchronous command instance.</returns>
-        protected internal AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             return Do(_ => execute(), propertyName);
         }
 
-        protected internal AsyncCommand<T> Do<T>(global::System.Func<T?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected AsyncCommand<T> Do<T>(global::System.Func<T?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
@@ -168,7 +168,7 @@
             return (AsyncCommand<T>)command;
         }
 
-        protected internal AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");

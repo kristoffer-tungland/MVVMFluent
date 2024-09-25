@@ -79,7 +79,7 @@
         private Command? _cancelCommand;
         private int _progress = 0;
 
-        protected AsyncCommand(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute)
+        protected void SetExecute(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute)
         {
             _execute = execute;
         }
@@ -241,7 +241,9 @@
         /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
         public static AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute)
         {
-            return new AsyncCommand((o, _) => execute(o));
+            var command = new AsyncCommand();
+            command.SetExecute((o, _) => execute(o));
+            return command;
         }
 
         /// <summary>
@@ -251,7 +253,9 @@
         /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
         public static AsyncCommand Do(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute)
         {
-            return new AsyncCommand(execute);
+            var command = new AsyncCommand();
+            command.SetExecute(execute);
+            return command;
         }
 
         /// <summary>
@@ -327,7 +331,7 @@
         /// Disposes the command and any related resources.
         /// </summary>
         /// <param name="disposing">Whether the method is called from <see cref="Dispose()"/>.</param>
-        protected internal virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
             {
@@ -391,7 +395,7 @@
         private Command? _cancelCommand;
         private int _progress = 0;
 
-        protected AsyncCommand(global::System.Func<T?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute)
+        protected void SetExecute(global::System.Func<T?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute)
         {
             _execute = execute;
         }
@@ -547,7 +551,9 @@
         /// <returns>An instance of <see cref="AsyncCommand{T}"/>.</returns>
         public static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.Tasks.Task> execute)
         {
-            return new AsyncCommand<T>((o, _) => execute(o));
+            var command = new AsyncCommand<T>();
+            command.SetExecute((o, _) => execute(o));
+            return command;
         }
 
         /// <summary>
@@ -557,7 +563,9 @@
         /// <returns>An instance of <see cref="AsyncCommand{T}"/>.</returns>
         public static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.CancellationToken, System.Threading.Tasks.Task> execute)
         {
-            return new AsyncCommand<T>((o, t) => execute(o, t));
+            var command = new AsyncCommand<T>();
+            command.SetExecute(execute);
+            return command;
         }
 
         /// <summary>
@@ -623,7 +631,7 @@
         /// Disposes the command and any related resources.
         /// </summary>
         /// <param name="disposing">Whether the method is called from <see cref="Dispose()"/>.</param>
-        protected internal virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
             {

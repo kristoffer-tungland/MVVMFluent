@@ -24,7 +24,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="Command"/> class with the specified execute action.
         /// </summary>
-        protected Command(global::System.Action<object?> execute)
+        protected void SetCommand(global::System.Action<object?> execute)
         {
             _execute = execute;
         }
@@ -51,7 +51,9 @@
         /// <returns>A new <see cref="Command"/> instance.</returns>
         public static Command Do(global::System.Action<object?> execute)
         {
-            return new Command(execute);
+            var command = new Command();
+            command.SetCommand(execute);
+            return command;
         }
 
         /// <summary>
@@ -113,7 +115,7 @@
         /// Releases unmanaged resources and optionally releases managed resources.
         /// </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-        protected internal virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
                 return;
@@ -161,7 +163,7 @@
         /// Initializes a new instance of the <see cref="Command{T}"/> class with the specified execute action.
         /// </summary>
         /// <param name="execute">The action to execute when the command is invoked.</param>
-        protected Command(global::System.Action<T> execute)
+        protected void SetCommand(global::System.Action<T> execute)
         {
             _execute = execute;
         }
@@ -178,7 +180,9 @@
         /// <returns>A new instance of <see cref="Command{T}"/>.</returns>
         public static Command<T> Do(global::System.Action<T> execute)
         {
-            return new Command<T>(execute);
+            var command = new Command<T>();
+            command.SetCommand(execute);
+            return command;
         }
 
         /// <summary>
@@ -240,7 +244,7 @@
         /// Releases the unmanaged resources used by the <see cref="Command{T}"/> instance and optionally releases the managed resources.
         /// </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-        protected internal virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
                 return;
