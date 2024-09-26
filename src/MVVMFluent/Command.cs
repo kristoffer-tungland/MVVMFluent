@@ -2,6 +2,8 @@
 {
     public interface IFluentCommand : global::System.Windows.Input.ICommand, global::System.IDisposable
     {
+        void MarkAsBuilt();
+        bool IsBuilt { get; }
         void RaiseCanExecuteChanged();
     }
 
@@ -20,6 +22,13 @@
         private global::System.Action<object?>? _execute;
         private global::System.Func<object, bool>? _canExecute;
         private bool _disposed = false;
+
+        public bool IsBuilt { get; private set; }
+
+        public void MarkAsBuilt()
+        {
+            IsBuilt = true;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Command"/> class with the specified execute action.
@@ -73,6 +82,9 @@
         /// <returns>The current <see cref="Command"/> instance.</returns>
         public Command If(global::System.Func<object, bool> canExecute)
         {
+            if (IsBuilt)
+                return this;
+
             _canExecute = canExecute;
             return this;
         }
@@ -159,6 +171,13 @@
         private global::System.Func<T, bool>? _canExecute;
         private bool _disposed = false;
 
+        public bool IsBuilt { get; private set; }
+
+        public void MarkAsBuilt()
+        {
+            IsBuilt = true;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Command{T}"/> class with the specified execute action.
         /// </summary>
@@ -202,6 +221,9 @@
         /// <returns>The current <see cref="Command{T}"/> instance for fluent chaining.</returns>
         public Command<T> If(global::System.Func<T, bool> canExecute)
         {
+            if (IsBuilt)
+                return this;
+
             _canExecute = canExecute;
             return this;
         }

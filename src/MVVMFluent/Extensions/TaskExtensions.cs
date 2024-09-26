@@ -1,4 +1,4 @@
-﻿namespace MVVMFluent
+﻿namespace MVVMFluent.Extensions
 {
     internal static class TaskExtensions
     {

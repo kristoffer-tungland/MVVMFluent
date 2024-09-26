@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net48;net6.0-windows</TargetFrameworks>
+    <langversion>9</langversion>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <NuSpecFile>MVVMFluent.WPF.nuspec</NuSpecFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MVVMFluent\MVVMFluent.csproj" />
+  </ItemGroup>
+
+</Project>

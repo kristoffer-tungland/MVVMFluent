@@ -1,4 +1,6 @@
-﻿namespace MVVMFluent
+﻿using MVVMFluent.Extensions;
+
+namespace MVVMFluent
 {
     /// <summary>
     /// Defines an asynchronous fluent command that supports cancellation and tracking of execution state.
@@ -78,6 +80,13 @@
         private bool _disposed;
         private Command? _cancelCommand;
         private int _progress = 0;
+
+        public bool IsBuilt { get; private set; }
+
+        public void MarkAsBuilt()
+        {
+            IsBuilt = true;
+        }
 
         protected void SetExecute(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute)
         {
@@ -186,9 +195,9 @@
 
             if (CanExecute(parameter))
             {
+                _cts = new global::System.Threading.CancellationTokenSource();
                 IsRunning = true;
                 Progress = 0;
-                _cts = new global::System.Threading.CancellationTokenSource();
 
                 try
                 {
@@ -275,6 +284,9 @@
         /// <returns>The updated command instance.</returns>
         public AsyncCommand If(global::System.Func<object?, bool> canExecute)
         {
+            if (IsBuilt)
+                return this;
+
             _canExecute = canExecute;
             return this;
         }
@@ -286,6 +298,9 @@
         /// <returns>The updated command instance.</returns>
         public AsyncCommand OnException(global::System.Action<global::System.Exception> onException)
         {
+            if (IsBuilt)
+                return this;
+
             _onException = onException;
             return this;
         }
@@ -297,6 +312,9 @@
         /// <returns>The updated command instance.</returns>
         public AsyncCommand ConfigureAwait(bool continueOnCapturedContext)
         {
+            if (IsBuilt)
+                return this;
+
             _continueOnCapturedContext = continueOnCapturedContext;
             return this;
         }
@@ -394,6 +412,13 @@
         private bool _disposed;
         private Command? _cancelCommand;
         private int _progress = 0;
+
+        public bool IsBuilt { get; private set; }
+
+        public void MarkAsBuilt()
+        {
+            IsBuilt = true;
+        }
 
         protected void SetExecute(global::System.Func<T?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute)
         {
@@ -517,8 +542,9 @@
 
             if (CanExecute(parameter))
             {
-                IsRunning = true;
                 _cts = new global::System.Threading.CancellationTokenSource();
+                IsRunning = true;
+                Progress = 0;
 
                 try
                 {
@@ -526,6 +552,7 @@
                 }
                 finally
                 {
+                    Progress = 0;
                     IsRunning = false;
                     _cts.Dispose();
                     _cts = null;
@@ -575,6 +602,9 @@
         /// <returns>The updated command instance.</returns>
         public AsyncCommand<T> If(global::System.Func<T?, bool> canExecute)
         {
+            if (IsBuilt)
+                return this;
+
             _canExecute = canExecute;
             return this;
         }
@@ -586,6 +616,9 @@
         /// <returns>The updated command instance.</returns>
         public AsyncCommand<T> OnException(global::System.Action<global::System.Exception> onException)
         {
+            if (IsBuilt)
+                return this;
+
             _onException = onException;
             return this;
         }
@@ -597,6 +630,9 @@
         /// <returns>The updated command instance.</returns>
         public AsyncCommand<T> ConfigureAwait(bool continueOnCapturedContext)
         {
+            if (IsBuilt)
+                return this;
+
             _continueOnCapturedContext = continueOnCapturedContext;
             return this;
         }

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>MVVMFluent</id>
-    <version>0.0.1-alfa7</version>
+    <version>0.0.1-alfa12</version>
     <!-- 👇 Indicates the package is only used at build time, not deploy time -->
     <developmentDependency>true</developmentDependency>
     <authors>Kristoffer Tungland</authors>
@@ -10,7 +10,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <projectUrl>https://github.com/kristoffer-tungland/MVVMFluent</projectUrl>
     <description>MVVMFluent is a lightweight, source-only .NET library designed to simplify the MVVM pattern through fluent command and property setter APIs. It reduces boilerplate code in view models, making your codebase cleaner, more readable, and easier to maintain.</description>
-    <tags>MVVM source-only Fluent</tags>
+    <tags>MVVM WPF source-only Fluent</tags>
   </metadata>
   <files>
     <file src="*.cs" target="contentFiles/cs/netstandard2.0/MVVMFluent/"/>

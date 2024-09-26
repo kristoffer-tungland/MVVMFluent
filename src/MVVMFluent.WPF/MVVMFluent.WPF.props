@@ -1,0 +1,8 @@
+﻿<Project>
+  <!-- Hide content files from Visual Studio solution explorer. -->
+  <ItemGroup>
+    <Compile Update="@(Compile)">
+      <Visible Condition="'%(NuGetItemType)' == 'Compile' and '%(NuGetPackageId)' == 'MVVMFluent.WPF'">false</Visible>
+    </Compile>
+  </ItemGroup>
+</Project>

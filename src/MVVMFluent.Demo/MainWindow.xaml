@@ -20,8 +20,24 @@
                     Command="{Binding HelpCommand}" CommandParameter="This is the help" />
 
         <TextBox Grid.Row="1" VerticalAlignment="Center" Padding="10" Margin="10"
-                 Text="{Binding Input, UpdateSourceTrigger=PropertyChanged}" 
-                 IsEnabled="{Binding Enable}" />
+                 Text="{Binding Input, UpdateSourceTrigger=PropertyChanged,
+                            ValidatesOnNotifyDataErrors=True}" 
+                 IsEnabled="{Binding Enable}">
+            <Validation.ErrorTemplate>
+                <ControlTemplate>
+                    <StackPanel>
+                        <AdornedElementPlaceholder x:Name="textBox" />
+                        <ItemsControl ItemsSource="{Binding}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ErrorContent}" Foreground="Red" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ControlTemplate>
+            </Validation.ErrorTemplate>
+        </TextBox>
 
         <ProgressBar Grid.Row="2" VerticalAlignment="Center" Padding="10" Margin="10"
                      Value="{Binding AsyncCommand.Progress}" Minimum="0" Maximum="100" Height="10">
