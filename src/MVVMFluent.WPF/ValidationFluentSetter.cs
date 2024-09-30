@@ -1,35 +1,25 @@
-﻿/* Unmerged change from project 'MVVMFluent.WPF (net6.0-windows)'
-Before:
-using MVVMFluent.WPF.Interfaces;
-After:
-using MVVMFluent;
-using MVVMFluent.WPF;
-using MVVMFluent.WPF;
-using MVVMFluent.WPF.Builders;
-using MVVMFluent.WPF.Interfaces;
-*/
-namespace MVVMFluent.WPF
+﻿namespace MVVMFluent.WPF
 {
-    public class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidationFluentSetter<TValue>
+    internal class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidationFluentSetter<TValue>
     {
-        private System.Collections.Generic.List<System.Windows.Controls.ValidationRule> _rules = new();
+        private global::System.Collections.Generic.List<global::System.Windows.Controls.ValidationRule> _rules = new();
         public bool HasErrors { get; private set; }
-        private readonly System.EventHandler<System.ComponentModel.DataErrorsChangedEventArgs>? _errorsChanged;
+        private readonly global::System.EventHandler<global::System.ComponentModel.DataErrorsChangedEventArgs>? _errorsChanged;
 
-        public ValidationFluentSetter(IValidationFluentSetterViewModel viewModel, string? propertyName, System.EventHandler<System.ComponentModel.DataErrorsChangedEventArgs>? errorsChanged) :
+        public ValidationFluentSetter(IValidationFluentSetterViewModel viewModel, string? propertyName, global::System.EventHandler<global::System.ComponentModel.DataErrorsChangedEventArgs>? errorsChanged) :
             base(viewModel, propertyName)
         {
             _errorsChanged = errorsChanged;
         }
 
-        public System.Collections.ObjectModel.ObservableCollection<string> Errors { get; } = new();
+        public global::System.Collections.ObjectModel.ObservableCollection<string> Errors { get; } = new();
 
-        public System.Collections.IEnumerable GetErrors()
+        public global::System.Collections.IEnumerable GetErrors()
         {
             return Errors;
         }
 
-        internal ValidationFluentSetter<TValue> Validate(params System.Windows.Controls.ValidationRule[] rules)
+        internal ValidationFluentSetter<TValue> Validate(params global::System.Windows.Controls.ValidationRule[] rules)
         {
             foreach (var rule in rules)
             {
@@ -41,15 +31,31 @@ namespace MVVMFluent.WPF
             return this;
         }
 
-        internal ValidationFluentSetter<TValue> AddRule(System.Windows.Controls.ValidationRule rule)
+        internal ValidationFluentSetter<TValue> AddRule(global::System.Windows.Controls.ValidationRule rule)
         {
             if (_rules.Contains(rule))
                 return this;
+
             _rules.Add(rule);
             return this;
         }
 
+        /// <summary>
+        /// Checks for errors based on the validation rules.
+        /// </summary>
+        /// <param name="valueToSet">Type of value to set.</param>
+        /// <exception cref="global::System.InvalidOperationException">Thrown when the validation rule does not return an error message.</exception>
         public void CheckForErrors(TValue? valueToSet)
+        {
+            CheckForErrors((object?)valueToSet);
+        }
+
+        /// <summary>
+        /// Checks for errors based on the validation rules.
+        /// </summary>
+        /// <param name="valueToSet">Value to set.</param>
+        /// <exception cref="global::System.InvalidOperationException">Thrown when the validation rule does not return an error message.</exception>
+        public void CheckForErrors(object? valueToSet)
         {
             var hadErrors = HasErrors;
             Errors.Clear();
@@ -57,14 +63,14 @@ namespace MVVMFluent.WPF
 
             foreach (var rule in _rules)
             {
-                var validationResult = rule.Validate(valueToSet, System.Globalization.CultureInfo.CurrentCulture);
+                var validationResult = rule.Validate(valueToSet, global::System.Globalization.CultureInfo.CurrentCulture);
 
                 if (!validationResult.IsValid)
                 {
                     var errorMessage = validationResult.ErrorContent?.ToString();
 
                     if (errorMessage is null || string.IsNullOrWhiteSpace(errorMessage))
-                        throw new System.InvalidOperationException("Validation rule did not return an error message.");
+                        throw new global::System.InvalidOperationException("Validation rule did not return an error message.");
 
                     Errors.Add(errorMessage);
                     HasErrors = true;
@@ -72,7 +78,7 @@ namespace MVVMFluent.WPF
             }
 
             if (hadErrors != HasErrors)
-                _errorsChanged?.Invoke(this, new System.ComponentModel.DataErrorsChangedEventArgs(PropertyName));
+                _errorsChanged?.Invoke(this, new global::System.ComponentModel.DataErrorsChangedEventArgs(PropertyName));
         }
     }
 }

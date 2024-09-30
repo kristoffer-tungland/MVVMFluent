@@ -36,11 +36,20 @@
             return Validate(new RequiredValidationRule(errorMessage));
         }
 
+        /// <summary>
+        /// Sets the value. This method is required to be called at the end of the fluent setter configuration.
+        /// </summary>
+        /// <remarks>This method runs the set action and checks for errors.</remarks>
         public override void Set()
         {
             base.Set();
 
             GetFluentSetter().CheckForErrors(_valueToSet);
+        }
+
+        public void CheckForErrors(object? value)
+        {
+            GetFluentSetter().CheckForErrors(value);
         }
     }
 }

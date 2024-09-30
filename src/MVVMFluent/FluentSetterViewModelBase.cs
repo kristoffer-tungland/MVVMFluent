@@ -4,7 +4,7 @@
     /// Represents a base class for view models that provides property change notification and command creation.
     /// <example>
     /// <code lang="csharp">
-    /// internal class MainViewModel : ViewModelBase
+    /// public class MainViewModel : ViewModelBase
     /// {
     ///     // Property with notification and default value
     ///     public bool Enable { get => Get(true); set => Set(value); }

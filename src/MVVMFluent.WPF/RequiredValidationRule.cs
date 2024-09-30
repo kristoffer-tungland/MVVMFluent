@@ -1,6 +1,6 @@
 ﻿namespace MVVMFluent.WPF
 {
-    public class RequiredValidationRule : System.Windows.Controls.ValidationRule
+    public class RequiredValidationRule : global::System.Windows.Controls.ValidationRule
     {
         private readonly string? _errorMessage;
 
@@ -9,16 +9,16 @@
             _errorMessage = errorMessage;
         }
 
-        public override System.Windows.Controls.ValidationResult Validate(object? value,
-            System.Globalization.CultureInfo cultureInfo)
+        public override global::System.Windows.Controls.ValidationResult Validate(object? value,
+            global::System.Globalization.CultureInfo cultureInfo)
         {
             if (value is null)
-                return new System.Windows.Controls.ValidationResult(false, _errorMessage ?? "Value is required");
+                return new global::System.Windows.Controls.ValidationResult(false, _errorMessage ?? "Value is required");
 
             if (value is string str && string.IsNullOrWhiteSpace(str))
-                return new System.Windows.Controls.ValidationResult(false, _errorMessage ?? "Value is required");
+                return new global::System.Windows.Controls.ValidationResult(false, _errorMessage ?? "Value is required");
 
-            return System.Windows.Controls.ValidationResult.ValidResult;
+            return global::System.Windows.Controls.ValidationResult.ValidResult;
         }
     }
 }

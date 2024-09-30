@@ -1,5 +1,23 @@
 ﻿namespace MVVMFluent
 {
+    /// <summary>
+    /// Represents a base class for view models that provides property change notification and command creation.
+    /// <example>
+    /// <code lang="csharp">
+    /// public class MainViewModel : ViewModelBase
+    /// {
+    ///     // Property with notification and default value
+    ///     public bool Enabled { get => Get(true); set => Set(value); }
+    ///     
+    ///     // Property that notifies the Ok command when changed
+    ///     public string? Input { get => Get&lt;string?&gt;(); set => When(value).Notify(Ok).Set(); }
+    ///     
+    ///     // Command
+    ///     public Command Ok => Do(() => MessageBox.Show(Input)).If(() => !string.IsNullOrWhiteSpace(Input));
+    /// }
+    /// </code>
+    /// </example>
+    /// </summary>
     public abstract class ViewModelBase : FluentSetterViewModelBase
     {
         /// <summary>

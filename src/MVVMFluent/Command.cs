@@ -5,7 +5,6 @@
         void MarkAsBuilt();
         bool IsBuilt { get; }
         IFluentSetterViewModel? Owner { get; }
-
         void RaiseCanExecuteChanged();
     }
 
