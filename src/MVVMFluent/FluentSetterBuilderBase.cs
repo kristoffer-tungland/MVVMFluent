@@ -1,8 +1,6 @@
-﻿using MVVMFluent.Interfaces;
-
-namespace MVVMFluent.Builders
+﻿namespace MVVMFluent
 {
-    public abstract class FluentSetterBuilderBase<TValue> : IFluentSetterBuilder, global::System.IDisposable
+    public abstract class FluentSetterBuilderBase<TValue> : IFluentSetterBuilder, System.IDisposable
     {
         protected TValue? _valueToSet;
         public bool IsBuilt { get; private set; }
@@ -61,7 +59,7 @@ namespace MVVMFluent.Builders
             if (disposing)
             {
                 _valueToSet = default;
-                if (FluentSetter is global::System.IDisposable disposable)
+                if (FluentSetter is System.IDisposable disposable)
                     disposable.Dispose();
 
                 DisposeInternal();

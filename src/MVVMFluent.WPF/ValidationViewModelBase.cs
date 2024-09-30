@@ -1,6 +1,3 @@
-using MVVMFluent.Bases;
-using MVVMFluent.WPF.Builders;
-using MVVMFluent.WPF.Interfaces;
 using System.Linq;
 
 namespace MVVMFluent.WPF

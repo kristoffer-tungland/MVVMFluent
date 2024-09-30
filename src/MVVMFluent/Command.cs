@@ -4,6 +4,8 @@
     {
         void MarkAsBuilt();
         bool IsBuilt { get; }
+        IFluentSetterViewModel? Owner { get; }
+
         void RaiseCanExecuteChanged();
     }
 
@@ -24,6 +26,8 @@
         private bool _disposed = false;
 
         public bool IsBuilt { get; private set; }
+
+        public IFluentSetterViewModel? Owner { get; private set; }
 
         public void MarkAsBuilt()
         {
@@ -48,9 +52,9 @@
         /// </summary>
         /// <param name="execute">The action to execute.</param>
         /// <returns>A new <see cref="Command"/> instance.</returns>
-        public static Command Do(global::System.Action execute)
+        public static Command Do(global::System.Action execute, IFluentSetterViewModel? owner)
         {
-            return Do(_ => execute());
+            return Do(_ => execute(), owner);
         }
 
         /// <summary>
@@ -58,9 +62,10 @@
         /// </summary>
         /// <param name="execute">The action to execute.</param>
         /// <returns>A new <see cref="Command"/> instance.</returns>
-        public static Command Do(global::System.Action<object?> execute)
+        public static Command Do(global::System.Action<object?> execute, IFluentSetterViewModel? owner)
         {
             var command = new Command();
+            command.Owner = owner;
             command.SetCommand(execute);
             return command;
         }
@@ -170,8 +175,8 @@
         private global::System.Action<T>? _execute;
         private global::System.Func<T, bool>? _canExecute;
         private bool _disposed = false;
-
         public bool IsBuilt { get; private set; }
+        public IFluentSetterViewModel? Owner { get; private set; }
 
         public void MarkAsBuilt()
         {
@@ -197,9 +202,12 @@
         /// </summary>
         /// <param name="execute">The action to execute when the command is invoked.</param>
         /// <returns>A new instance of <see cref="Command{T}"/>.</returns>
-        public static Command<T> Do(global::System.Action<T> execute)
+        public static Command<T> Do(global::System.Action<T> execute, IFluentSetterViewModel? owner)
         {
-            var command = new Command<T>();
+            var command = new Command<T>
+            {
+                Owner = owner
+            };
             command.SetCommand(execute);
             return command;
         }

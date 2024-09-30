@@ -1,4 +1,4 @@
-﻿namespace MVVMFluent.Bases
+﻿namespace MVVMFluent
 {
     public abstract class NotificationViewModelBase : System.ComponentModel.INotifyPropertyChanged, System.IDisposable
     {

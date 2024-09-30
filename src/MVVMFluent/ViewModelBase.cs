@@ -1,7 +1,4 @@
-﻿using MVVMFluent.Bases;
-using MVVMFluent.Builders;
-
-namespace MVVMFluent
+﻿namespace MVVMFluent
 {
     public abstract class ViewModelBase : FluentSetterViewModelBase
     {

@@ -1,7 +1,14 @@
-﻿using MVVMFluent.Builders;
+﻿/* Unmerged change from project 'MVVMFluent.WPF (net6.0-windows)'
+Before:
 using MVVMFluent.WPF.Interfaces;
-
-namespace MVVMFluent.WPF.Builders
+After:
+using MVVMFluent;
+using MVVMFluent.WPF;
+using MVVMFluent.WPF;
+using MVVMFluent.WPF.Builders;
+using MVVMFluent.WPF.Interfaces;
+*/
+namespace MVVMFluent.WPF
 {
     public class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidationFluentSetter<TValue>
     {

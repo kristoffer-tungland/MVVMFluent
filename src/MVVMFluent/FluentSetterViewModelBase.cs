@@ -1,7 +1,4 @@
-﻿using MVVMFluent.Builders;
-using MVVMFluent.Interfaces;
-
-namespace MVVMFluent.Bases
+﻿namespace MVVMFluent
 {
     /// <summary>
     /// Represents a base class for view models that provides property change notification and command creation.
@@ -126,7 +123,7 @@ namespace MVVMFluent.Bases
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
-                command = Command<TValue>.Do(execute);
+                command = Command<TValue>.Do(execute, this);
                 _commandStore.Add(propertyName, command);
             }
             else
@@ -143,7 +140,7 @@ namespace MVVMFluent.Bases
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
-                command = Command.Do(execute);
+                command = Command.Do(execute, this);
                 _commandStore.Add(propertyName, command);
             }
             else
@@ -182,7 +179,7 @@ namespace MVVMFluent.Bases
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
-                command = AsyncCommand<TValue>.Do(execute);
+                command = AsyncCommand<TValue>.Do(execute, this);
                 _commandStore.Add(propertyName, command);
             }
             else
@@ -198,7 +195,7 @@ namespace MVVMFluent.Bases
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
-                command = AsyncCommand.Do(execute);
+                command = AsyncCommand.Do(execute, this);
                 _commandStore.Add(propertyName, command);
             }
             else

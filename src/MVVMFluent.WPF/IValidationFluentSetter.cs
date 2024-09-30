@@ -1,4 +1,4 @@
-﻿namespace MVVMFluent.WPF.Builders
+﻿namespace MVVMFluent.WPF
 {
     public interface IValidationFluentSetter<TValue> : IFluentSetter<TValue>
     {

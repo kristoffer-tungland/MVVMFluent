@@ -1,6 +1,4 @@
-﻿using MVVMFluent.Interfaces;
-
-namespace MVVMFluent.WPF.Interfaces
+﻿namespace MVVMFluent.WPF
 {
     public interface IValidationFluentSetterViewModel : IFluentSetterViewModel
     {

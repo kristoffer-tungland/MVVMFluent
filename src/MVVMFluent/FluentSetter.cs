@@ -1,6 +1,4 @@
-﻿using MVVMFluent.Interfaces;
-
-namespace MVVMFluent.Builders
+﻿namespace MVVMFluent
 {
     public class FluentSetter<T> : IFluentSetter<T>, System.IDisposable
     {

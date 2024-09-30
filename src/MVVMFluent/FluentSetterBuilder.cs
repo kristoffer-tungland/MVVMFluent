@@ -1,6 +1,4 @@
-﻿using MVVMFluent.Interfaces;
-
-namespace MVVMFluent.Builders
+﻿namespace MVVMFluent
 {
     /// <summary>
     /// Represents a builder for a fluent setter.

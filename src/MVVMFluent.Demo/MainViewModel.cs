@@ -10,10 +10,10 @@ internal class MainViewModel : ValidationViewModelBase
     public string? Input
     {
         get => Get<string?>();
-        set => When(value).Required().Notify(OkCommand, AsyncCommand).Set();
+        set => When(value).Required().Notify(AsyncCommand).Set();
     }
 
-    public Command OkCommand => Do(() => ShowDialog(Input)).IfErrorFree(this, nameof(Input));
+    public Command OkCommand => Do(() => ShowDialog(Input)).IfValid(nameof(Input));
 
     private bool CanExecute()
     {

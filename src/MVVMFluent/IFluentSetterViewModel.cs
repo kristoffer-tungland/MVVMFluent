@@ -1,6 +1,4 @@
-﻿using MVVMFluent.Builders;
-
-namespace MVVMFluent.Interfaces
+﻿namespace MVVMFluent
 {
     public interface IFluentSetterViewModel
     {

@@ -1,18 +1,19 @@
-﻿using System.Windows;
+﻿using MVVMFluent.WPF;
+using System.Windows;
 
 namespace MVVMFluent.NugetDemo;
 
-internal class MainViewModel : ViewModelBase
+internal class MainViewModel : ValidationViewModelBase
 {
     public bool Enable { get => Get(true); set => Set(value); }
 
     public string? Input
     {
         get => Get<string?>();
-        set => When(value).Notify(OkCommand, AsyncCommand).Set();
+        set => When(value).Required().Notify(OkCommand, AsyncCommand).Set();
     }
 
-    public Command OkCommand => Do(() => ShowDialog(Input)).If(CanExecute);
+    public Command OkCommand => Do(() => ShowDialog(Input)).IfValid(nameof(Input));
 
     private bool CanExecute()
     {

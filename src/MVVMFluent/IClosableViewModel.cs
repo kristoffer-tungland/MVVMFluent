@@ -1,4 +1,4 @@
-﻿namespace MVVMFluent.Interfaces
+﻿namespace MVVMFluent
 {
     internal interface IClosableViewModel
     {

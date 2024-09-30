@@ -1,6 +1,4 @@
-﻿using MVVMFluent.Extensions;
-
-namespace MVVMFluent
+﻿namespace MVVMFluent
 {
     /// <summary>
     /// Defines an asynchronous fluent command that supports cancellation and tracking of execution state.
@@ -80,6 +78,7 @@ namespace MVVMFluent
         private bool _disposed;
         private Command? _cancelCommand;
         private int _progress = 0;
+        public IFluentSetterViewModel? Owner { get; private set; }
 
         public bool IsBuilt { get; private set; }
 
@@ -112,7 +111,7 @@ namespace MVVMFluent
             {
                 if (_cancelCommand == null)
                 {
-                    _cancelCommand = Command.Do(() => Cancel()).If(() => IsRunning && _cts?.IsCancellationRequested == false);
+                    _cancelCommand = Command.Do(() => Cancel(), Owner).If(() => IsRunning && _cts?.IsCancellationRequested == false);
                     PropertyChanged += (s, e) => _cancelCommand.RaiseCanExecuteChanged();
                 }
                 return _cancelCommand;
@@ -238,9 +237,9 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
         /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
-        public static AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute)
+        public static AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
         {
-            return Do((_, _) => execute());
+            return Do((_, _) => execute(), owner);
         }
 
         /// <summary>
@@ -248,9 +247,12 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
         /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
-        public static AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute)
+        public static AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
         {
-            var command = new AsyncCommand();
+            var command = new AsyncCommand
+            {
+                Owner = owner
+            };
             command.SetExecute((o, _) => execute(o));
             return command;
         }
@@ -260,9 +262,12 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
         /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
-        public static AsyncCommand Do(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute)
+        public static AsyncCommand Do(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
         {
-            var command = new AsyncCommand();
+            var command = new AsyncCommand
+            {
+                Owner = owner
+            };
             command.SetExecute(execute);
             return command;
         }
@@ -412,6 +417,7 @@ namespace MVVMFluent
         private bool _disposed;
         private Command? _cancelCommand;
         private int _progress = 0;
+        public IFluentSetterViewModel? Owner { get; private set; }
 
         public bool IsBuilt { get; private set; }
 
@@ -444,7 +450,7 @@ namespace MVVMFluent
             {
                 if (_cancelCommand == null)
                 {
-                    _cancelCommand = Command.Do(() => Cancel()).If(() => IsRunning && _cts?.IsCancellationRequested == false);
+                    _cancelCommand = Command.Do(() => Cancel(), Owner).If(() => IsRunning && _cts?.IsCancellationRequested == false);
                     PropertyChanged += (s, e) => _cancelCommand.RaiseCanExecuteChanged();
                 }
                 return _cancelCommand;
@@ -576,9 +582,12 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
         /// <returns>An instance of <see cref="AsyncCommand{T}"/>.</returns>
-        public static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.Tasks.Task> execute)
+        public static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
         {
-            var command = new AsyncCommand<T>();
+            var command = new AsyncCommand<T>
+            {
+                Owner = owner
+            };
             command.SetExecute((o, _) => execute(o));
             return command;
         }
@@ -588,9 +597,12 @@ namespace MVVMFluent
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
         /// <returns>An instance of <see cref="AsyncCommand{T}"/>.</returns>
-        public static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.CancellationToken, System.Threading.Tasks.Task> execute)
+        public static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.CancellationToken, System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
         {
-            var command = new AsyncCommand<T>();
+            var command = new AsyncCommand<T>
+            {
+                Owner = owner
+            };
             command.SetExecute(execute);
             return command;
         }

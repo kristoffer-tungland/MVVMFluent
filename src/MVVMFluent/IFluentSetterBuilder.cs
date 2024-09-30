@@ -1,4 +1,4 @@
-﻿namespace MVVMFluent.Builders
+﻿namespace MVVMFluent
 {
     public interface IFluentSetterBuilder
     {
