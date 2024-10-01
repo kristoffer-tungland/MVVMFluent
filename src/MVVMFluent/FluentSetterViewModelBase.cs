@@ -58,10 +58,14 @@
         /// <param name="value">The new value to set.</param>
         /// <param name="propertyName">The name of the property being set.</param>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
         protected void Set<TValue>(TValue value, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
+            if (propertyName == ".ctor")
+                throw new global::System.ArgumentException(nameof(propertyName), "Property name must be provided when it is set in the constructor.");
 
             SetFieldValue(propertyName, value);
         }
@@ -73,11 +77,15 @@
         /// <param name="defaultValue">The default value to return if the property is not set.</param>
         /// <param name="propertyName">The name of the property being retrieved.</param>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
         /// <returns>The value of the property.</returns>
         protected TValue? Get<TValue>(TValue? defaultValue = default, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to get.");
+
+            if (propertyName == ".ctor")
+                throw new global::System.ArgumentException(nameof(propertyName), "Property name must be provided when it is retrieved in the constructor.");
 
             if (_fieldStore.TryGetValue(propertyName, out var value))
                 return (TValue?)value;
@@ -100,6 +108,7 @@
         /// <param name="propertyName">The name of the property associated with the command.</param>
         /// <returns>A new <see cref="Command"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
         protected Command Do(global::System.Action execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             return Do(_ => execute(), propertyName);
@@ -120,6 +129,7 @@
         /// <param name="propertyName">The name of the property associated with the command.</param>
         /// <returns>Returns a new <see cref="Command{TValue}"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
         protected Command<TValue> Do<TValue>(global::System.Action<TValue> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
@@ -153,10 +163,15 @@
         /// <param name="propertyName">The name of the property associated with the command.</param>
         /// <returns>Returns a new <see cref="Command"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
         protected Command Do(global::System.Action<object?> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
+            // Error handling when property name is .ctor
+            if (propertyName == ".ctor")
+                throw new global::System.ArgumentException(nameof(propertyName), "Command name must be provided when it is created in the constructor.");
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
@@ -188,6 +203,7 @@
         /// <param name="propertyName">The name of the property associated with the command.</param>
         /// <returns>A new <see cref="AsyncCommand"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
         protected AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             return Do(_ => execute(), propertyName);
@@ -211,10 +227,15 @@
         /// <param name="propertyName">The name of the property associated with the command.</param>
         /// <returns>A new <see cref="AsyncCommand{TValue}"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
         protected AsyncCommand<TValue> Do<TValue>(global::System.Func<TValue?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
+            // Error handling when property name is .ctor
+            if (propertyName == ".ctor")
+                throw new global::System.ArgumentException(nameof(propertyName), "Command name must be provided when it is created in the constructor.");
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
@@ -240,10 +261,15 @@
         /// <param name="propertyName">The name of the property associated with the command.</param>
         /// <returns>A new <see cref="AsyncCommand"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
         protected AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
+            // Error handling when property name is .ctor
+            if (propertyName == ".ctor")
+                throw new global::System.ArgumentException(nameof(propertyName), "Command name must be provided when it is created in the constructor.");
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
