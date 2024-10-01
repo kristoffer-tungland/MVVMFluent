@@ -31,7 +31,7 @@
         /// Sets the value to be set.
         /// </summary>
         /// <param name="value">The value to set.</param>
-        public void ValueToSet(TValue? value)
+        public void _intValueToSet(TValue? value)
         {
             _valueToSet = value;
         }
@@ -40,7 +40,7 @@
         /// Builds the fluent setter to make it ready to be used.
         /// </summary>
         /// <exception cref="global::System.InvalidOperationException">Thrown when the fluent setter is already built.</exception>
-        public void Build()
+        public void _intBuild()
         {
             if (IsBuilt)
                 throw new global::System.InvalidOperationException("Fluent setter is already built.");
@@ -56,7 +56,7 @@
         public virtual void Set()
         {
             if (!IsBuilt)
-                Build();
+                _intBuild();
 
             FluentSetter.Set(_valueToSet);
         }

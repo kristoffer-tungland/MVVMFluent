@@ -137,7 +137,7 @@ namespace MVVMFluent.WPF
 
             if (GetFluentSetterBuilder(propertyName) is ValidationFluentSetterBuilder<TValue> exsistingBuilder)
             {
-                exsistingBuilder.ValueToSet(value);
+                exsistingBuilder._intValueToSet(value);
                 return exsistingBuilder;
             }
 

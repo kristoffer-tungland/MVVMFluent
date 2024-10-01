@@ -10,7 +10,7 @@
         /// <summary>
         /// Builds the setter.
         /// </summary>
-        void Build();
+        void _intBuild();
 
         /// <summary>
         /// Gets the property name.

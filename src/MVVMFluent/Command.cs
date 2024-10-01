@@ -1,6 +1,4 @@
-﻿using global::System;
-
-namespace MVVMFluent
+﻿namespace MVVMFluent
 {
     public interface IFluentCommand : global::System.Windows.Input.ICommand, global::System.IDisposable
     {

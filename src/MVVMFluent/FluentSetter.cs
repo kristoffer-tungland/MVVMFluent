@@ -34,7 +34,18 @@
         /// </summary>
         /// <param name="action">The action to execute before changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<TValue> OnChanging(global::System.Action<TValue?> action)
+        internal FluentSetter<TValue> Changing(global::System.Action action)
+        {
+            _onChanging = _ => action();
+            return this;
+        }
+
+        /// <summary>
+        /// Configures what happens before the value changes.
+        /// </summary>
+        /// <param name="action">The action to execute before changing the value.</param>
+        /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
+        internal FluentSetter<TValue> Changing(global::System.Action<TValue?> action)
         {
             _onChanging = action;
             return this;
@@ -45,7 +56,7 @@
         /// </summary>
         /// <param name="action">The action to execute before changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<TValue> OnChanging(global::System.Action<TValue?, TValue?> action)
+        internal FluentSetter<TValue> Changing(global::System.Action<TValue?, TValue?> action)
         {
             _onChangingOldNew = action;
             return this;
@@ -56,7 +67,18 @@
         /// </summary>
         /// <param name="action">The action to execute after changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<TValue> OnChanged(global::System.Action<TValue?> action)
+        internal FluentSetter<TValue> Changed(global::System.Action action)
+        {
+            _onChanged = _ => action();
+            return this;
+        }
+
+        /// <summary>
+        /// Configures what happens after the value changes.
+        /// </summary>
+        /// <param name="action">The action to execute after changing the value.</param>
+        /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
+        internal FluentSetter<TValue> Changed(global::System.Action<TValue?> action)
         {
             _onChanged = action;
             return this;
@@ -67,7 +89,7 @@
         /// </summary>
         /// <param name="action">The action to execute after changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<TValue> OnChanged(global::System.Action<TValue?, TValue?> action)
+        internal FluentSetter<TValue> Changed(global::System.Action<TValue?, TValue?> action)
         {
             _onChangedOldNew = action;
             return this;
@@ -109,14 +131,14 @@
             if (!valueHasChanged)
                 return;
 
-            // Trigger OnChanging actions
+            // Trigger Changing actions
             _onChanging?.Invoke(value);
             _onChangingOldNew?.Invoke(oldValue, value);
 
             // Update the backing store
             _viewModel.SetFieldValue(PropertyName, value);
 
-            // Trigger OnChanged actions
+            // Trigger Changed actions
             _onChanged?.Invoke(value);
             _onChangedOldNew?.Invoke(oldValue, value);
 

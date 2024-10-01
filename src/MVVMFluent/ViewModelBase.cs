@@ -34,7 +34,7 @@
 
             if (GetFluentSetterBuilder(propertyName) is FluentSetterBuilder<TValue> exsistingBuilder)
             {
-                exsistingBuilder.ValueToSet(value);
+                exsistingBuilder._intValueToSet(value);
                 return exsistingBuilder;
             }
 

@@ -23,12 +23,26 @@
         /// </summary>
         /// <param name="action">The action to execute before changing the value.</param>
         /// <returns>The current <see cref="FluentSetterBuilder{T}"/> instance.</returns>
-        public FluentSetterBuilder<TValue> OnChanging(global::System.Action<TValue?> action)
+        public FluentSetterBuilder<TValue> Changing(global::System.Action action)
         {
             if (IsBuilt)
                 return this;
 
-            GetFluentSetter().OnChanging(action);
+            GetFluentSetter().Changing(action);
+            return this;
+        }
+
+        /// <summary>
+        /// Configures what happens before the value changes.
+        /// </summary>
+        /// <param name="action">The action to execute before changing the value.</param>
+        /// <returns>The current <see cref="FluentSetterBuilder{T}"/> instance.</returns>
+        public FluentSetterBuilder<TValue> Changing(global::System.Action<TValue?> action)
+        {
+            if (IsBuilt)
+                return this;
+
+            GetFluentSetter().Changing(action);
             return this;
         }
 
@@ -37,12 +51,12 @@
         /// </summary>
         /// <param name="action">The action to execute before changing the value.</param>
         /// <returns>The current <see cref="FluentSetterBuilder{T}"/> instance.</returns>
-        public FluentSetterBuilder<TValue> OnChanging(global::System.Action<TValue?, TValue?> action)
+        public FluentSetterBuilder<TValue> Changing(global::System.Action<TValue?, TValue?> action)
         {
             if (IsBuilt)
                 return this;
 
-            GetFluentSetter().OnChanging(action);
+            GetFluentSetter().Changing(action);
             return this;
         }
 
@@ -51,12 +65,26 @@
         /// </summary>
         /// <param name="action">The action to execute after changing the value.</param>
         /// <returns>The current <see cref="FluentSetterBuilder{T}"/> instance.</returns>
-        public FluentSetterBuilder<TValue> OnChanged(global::System.Action<TValue?> action)
+        public FluentSetterBuilder<TValue> Changed(global::System.Action<TValue?> action)
         {
             if (IsBuilt)
                 return this;
 
-            GetFluentSetter().OnChanged(action);
+            GetFluentSetter().Changed(action);
+            return this;
+        }
+
+        /// <summary>
+        /// Configures what happens after the value changes.
+        /// </summary>
+        /// <param name="action">The action to execute after changing the value.</param>
+        /// <returns>The current <see cref="FluentSetterBuilder{T}"/> instance.</returns>
+        public FluentSetterBuilder<TValue> Changed(global::System.Action action)
+        {
+            if (IsBuilt)
+                return this;
+
+            GetFluentSetter().Changed(action);
             return this;
         }
 
@@ -65,12 +93,12 @@
         /// </summary>
         /// <param name="action">The action to execute after changing the value.</param>
         /// <returns>The current <see cref="FluentSetterBuilder{T}"/> instance.</returns>
-        public FluentSetterBuilder<TValue> OnChanged(global::System.Action<TValue?, TValue?> action)
+        public FluentSetterBuilder<TValue> Changed(global::System.Action<TValue?, TValue?> action)
         {
             if (IsBuilt)
                 return this;
 
-            GetFluentSetter().OnChanged(action);
+            GetFluentSetter().Changed(action);
             return this;
         }
 

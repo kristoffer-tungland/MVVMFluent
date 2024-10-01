@@ -28,7 +28,7 @@
             if (_builderStore.TryGetValue(propertyName, out var setter))
             {
                 if (!setter.IsBuilt)
-                    setter.Build();
+                    setter._intBuild();
 
                 return setter;
             }
@@ -124,6 +124,10 @@
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+
+            // Error handling when property name is .ctor
+            if (propertyName == ".ctor")
+                throw new global::System.ArgumentException(nameof(propertyName), "Command name must be provided when it is created in the constructor.");
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
