@@ -5,12 +5,17 @@ namespace MVVMFluent.Demo;
 
 internal class MainViewModel : ValidationViewModelBase
 {
+    public MainViewModel()
+    {
+        Input = "Hello World";
+    }
+
     public bool Enable { get => Get(true); set => Set(value); }
 
     public string? Input
     {
         get => Get<string?>();
-        set => When(value).Required().Notify(AsyncCommand).Set();
+        set => When(value).Required().Notify(AsyncCommand, OkCommand).Set();
     }
 
     public Command OkCommand => Do(() => ShowDialog(Input)).IfValid(nameof(Input));

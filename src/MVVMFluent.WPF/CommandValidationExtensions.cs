@@ -16,8 +16,7 @@
 
             if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
-            
-            SubscribeToErrors(command, propertyName);
+
             return command.If(() =>
             {
                 return HasNoErrors(command, propertyName);
@@ -40,7 +39,6 @@
             if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
             
-            SubscribeToErrors(command, propertyName);
             return command.If(() =>
             {
                 return HasNoErrors(command, propertyName);
@@ -62,7 +60,6 @@
             if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
 
-            SubscribeToErrors(command, propertyName);
             return command.If(() =>
             {
                 return HasNoErrors(command, propertyName);
@@ -84,25 +81,11 @@
 
             if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
-            SubscribeToErrors(command, propertyName);
+            
             return command.If(_ =>
             {
                 return HasNoErrors(command, propertyName);
             });
-        }
-
-        private static void SubscribeToErrors(IFluentCommand command, string? propertyName)
-        {
-            if (command.Owner is not IValidationFluentSetterViewModel viewModel)
-                throw new global::System.ArgumentNullException(nameof(viewModel), "ViewModel cannot be null.");
-
-            viewModel.ErrorsChanged += (sender, e) =>
-            {
-                if (e.PropertyName == propertyName)
-                    command.RaiseCanExecuteChanged();
-            };
-
-            viewModel.CheckErrorsFor(propertyName);
         }
 
         private static bool HasNoErrors(IFluentCommand command, string propertyName)

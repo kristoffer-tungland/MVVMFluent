@@ -5,6 +5,8 @@
         private global::System.Collections.Generic.List<global::System.Windows.Controls.ValidationRule> _rules = new();
         public bool HasErrors { get; private set; }
         private readonly global::System.EventHandler<global::System.ComponentModel.DataErrorsChangedEventArgs>? _errorsChanged;
+        private global::System.Func<TValue?, bool>? _validationFunction;
+        private string? _errorMessage;
 
         public ValidationFluentSetter(IValidationFluentSetterViewModel viewModel, string? propertyName, global::System.EventHandler<global::System.ComponentModel.DataErrorsChangedEventArgs>? errorsChanged) :
             base(viewModel, propertyName)
@@ -31,6 +33,13 @@
             return this;
         }
 
+        internal ValidationFluentSetter<TValue> Validate(global::System.Func<TValue?, bool> validationFuntion, string? errorMessage)
+        {
+            _validationFunction = validationFuntion;
+            _errorMessage = errorMessage;
+            return this;
+        }
+
         internal ValidationFluentSetter<TValue> AddRule(global::System.Windows.Controls.ValidationRule rule)
         {
             if (_rules.Contains(rule))
@@ -38,6 +47,12 @@
 
             _rules.Add(rule);
             return this;
+        }
+
+        public override void Set(TValue? value)
+        {
+            CheckForErrors(value);
+            base.Set(value);
         }
 
         /// <summary>
@@ -75,6 +90,15 @@
                     Errors.Add(errorMessage);
                     HasErrors = true;
                 }
+            }
+
+            if (_validationFunction is not null && !_validationFunction.Invoke((TValue?)valueToSet))
+            {
+                if (_errorMessage is null || string.IsNullOrWhiteSpace(_errorMessage))
+                    _errorMessage = "Value is not valid.";
+
+                Errors.Add(_errorMessage);
+                HasErrors = true;
             }
 
             if (hadErrors != HasErrors)

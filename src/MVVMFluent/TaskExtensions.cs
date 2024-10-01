@@ -1,14 +1,19 @@
-﻿namespace MVVMFluent
+﻿using System.Collections.Generic;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace MVVMFluent
 {
-    internal static class TaskExtensions
+    public static class TaskExtensions
     {
-        internal async static void RunWithExceptionHandling(this System.Threading.Tasks.Task task, System.Action<System.Exception> onException, bool continueOnCapturedContext)
+        public async static void RunWithExceptionHandling(this global::System.Threading.Tasks.Task task, global::System.Action<global::System.Exception> onException, bool continueOnCapturedContext)
         {
             try
             {
                 await task.ConfigureAwait(continueOnCapturedContext);
             }
-            catch (System.Exception ex)
+            catch (global::System.Exception ex)
             {
                 onException.Invoke(ex);
             }

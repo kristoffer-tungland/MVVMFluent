@@ -597,7 +597,7 @@
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
         /// <returns>An instance of <see cref="AsyncCommand{T}"/>.</returns>
-        public static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.CancellationToken, System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
+        public static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
         {
             var command = new AsyncCommand<T>
             {

@@ -1,4 +1,4 @@
-using System.Linq;
+using global::System.Linq;
 
 namespace MVVMFluent.WPF
 {
@@ -21,7 +21,7 @@ namespace MVVMFluent.WPF
     /// </code>
     /// </example>
     /// </summary>
-    public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IValidationFluentSetterViewModel, global::System.ComponentModel.INotifyDataErrorInfo
+    public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IValidationFluentSetterViewModel
     {
         public bool HasErrors { get; private set; }
 
@@ -78,22 +78,25 @@ namespace MVVMFluent.WPF
             if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
 
-            var property = GetType().GetProperty(propertyName);
-            var value = property?.GetValue(this);
+            //var property = GetType().GetProperty(propertyName);
+            //var value = property?.GetValue(this);
 
-            if (property == null)
-                throw new global::System.ArgumentException($"Property {propertyName} not found on {GetType().Name}");
+            //if (property == null)
+            //    throw new global::System.ArgumentException($"Property {propertyName} not found on {GetType().Name}");
 
             var validationFluentSetter = GetFluentSetterBuilder(propertyName) as IValidationFluentSetterBuilder;
 
-            if (validationFluentSetter == null)
-            {
-                property.SetValue(this, value);
-                return;
-            }
+            //if (validationFluentSetter == null)
+            //{
+            //    property.SetValue(this, value);
+            //    return;
+            //}
 
             if (validationFluentSetter == null)
                 return;
+
+            var property = GetType().GetProperty(propertyName);
+            var value = property?.GetValue(this);
 
             validationFluentSetter.CheckForErrors(value);
         }
@@ -117,12 +120,12 @@ namespace MVVMFluent.WPF
         /// public string? Input
         /// {
         ///     get => Get&lt;string?&gt;();
-        ///     set => When(value).Validate(new RequiredValidator(), new MinLengthValidator(5)).Set();
+        ///     set => When(value).ValidateAsync(new RequiredValidator(), new MinLengthValidator(5)).Set();
         /// }
         /// </code>
         /// </example>
         /// </summary>
-        /// <remarks>The Validate method is used to add a custom validator to the property, the validator must inherit from <see cref="global::System.Windows.Controls.ValidationRule"/>.</remarks>
+        /// <remarks>The ValidateAsync method is used to add a custom validator to the property, the validator must inherit from <see cref="global::System.Windows.Controls.ValidationRule"/>.</remarks>
         /// <typeparam name="TValue">The type of the property.</typeparam>
         /// <param name="value">The new value to set.</param>
         /// <param name="propertyName">The name of the property being set.</param>

@@ -1,9 +1,7 @@
 ﻿namespace MVVMFluent.WPF
 {
-    public interface IValidationFluentSetterViewModel : IFluentSetterViewModel
+    public interface IValidationFluentSetterViewModel : IFluentSetterViewModel, global::System.ComponentModel.INotifyDataErrorInfo
     {
-        event global::System.EventHandler<global::System.ComponentModel.DataErrorsChangedEventArgs>? ErrorsChanged;
-
         void CheckErrorsFor(string? propertyName);
     }
 

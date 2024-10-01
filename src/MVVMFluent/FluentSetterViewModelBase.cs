@@ -14,9 +14,9 @@
     /// </summary>
     public abstract class FluentSetterViewModelBase : NotificationViewModelBase, IFluentSetterViewModel
     {
-        protected readonly System.Collections.Generic.Dictionary<string, object?> _fieldStore = new System.Collections.Generic.Dictionary<string, object?>();
-        protected readonly System.Collections.Generic.Dictionary<string, IFluentCommand> _commandStore = new System.Collections.Generic.Dictionary<string, IFluentCommand>();
-        protected readonly System.Collections.Generic.Dictionary<string, IFluentSetterBuilder> _builderStore = new System.Collections.Generic.Dictionary<string, IFluentSetterBuilder>();
+        protected readonly global::System.Collections.Generic.Dictionary<string, object?> _fieldStore = new();
+        protected readonly global::System.Collections.Generic.Dictionary<string, IFluentCommand> _commandStore = new();
+        protected readonly global::System.Collections.Generic.Dictionary<string, IFluentSetterBuilder> _builderStore = new();
 
         public void AddFluentSetterBuilder(IFluentSetterBuilder fluentSetterBuilder)
         {
@@ -57,10 +57,11 @@
         /// <typeparam name="TValue">The type of the property.</typeparam>
         /// <param name="value">The new value to set.</param>
         /// <param name="propertyName">The name of the property being set.</param>
-        protected void Set<TValue>(TValue value, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        protected void Set<TValue>(TValue value, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
-                throw new System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
 
             SetFieldValue(propertyName, value);
         }
@@ -71,11 +72,12 @@
         /// <typeparam name="TValue">The type of the property.</typeparam>
         /// <param name="defaultValue">The default value to return if the property is not set.</param>
         /// <param name="propertyName">The name of the property being retrieved.</param>
+        /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
         /// <returns>The value of the property.</returns>
-        protected TValue? Get<TValue>(TValue? defaultValue = default, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected TValue? Get<TValue>(TValue? defaultValue = default, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
-                throw new System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to get.");
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to get.");
 
             if (_fieldStore.TryGetValue(propertyName, out var value))
                 return (TValue?)value;
@@ -96,8 +98,9 @@
         /// </summary>
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
-        /// <returns>A command instance.</returns>
-        protected Command Do(System.Action execute, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        /// <returns>A new <see cref="Command"/> instance.</returns>
+        /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        protected Command Do(global::System.Action execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             return Do(_ => execute(), propertyName);
         }
@@ -115,11 +118,12 @@
         /// <typeparam name="TValue">The type of the parameter for the command.</typeparam>
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
-        /// <returns>A command instance.</returns>
-        protected Command<TValue> Do<TValue>(System.Action<TValue> execute, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        /// <returns>Returns a new <see cref="Command{TValue}"/> instance.</returns>
+        /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        protected Command<TValue> Do<TValue>(global::System.Action<TValue> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
-                throw new System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
@@ -132,11 +136,23 @@
             return (Command<TValue>)command;
         }
 
-
-        protected Command Do(System.Action<object?> execute, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        /// <summary>
+        /// Creates a command that can execute the specified action with a parameter.
+        /// <example>
+        /// <code lang="csharp">
+        /// public Command OkCommand => Do(obj => MessageBox.Show(obj.ToString()));
+        /// </code>
+        /// </example>
+        /// </summary>
+        /// <remarks>Use generic version for type safety.</remarks>
+        /// <param name="execute">The action to execute. The parameter is of type object.</param>
+        /// <param name="propertyName">The name of the property associated with the command.</param>
+        /// <returns>Returns a new <see cref="Command"/> instance.</returns>
+        /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        protected Command Do(global::System.Action<object?> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
-                throw new System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
@@ -166,16 +182,35 @@
         /// </summary>
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
-        /// <returns>An asynchronous command instance.</returns>
-        protected AsyncCommand Do(System.Func<System.Threading.Tasks.Task> execute, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        /// <returns>A new <see cref="AsyncCommand"/> instance.</returns>
+        /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        protected AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             return Do(_ => execute(), propertyName);
         }
 
-        protected AsyncCommand<TValue> Do<TValue>(System.Func<TValue?, System.Threading.Tasks.Task> execute, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        /// <summary>
+        /// Creates an asynchronous command that supports cancellation and tracks execution state.
+        /// <example>
+        /// <code lang="csharp">
+        /// // Short command
+        /// public AsyncCommand OkCommand => Do(async () => await Task.Delay(1000)).If(() => CanOk);
+        /// </code>
+        /// <code lang="csharp">
+        /// // Command with all options
+        /// public AsyncCommand&lt;string&gt; OkCommand => Do&lt;string&gt;(str => Task.Delay(1000).ContinueWith(_ => MessageBox.Show(str))).If(str => CanOk(str)).OnException(ex => MessageBox.Show(ex.Message)).ConfigureAwait(false);
+        /// </code>
+        /// </example>
+        /// </summary>
+        /// <typeparam name="TValue">The type of the parameter for the command.</typeparam>
+        /// <param name="execute">The action to execute.</param>
+        /// <param name="propertyName">The name of the property associated with the command.</param>
+        /// <returns>A new <see cref="AsyncCommand{TValue}"/> instance.</returns>
+        /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        protected AsyncCommand<TValue> Do<TValue>(global::System.Func<TValue?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
-                throw new System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
@@ -188,10 +223,23 @@
             return (AsyncCommand<TValue>)command;
         }
 
-        protected AsyncCommand Do(System.Func<object?, System.Threading.Tasks.Task> execute, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        /// <summary>
+        /// Creates an asynchronous command that supports cancellation and tracks execution state.
+        /// <example>
+        /// <code lang="csharp">
+        /// public AsyncCommand OkCommand => Do(async obj => await Task.Delay(1000)).If(obj => CanOk(obj));
+        /// </code>
+        /// </example>
+        /// </summary>
+        /// <remarks>Use generic version for type safety.</remarks>
+        /// <param name="execute">The action to execute.</param>
+        /// <param name="propertyName">The name of the property associated with the command.</param>
+        /// <returns>A new <see cref="AsyncCommand"/> instance.</returns>
+        /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
+        protected AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
-                throw new System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
@@ -209,7 +257,7 @@
             // Clean up commands
             foreach (var command in _commandStore.Values)
             {
-                if (command is System.IDisposable disposableCommand)
+                if (command is global::System.IDisposable disposableCommand)
                 {
                     disposableCommand.Dispose();
                 }
@@ -219,7 +267,7 @@
 
             foreach (var builder in _builderStore.Values)
             {
-                if (builder is System.IDisposable disposableBuilder)
+                if (builder is global::System.IDisposable disposableBuilder)
                 {
                     disposableBuilder.Dispose();
                 }
@@ -228,7 +276,7 @@
 
             foreach (var field in _fieldStore.Values)
             {
-                if (field is System.IDisposable disposableField)
+                if (field is global::System.IDisposable disposableField)
                 {
                     disposableField.Dispose();
                 }

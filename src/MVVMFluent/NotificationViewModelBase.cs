@@ -1,20 +1,20 @@
 ﻿namespace MVVMFluent
 {
-    public abstract class NotificationViewModelBase : System.ComponentModel.INotifyPropertyChanged, System.IDisposable
+    public abstract class NotificationViewModelBase : global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
     {
         protected bool _disposed = false;
 
-        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+        public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 
-        public void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        public void OnPropertyChanged([global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
         }
 
         public void Dispose()
         {
             Dispose(true);
-            System.GC.SuppressFinalize(this);
+            global::System.GC.SuppressFinalize(this);
         }
 
         private void Dispose(bool disposing)

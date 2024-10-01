@@ -6,12 +6,12 @@
 
         public bool HasErrors => GetFluentSetter().HasErrors;
 
-        public System.Collections.IEnumerable GetErrors()
+        public global::System.Collections.IEnumerable GetErrors()
         {
             return GetFluentSetter().GetErrors();
         }
 
-        public ValidationFluentSetterBuilder(TValue value, IValidationFluentSetterViewModel fluentSetterViewModel, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null, System.EventHandler<System.ComponentModel.DataErrorsChangedEventArgs>? errorsChanged = null)
+        public ValidationFluentSetterBuilder(TValue value, IValidationFluentSetterViewModel fluentSetterViewModel, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null, global::System.EventHandler<global::System.ComponentModel.DataErrorsChangedEventArgs>? errorsChanged = null)
             : base(value, fluentSetterViewModel)
         {
             FluentSetter = new ValidationFluentSetter<TValue>(fluentSetterViewModel, propertyName, errorsChanged);
@@ -22,12 +22,21 @@
             return (ValidationFluentSetter<TValue>)FluentSetter;
         }
 
-        public ValidationFluentSetterBuilder<TValue> Validate(params System.Windows.Controls.ValidationRule[] rules)
+        public ValidationFluentSetterBuilder<TValue> Validate(params global::System.Windows.Controls.ValidationRule[] rules)
         {
             if (IsBuilt)
                 return this;
 
             GetFluentSetter().Validate(rules);
+            return this;
+        }
+
+        public ValidationFluentSetterBuilder<TValue> Validate(global::System.Func<TValue?, bool> validationFuntion, string? errorMessage)
+        {
+            if (IsBuilt)
+                return this;
+
+            GetFluentSetter().Validate(validationFuntion, errorMessage);
             return this;
         }
 
@@ -43,8 +52,6 @@
         public override void Set()
         {
             base.Set();
-
-            GetFluentSetter().CheckForErrors(_valueToSet);
         }
 
         public void CheckForErrors(object? value)

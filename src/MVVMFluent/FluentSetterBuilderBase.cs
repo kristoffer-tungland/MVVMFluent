@@ -4,7 +4,7 @@
     /// Base class for fluent setter builders.
     /// </summary>
     /// <typeparam name="TValue">The type of the value the FluentSetter will be used with.</typeparam>
-    public abstract class FluentSetterBuilderBase<TValue> : IFluentSetterBuilder, System.IDisposable
+    public abstract class FluentSetterBuilderBase<TValue> : IFluentSetterBuilder, global::System.IDisposable
     {
         protected TValue? _valueToSet;
         public bool IsBuilt { get; private set; }
@@ -39,11 +39,11 @@
         /// <summary>
         /// Builds the fluent setter to make it ready to be used.
         /// </summary>
-        /// <exception cref="System.InvalidOperationException">Thrown when the fluent setter is already built.</exception>
+        /// <exception cref="global::System.InvalidOperationException">Thrown when the fluent setter is already built.</exception>
         public void Build()
         {
             if (IsBuilt)
-                throw new System.InvalidOperationException("Fluent setter is already built.");
+                throw new global::System.InvalidOperationException("Fluent setter is already built.");
 
             _viewModel.AddFluentSetterBuilder(this);
             IsBuilt = true;
@@ -64,7 +64,7 @@
         public void Dispose()
         {
             Dispose(true);
-            System.GC.SuppressFinalize(this);
+            global::System.GC.SuppressFinalize(this);
         }
 
         private bool _disposed = false;
@@ -76,7 +76,7 @@
             if (disposing)
             {
                 _valueToSet = default;
-                if (FluentSetter is System.IDisposable disposable)
+                if (FluentSetter is global::System.IDisposable disposable)
                     disposable.Dispose();
 
                 DisposeInternal();

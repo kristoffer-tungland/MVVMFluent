@@ -1,11 +1,11 @@
 ﻿namespace MVVMFluent
 {
-    internal interface IClosableViewModel
+    public interface IClosableViewModel
     {
         /// <summary>
         /// Action invoked when the ViewModel requests to close the view.
         /// </summary>
-        System.Action? RequestCloseView { get; set; }
+        global::System.Action? RequestCloseView { get; set; }
 
         /// <summary>
         /// Determines if the ViewModel can close the view.

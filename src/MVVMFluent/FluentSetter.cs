@@ -1,17 +1,17 @@
 ﻿namespace MVVMFluent
 {
-    public class FluentSetter<T> : IFluentSetter<T>, System.IDisposable
+    public class FluentSetter<TValue> : IFluentSetter<TValue>, global::System.IDisposable
     {
         protected readonly IFluentSetterViewModel _viewModel;
 
-        private System.Action<T?>? _onChanging;
-        private System.Action<T?, T?>? _onChangingOldNew;
+        protected global::System.Action<TValue?>? _onChanging;
+        protected global::System.Action<TValue?, TValue?>? _onChangingOldNew;
 
-        private System.Action<T?>? _onChanged;
-        private System.Action<T?, T?>? _onChangedOldNew;
+        protected global::System.Action<TValue?>? _onChanged;
+        protected global::System.Action<TValue?, TValue?>? _onChangedOldNew;
 
-        private System.Collections.Generic.IEnumerable<IFluentCommand>? _commandsToReevaluate;
-        private System.Collections.Generic.IEnumerable<string>? _propertiesToNotify;
+        protected global::System.Collections.Generic.IEnumerable<IFluentCommand>? _commandsToReevaluate;
+        protected global::System.Collections.Generic.IEnumerable<string>? _propertiesToNotify;
 
         public string PropertyName { get; }
 
@@ -23,7 +23,7 @@
         public FluentSetter(IFluentSetterViewModel viewModel, string? propertyName)
         {
             if (propertyName == null)
-                throw new System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
+                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
 
             PropertyName = propertyName;
             _viewModel = viewModel;
@@ -34,7 +34,7 @@
         /// </summary>
         /// <param name="action">The action to execute before changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> OnChanging(System.Action<T?> action)
+        internal FluentSetter<TValue> OnChanging(global::System.Action<TValue?> action)
         {
             _onChanging = action;
             return this;
@@ -45,7 +45,7 @@
         /// </summary>
         /// <param name="action">The action to execute before changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> OnChanging(System.Action<T?, T?> action)
+        internal FluentSetter<TValue> OnChanging(global::System.Action<TValue?, TValue?> action)
         {
             _onChangingOldNew = action;
             return this;
@@ -56,7 +56,7 @@
         /// </summary>
         /// <param name="action">The action to execute after changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> OnChanged(System.Action<T?> action)
+        internal FluentSetter<TValue> OnChanged(global::System.Action<TValue?> action)
         {
             _onChanged = action;
             return this;
@@ -67,7 +67,7 @@
         /// </summary>
         /// <param name="action">The action to execute after changing the value.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> OnChanged(System.Action<T?, T?> action)
+        internal FluentSetter<TValue> OnChanged(global::System.Action<TValue?, TValue?> action)
         {
             _onChangedOldNew = action;
             return this;
@@ -78,7 +78,7 @@
         /// </summary>
         /// <param name="commands">The commands to reevaluate.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> Notify(params IFluentCommand[] commands)
+        internal FluentSetter<TValue> Notify(params IFluentCommand[] commands)
         {
             _commandsToReevaluate = commands;
             return this;
@@ -89,7 +89,7 @@
         /// </summary>
         /// <param name="propertyNames">The names of the properties to notify.</param>
         /// <returns>The current <see cref="FluentSetter{T}"/> instance.</returns>
-        internal FluentSetter<T> Notify(params string[] propertyNames)
+        internal FluentSetter<TValue> Notify(params string[] propertyNames)
         {
             _propertiesToNotify = propertyNames;
             return this;
@@ -98,13 +98,13 @@
         /// <summary>
         /// Commits the value change and runs the configured logic.
         /// </summary>
-        public virtual void Set(T? value)
+        public virtual void Set(TValue? value)
         {
             // Get the old value from the backing store
-            var oldValue = _viewModel.GetFieldValue<T>(PropertyName);
+            var oldValue = _viewModel.GetFieldValue<TValue>(PropertyName);
 
             // Check if the value has changed
-            var valueHasChanged = !System.Collections.Generic.EqualityComparer<T?>.Default.Equals(oldValue, value);
+            var valueHasChanged = !global::System.Collections.Generic.EqualityComparer<TValue?>.Default.Equals(oldValue, value);
 
             if (!valueHasChanged)
                 return;
@@ -145,7 +145,7 @@
         public void Dispose()
         {
             Dispose(true);
-            System.GC.SuppressFinalize(this);
+            global::System.GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)

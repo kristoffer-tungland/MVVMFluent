@@ -1,13 +1,13 @@
 ﻿namespace MVVMFluent
 {
     /// <summary>
-    /// Represents a builder for a fluent setter.
+    /// Represents a builder for a fluent setter, see <see cref="FluentSetter{T}"/>.
     /// </summary>
     public class FluentSetterBuilder<TValue> : FluentSetterBuilderBase<TValue>, IFluentSetterBuilder
     {
         protected override IFluentSetter<TValue> FluentSetter { get; set; }
 
-        public FluentSetterBuilder(TValue? valueToSet, IFluentSetterViewModel fluentSetterViewModel, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null) :
+        public FluentSetterBuilder(TValue? valueToSet, IFluentSetterViewModel fluentSetterViewModel, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null) :
             base(valueToSet, fluentSetterViewModel)
         {
             FluentSetter = new FluentSetter<TValue>(fluentSetterViewModel, propertyName);
@@ -23,7 +23,7 @@
         /// </summary>
         /// <param name="action">The action to execute before changing the value.</param>
         /// <returns>The current <see cref="FluentSetterBuilder{T}"/> instance.</returns>
-        public FluentSetterBuilder<TValue> OnChanging(System.Action<TValue?> action)
+        public FluentSetterBuilder<TValue> OnChanging(global::System.Action<TValue?> action)
         {
             if (IsBuilt)
                 return this;
@@ -37,7 +37,7 @@
         /// </summary>
         /// <param name="action">The action to execute before changing the value.</param>
         /// <returns>The current <see cref="FluentSetterBuilder{T}"/> instance.</returns>
-        public FluentSetterBuilder<TValue> OnChanging(System.Action<TValue?, TValue?> action)
+        public FluentSetterBuilder<TValue> OnChanging(global::System.Action<TValue?, TValue?> action)
         {
             if (IsBuilt)
                 return this;
@@ -51,7 +51,7 @@
         /// </summary>
         /// <param name="action">The action to execute after changing the value.</param>
         /// <returns>The current <see cref="FluentSetterBuilder{T}"/> instance.</returns>
-        public FluentSetterBuilder<TValue> OnChanged(System.Action<TValue?> action)
+        public FluentSetterBuilder<TValue> OnChanged(global::System.Action<TValue?> action)
         {
             if (IsBuilt)
                 return this;
@@ -65,7 +65,7 @@
         /// </summary>
         /// <param name="action">The action to execute after changing the value.</param>
         /// <returns>The current <see cref="FluentSetterBuilder{T}"/> instance.</returns>
-        public FluentSetterBuilder<TValue> OnChanged(System.Action<TValue?, TValue?> action)
+        public FluentSetterBuilder<TValue> OnChanged(global::System.Action<TValue?, TValue?> action)
         {
             if (IsBuilt)
                 return this;
