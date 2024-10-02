@@ -22,7 +22,7 @@ internal class MainViewModel : ValidationViewModelBase
 
     public bool ThrowException { get => Get(false); set => Set(value); }
 
-    public AsyncCommand AsyncCommand => Do(ShowDialogAsync).If(CanExecute).OnException(HandleException).ConfigureAwait(false);
+    public AsyncCommand AsyncCommand => Do(ShowDialogAsync).If(CanExecute).Handle(HandleException).ConfigureAwait(false);
 
     private void HandleException(Exception exception)
     {

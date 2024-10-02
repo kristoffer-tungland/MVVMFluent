@@ -27,21 +27,24 @@ internal class MainViewModel : ValidationViewModelBase
 
     public bool ThrowException { get => Get(false); set => Set(value); }
 
-    public AsyncCommand AsyncCommand => Do(ShowDialogAsync).If(CanExecute).OnException(HandleException).ConfigureAwait(false);
+    public AsyncCommand AsyncCommand => Do(ShowDialogAsync).If(CanExecute).Handle(HandleException).ConfigureAwait(false);
 
     private void HandleException(Exception exception)
     {
-        MessageBox.Show(exception.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        if (exception is TaskCanceledException)
+            MessageBox.Show(exception.Message, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+        else
+            MessageBox.Show(exception.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
     }
 
-    private async Task ShowDialogAsync()
+    private async Task ShowDialogAsync(CancellationToken cancellationToken)
     {
         for (var i = 1; i <= 100; i++)
         {
-            if (AsyncCommand.IsCancellationRequested)
-                return;
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
 
-            await Task.Delay(50);
+            await Task.Delay(50, cancellationToken);
             AsyncCommand.ReportProgress(i+1, 100);
 
             if (AsyncCommand.Progress == 50 && ThrowException)

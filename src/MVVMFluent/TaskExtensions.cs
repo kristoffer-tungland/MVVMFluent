@@ -7,7 +7,7 @@ namespace MVVMFluent
 {
     public static class TaskExtensions
     {
-        public async static void RunWithExceptionHandling(this global::System.Threading.Tasks.Task task, global::System.Action<global::System.Exception> onException, bool continueOnCapturedContext)
+        public async static void RunWithExceptionHandling(this global::System.Threading.Tasks.Task task, global::System.Action<global::System.Exception> handle, bool continueOnCapturedContext)
         {
             try
             {
@@ -15,7 +15,7 @@ namespace MVVMFluent
             }
             catch (global::System.Exception ex)
             {
-                onException.Invoke(ex);
+                handle.Invoke(ex);
             }
         }
     }

@@ -56,7 +56,7 @@
     /// Represents an asynchronous command that supports cancellation and tracks execution state.
     /// <example>
     /// <code lang="csharp">
-    /// public AsyncCommand OkCommand => Do(async () => await Task.Delay(1000)).If(() => CanOk).OnException(ex => MessageBox.Show(ex.Message)).ConfigureAwait(false);
+    /// public AsyncCommand OkCommand => Do(async () => await Task.Delay(1000)).If(() => CanOk).Handle(ex => MessageBox.Show(ex.Message)).ConfigureAwait(false);
     /// 
     /// public bool CanOk { get => Get(true); set => Set(value); }
     /// </code>
@@ -299,14 +299,14 @@
         /// <summary>
         /// Specifies an action to handle exceptions during execution.
         /// </summary>
-        /// <param name="onException">The action to handle exceptions.</param>
+        /// <param name="handle">The action to handle exceptions.</param>
         /// <returns>The updated command instance.</returns>
-        public AsyncCommand OnException(global::System.Action<global::System.Exception> onException)
+        public AsyncCommand Handle(global::System.Action<global::System.Exception> handle)
         {
             if (IsBuilt)
                 return this;
 
-            _onException = onException;
+            _onException = handle;
             return this;
         }
 
@@ -389,7 +389,7 @@
     /// Represents an asynchronous command that supports cancellation and tracks execution state, with a generic parameter.
     /// <example>
     /// <code lang="csharp">
-    /// public AsyncCommand OkCommand => Do&lt;string&gt;(Ok).If(() => CanOk).OnException(ex => MessageBox.Show(ex.Message)).ConfigureAwait(true);
+    /// public AsyncCommand OkCommand => Do&lt;string&gt;(Ok).If(() => CanOk).Handle(ex => MessageBox.Show(ex.Message)).ConfigureAwait(true);
     /// 
     /// public async Task Ok(string input)
     /// {
@@ -624,14 +624,14 @@
         /// <summary>
         /// Specifies an action to handle exceptions during execution.
         /// </summary>
-        /// <param name="onException">The action to handle exceptions.</param>
+        /// <param name="handle">The action to handle exceptions.</param>
         /// <returns>The updated command instance.</returns>
-        public AsyncCommand<T> OnException(global::System.Action<global::System.Exception> onException)
+        public AsyncCommand<T> Handle(global::System.Action<global::System.Exception> handle)
         {
             if (IsBuilt)
                 return this;
 
-            _onException = onException;
+            _onException = handle;
             return this;
         }
 

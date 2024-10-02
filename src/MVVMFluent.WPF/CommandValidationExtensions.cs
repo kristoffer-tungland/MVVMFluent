@@ -9,13 +9,10 @@
         /// <param name="propertyName">The name of the property to check for errors.</param>
         /// <returns>The command with the condition added.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
-        public static Command IfValid(this Command command, string? propertyName)
+        public static Command IfValid(this Command command, params string[] propertyName)
         {
             if (command.IsBuilt)
                 return command;
-
-            if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
-                throw new global::System.ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
 
             return command.If(() =>
             {
@@ -31,14 +28,11 @@
         /// <param name="propertyName">The name of the property to check for errors.</param>
         /// <returns>The command with the condition added.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
-        public static Command<T> IfValid<T>(this Command<T> command, string? propertyName)
+        public static Command<T> IfValid<T>(this Command<T> command, params string[] propertyName)
         {
             if (command.IsBuilt)
                 return command;
-
-            if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
-                throw new global::System.ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
-            
+                        
             return command.If(() =>
             {
                 return HasNoErrors(command, propertyName);
@@ -52,13 +46,10 @@
         /// <param name="propertyName">The name of the property to check for errors.</param>
         /// <returns>The command with the condition added.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
-        public static AsyncCommand IfValid(this AsyncCommand command, string? propertyName)
+        public static AsyncCommand IfValid(this AsyncCommand command, params string[] propertyName)
         {
             if (command.IsBuilt)
                 return command;
-
-            if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
-                throw new global::System.ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
 
             return command.If(() =>
             {
@@ -74,27 +65,35 @@
         /// <param name="propertyName">The name of the property to check for errors.</param>
         /// <returns>The command with the condition added.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
-        public static AsyncCommand<T> IfValid<T>(this AsyncCommand<T> command, string? propertyName)
+        public static AsyncCommand<T> IfValid<T>(this AsyncCommand<T> command, params string[] propertyName)
         {
             if (command.IsBuilt)
                 return command;
-
-            if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
-                throw new global::System.ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
-            
+                        
             return command.If(_ =>
             {
                 return HasNoErrors(command, propertyName);
             });
         }
 
-        private static bool HasNoErrors(IFluentCommand command, string propertyName)
+        private static bool HasNoErrors(IFluentCommand command, params string[] propertyName)
         {
             if (command.Owner is not IValidationFluentSetterViewModel viewModel)
                 throw new global::System.ArgumentNullException(nameof(viewModel), "ViewModel cannot be null.");
 
-            var validationFluentSetter = viewModel.GetFluentSetterBuilder(propertyName) as IValidationFluentSetterBuilder;
-            return validationFluentSetter?.HasErrors == false;
+            var hasErrors = false;
+
+            foreach (var name in propertyName)
+            {
+                var validationFluentSetter = viewModel.GetFluentSetterBuilder(name) as IValidationFluentSetterBuilder;
+                if (validationFluentSetter?.HasErrors == true)
+                {
+                    hasErrors = true;
+                    break;
+                }
+            }
+
+            return !hasErrors;
         }
     }
 }
