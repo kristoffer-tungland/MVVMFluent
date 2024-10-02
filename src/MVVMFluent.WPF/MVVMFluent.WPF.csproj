@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <NuSpecFile>MVVMFluent.WPF.nuspec</NuSpecFile>
-    <VersionPrefix>0.0.1</VersionPrefix>
+    <Version>0.0.1</Version>
     <NuspecProperties>version=$(Version)</NuspecProperties>
   </PropertyGroup>
 

@@ -10,11 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--<PackageReference Include="MVVMFluent" Version="0.0.1-alfa21">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>-->
-    <PackageReference Include="MVVMFluent.WPF" Version="0.0.1-alfa22">
+    <PackageReference Include="MVVMFluent.WPF" Version="0.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
