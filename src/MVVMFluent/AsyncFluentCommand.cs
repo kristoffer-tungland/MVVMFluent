@@ -56,18 +56,18 @@
     /// Represents an asynchronous command that supports cancellation and tracks execution state.
     /// <example>
     /// <code lang="csharp">
-    /// public AsyncCommand OkCommand => Do(async () => await Task.Delay(1000)).If(() => CanOk).Handle(ex => MessageBox.Show(ex.Message)).ConfigureAwait(false);
+    /// public AsyncFluentCommand OkCommand => Do(async () => await Task.Delay(1000)).If(() => CanOk).Handle(ex => MessageBox.Show(ex.Message)).ConfigureAwait(false);
     /// 
     /// public bool CanOk { get => Get(true); set => Set(value); }
     /// </code>
     /// <code lang="xaml">
-    /// &lt;Button Content=&quot;Run&quot; FluentCommand=&quot;{Binding AsyncCommand}&quot; /&gt;
-    /// &lt;ProgressBar Visibility = &quot;{Binding AsyncCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}&quot; /&gt;
-    /// &lt;Button Content=&quot;Cancel&quot; FluentCommand=&quot;{Binding AsyncCommand.CancelCommand}&quot; /&gt;
+    /// &lt;Button Content=&quot;Run&quot; FluentCommand=&quot;{Binding AsyncFluentCommand}&quot; /&gt;
+    /// &lt;ProgressBar Visibility = &quot;{Binding AsyncFluentCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}&quot; /&gt;
+    /// &lt;Button Content=&quot;Cancel&quot; FluentCommand=&quot;{Binding AsyncFluentCommand.CancelCommand}&quot; /&gt;
     /// </code>
     /// </example>
     /// </summary>
-    public class AsyncCommand : IAsyncFluentCommand, global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
+    public class AsyncFluentCommand : IAsyncFluentCommand, global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
     {
         private global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task>? _execute;
         private global::System.Func<object?, bool>? _canExecute;
@@ -236,8 +236,8 @@
         /// Creates an asynchronous command with the specified execute action.
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
-        /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
-        public static AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
+        /// <returns>An instance of <see cref="AsyncFluentCommand"/>.</returns>
+        public static AsyncFluentCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
         {
             return Do((_, _) => execute(), owner);
         }
@@ -246,10 +246,10 @@
         /// Creates an asynchronous command with the specified execute action.
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
-        /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
-        public static AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
+        /// <returns>An instance of <see cref="AsyncFluentCommand"/>.</returns>
+        public static AsyncFluentCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
         {
-            var command = new AsyncCommand
+            var command = new AsyncFluentCommand
             {
                 Owner = owner
             };
@@ -261,10 +261,10 @@
         /// Creates an asynchronous command with the specified execute action.
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
-        /// <returns>An instance of <see cref="AsyncCommand"/>.</returns>
-        public static AsyncCommand Do(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
+        /// <returns>An instance of <see cref="AsyncFluentCommand"/>.</returns>
+        public static AsyncFluentCommand Do(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
         {
-            var command = new AsyncCommand
+            var command = new AsyncFluentCommand
             {
                 Owner = owner
             };
@@ -277,7 +277,7 @@
         /// </summary>
         /// <param name="canExecute">The condition function.</param>
         /// <returns>The updated command instance.</returns>
-        public AsyncCommand If(global::System.Func<bool> canExecute)
+        public AsyncFluentCommand If(global::System.Func<bool> canExecute)
         {
             return If(_ => canExecute());
         }
@@ -287,7 +287,7 @@
         /// </summary>
         /// <param name="canExecute">The condition function.</param>
         /// <returns>The updated command instance.</returns>
-        public AsyncCommand If(global::System.Func<object?, bool> canExecute)
+        public AsyncFluentCommand If(global::System.Func<object?, bool> canExecute)
         {
             if (IsBuilt)
                 return this;
@@ -301,7 +301,7 @@
         /// </summary>
         /// <param name="handle">The action to handle exceptions.</param>
         /// <returns>The updated command instance.</returns>
-        public AsyncCommand Handle(global::System.Action<global::System.Exception> handle)
+        public AsyncFluentCommand Handle(global::System.Action<global::System.Exception> handle)
         {
             if (IsBuilt)
                 return this;
@@ -315,7 +315,7 @@
         /// </summary>
         /// <param name="continueOnCapturedContext">Whether to continue on captured context.</param>
         /// <returns>The updated command instance.</returns>
-        public AsyncCommand ConfigureAwait(bool continueOnCapturedContext)
+        public AsyncFluentCommand ConfigureAwait(bool continueOnCapturedContext)
         {
             if (IsBuilt)
                 return this;
@@ -377,9 +377,9 @@
         }
 
         /// <summary>
-        /// Finalizer for the <see cref="AsyncCommand"/> class.
+        /// Finalizer for the <see cref="AsyncFluentCommand"/> class.
         /// </summary>
-        ~AsyncCommand()
+        ~AsyncFluentCommand()
         {
             Dispose(false);
         }
@@ -389,7 +389,7 @@
     /// Represents an asynchronous command that supports cancellation and tracks execution state, with a generic parameter.
     /// <example>
     /// <code lang="csharp">
-    /// public AsyncCommand OkCommand => Do&lt;string&gt;(Ok).If(() => CanOk).Handle(ex => MessageBox.Show(ex.Message)).ConfigureAwait(true);
+    /// public AsyncFluentCommand OkCommand => Do&lt;string&gt;(Ok).If(() => CanOk).Handle(ex => MessageBox.Show(ex.Message)).ConfigureAwait(true);
     /// 
     /// public async Task Ok(string input)
     /// {
@@ -400,13 +400,13 @@
     /// public bool CanOk { get => Get(true); set => Set(value); }
     /// </code>
     /// <code lang="xaml">
-    /// &lt;Button Content=&quot;Run&quot; FluentCommand=&quot;{Binding AsyncCommand}&quot; /&gt;
-    /// &lt;ProgressBar Visibility = &quot;{Binding AsyncCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}&quot; /&gt;
-    /// &lt;Button Content=&quot;Cancel&quot; FluentCommand=&quot;{Binding AsyncCommand.CancelCommand}&quot; /&gt;
+    /// &lt;Button Content=&quot;Run&quot; FluentCommand=&quot;{Binding AsyncFluentCommand}&quot; /&gt;
+    /// &lt;ProgressBar Visibility = &quot;{Binding AsyncFluentCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}&quot; /&gt;
+    /// &lt;Button Content=&quot;Cancel&quot; FluentCommand=&quot;{Binding AsyncFluentCommand.CancelCommand}&quot; /&gt;
     /// </code>
     /// </example>
     /// </summary>
-    public class AsyncCommand<T> : IAsyncFluentCommand, global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
+    public class AsyncFluentCommand<T> : IAsyncFluentCommand, global::System.ComponentModel.INotifyPropertyChanged, global::System.IDisposable
     {
         private global::System.Func<T?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task>? _execute;
         private global::System.Func<T?, bool>? _canExecute;
@@ -581,10 +581,10 @@
         /// Creates an asynchronous command with the specified execute action.
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
-        /// <returns>An instance of <see cref="AsyncCommand{T}"/>.</returns>
-        public static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
+        /// <returns>An instance of <see cref="AsyncFluentCommand{T}"/>.</returns>
+        public static AsyncFluentCommand<T> Do(global::System.Func<T?, global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
         {
-            var command = new AsyncCommand<T>
+            var command = new AsyncFluentCommand<T>
             {
                 Owner = owner
             };
@@ -596,10 +596,10 @@
         /// Creates an asynchronous command with the specified execute action.
         /// </summary>
         /// <param name="execute">The action to execute asynchronously.</param>
-        /// <returns>An instance of <see cref="AsyncCommand{T}"/>.</returns>
-        public static AsyncCommand<T> Do(global::System.Func<T?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
+        /// <returns>An instance of <see cref="AsyncFluentCommand{T}"/>.</returns>
+        public static AsyncFluentCommand<T> Do(global::System.Func<T?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, IFluentSetterViewModel? owner)
         {
-            var command = new AsyncCommand<T>
+            var command = new AsyncFluentCommand<T>
             {
                 Owner = owner
             };
@@ -612,7 +612,7 @@
         /// </summary>
         /// <param name="canExecute">The condition function.</param>
         /// <returns>The updated command instance.</returns>
-        public AsyncCommand<T> If(global::System.Func<T?, bool> canExecute)
+        public AsyncFluentCommand<T> If(global::System.Func<T?, bool> canExecute)
         {
             if (IsBuilt)
                 return this;
@@ -626,7 +626,7 @@
         /// </summary>
         /// <param name="handle">The action to handle exceptions.</param>
         /// <returns>The updated command instance.</returns>
-        public AsyncCommand<T> Handle(global::System.Action<global::System.Exception> handle)
+        public AsyncFluentCommand<T> Handle(global::System.Action<global::System.Exception> handle)
         {
             if (IsBuilt)
                 return this;
@@ -640,7 +640,7 @@
         /// </summary>
         /// <param name="continueOnCapturedContext">Whether to continue on captured context.</param>
         /// <returns>The updated command instance.</returns>
-        public AsyncCommand<T> ConfigureAwait(bool continueOnCapturedContext)
+        public AsyncFluentCommand<T> ConfigureAwait(bool continueOnCapturedContext)
         {
             if (IsBuilt)
                 return this;
@@ -701,9 +701,9 @@
         }
 
         /// <summary>
-        /// Finalizer for the <see cref="AsyncCommand"/> class.
+        /// Finalizer for the <see cref="AsyncFluentCommand"/> class.
         /// </summary>
-        ~AsyncCommand()
+        ~AsyncFluentCommand()
         {
             Dispose(false);
         }

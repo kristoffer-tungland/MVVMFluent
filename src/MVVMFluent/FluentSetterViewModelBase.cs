@@ -188,23 +188,23 @@
         /// Creates an asynchronous command that supports cancellation and tracks execution state.
         /// <example>
         /// <code lang="csharp">
-        /// public AsyncCommand OkCommand => Do(async () => await Task.Delay(1000)).If(() => CanOk).Handle(ex => MessageBox.Show(ex.Message)).ConfigureAwait(false);
+        /// public AsyncFluentCommand OkCommand => Do(async () => await Task.Delay(1000)).If(() => CanOk).Handle(ex => MessageBox.Show(ex.Message)).ConfigureAwait(false);
         /// 
         /// public bool CanOk { get => Get(true); set => Set(value); }
         /// </code>
         /// <code lang="xaml">
-        /// &lt;Button Content=&quot;Run&quot; FluentCommand=&quot;{Binding AsyncCommand}&quot; /&gt;
-        /// &lt;ProgressBar Visibility = &quot;{Binding AsyncCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}&quot; /&gt;
-        /// &lt;Button Content=&quot;Cancel&quot; FluentCommand=&quot;{Binding AsyncCommand.CancelCommand}&quot; /&gt;
+        /// &lt;Button Content=&quot;Run&quot; FluentCommand=&quot;{Binding AsyncFluentCommand}&quot; /&gt;
+        /// &lt;ProgressBar Visibility = &quot;{Binding AsyncFluentCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}&quot; /&gt;
+        /// &lt;Button Content=&quot;Cancel&quot; FluentCommand=&quot;{Binding AsyncFluentCommand.CancelCommand}&quot; /&gt;
         /// </code>
         /// </example>
         /// </summary>
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
-        /// <returns>A new <see cref="AsyncCommand"/> instance.</returns>
+        /// <returns>A new <see cref="AsyncFluentCommand"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
         /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
-        protected AsyncCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected AsyncFluentCommand Do(global::System.Func<global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             return Do((object? _) => execute(), propertyName);
         }
@@ -213,7 +213,7 @@
         /// Creates an asynchronous command that passes a cancellation token to the method.
         /// <example>
         /// <code lang="csharp">
-        /// public AsyncCommand OkCommand => Do(Ok);
+        /// public AsyncFluentCommand OkCommand => Do(Ok);
         /// 
         /// private Task Ok(CancellationToken cancellationToken) { }
         /// </code>
@@ -221,15 +221,15 @@
         /// </summary>
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
-        /// <returns>A new <see cref="AsyncCommand"/> instance.</returns>
+        /// <returns>A new <see cref="AsyncFluentCommand"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
         /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
-        protected AsyncCommand Do(global::System.Func<global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected AsyncFluentCommand Do(global::System.Func<global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             return Do((_,ct) => execute(ct), propertyName);
         }
 
-        protected AsyncCommand<TValue> Do<TValue>(global::System.Func<global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected AsyncFluentCommand<TValue> Do<TValue>(global::System.Func<global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             return Do<TValue>((_,ct) => execute(ct), propertyName);
         }
@@ -239,21 +239,21 @@
         /// <example>
         /// <code lang="csharp">
         /// // Short command
-        /// public AsyncCommand OkCommand => Do(async () => await Task.Delay(1000)).If(() => CanOk);
+        /// public AsyncFluentCommand OkCommand => Do(async () => await Task.Delay(1000)).If(() => CanOk);
         /// </code>
         /// <code lang="csharp">
         /// // FluentCommand with all options
-        /// public AsyncCommand&lt;string&gt; OkCommand => Do&lt;string&gt;(str => Task.Delay(1000).ContinueWith(_ => MessageBox.Show(str))).If(str => CanOk(str)).Handle(ex => MessageBox.Show(ex.Message)).ConfigureAwait(false);
+        /// public AsyncFluentCommand&lt;string&gt; OkCommand => Do&lt;string&gt;(str => Task.Delay(1000).ContinueWith(_ => MessageBox.Show(str))).If(str => CanOk(str)).Handle(ex => MessageBox.Show(ex.Message)).ConfigureAwait(false);
         /// </code>
         /// </example>
         /// </summary>
         /// <typeparam name="TValue">The type of the parameter for the command.</typeparam>
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
-        /// <returns>A new <see cref="AsyncCommand{TValue}"/> instance.</returns>
+        /// <returns>A new <see cref="AsyncFluentCommand{TValue}"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
         /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
-        protected AsyncCommand<TValue> Do<TValue>(global::System.Func<TValue?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected AsyncFluentCommand<TValue> Do<TValue>(global::System.Func<TValue?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             return Do<TValue>((para, ct) => execute(para), propertyName);
         }
@@ -262,7 +262,7 @@
         /// Creates an asynchronous command that passes a cancellation token to the method.
         /// <example>
         /// <code lang="csharp">
-        /// public AsyncCommand&lt;string&gt; OkCommand => Do&lt;string?&gt;(Ok);
+        /// public AsyncFluentCommand&lt;string&gt; OkCommand => Do&lt;string?&gt;(Ok);
         /// 
         /// private Task Ok(string? str, CancellationToken cancellationToken) { }
         /// </code>
@@ -271,10 +271,10 @@
         /// <typeparam name="TValue">The type of the parameter for the command.</typeparam>
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
-        /// <returns>A new <see cref="AsyncCommand{TValue}"/> instance.</returns>
+        /// <returns>A new <see cref="AsyncFluentCommand{TValue}"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
         /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
-        protected AsyncCommand<TValue> Do<TValue>(global::System.Func<TValue?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected AsyncFluentCommand<TValue> Do<TValue>(global::System.Func<TValue?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
@@ -285,30 +285,30 @@
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
-                command = AsyncCommand<TValue>.Do(execute, this);
+                command = AsyncFluentCommand<TValue>.Do(execute, this);
                 _commandStore.Add(propertyName, command);
             }
             else
                 command.MarkAsBuilt();
 
-            return (AsyncCommand<TValue>)command;
+            return (AsyncFluentCommand<TValue>)command;
         }
 
         /// <summary>
         /// Creates an asynchronous command that supports cancellation and tracks execution state.
         /// <example>
         /// <code lang="csharp">
-        /// public AsyncCommand OkCommand => Do(async obj => await Task.Delay(1000)).If(obj => CanOk(obj));
+        /// public AsyncFluentCommand OkCommand => Do(async obj => await Task.Delay(1000)).If(obj => CanOk(obj));
         /// </code>
         /// </example>
         /// </summary>
         /// <remarks>Use generic version for type safety.</remarks>
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
-        /// <returns>A new <see cref="AsyncCommand"/> instance.</returns>
+        /// <returns>A new <see cref="AsyncFluentCommand"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
         /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
-        protected AsyncCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected AsyncFluentCommand Do(global::System.Func<object?, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             return Do((para, ct) => execute(para), propertyName);
         }
@@ -317,7 +317,7 @@
         /// Creates an asynchronous command that passes a cancellation token to the method.
         /// <example>
         /// <code lang="csharp">
-        /// public AsyncCommand OkCommand => Do(Ok);
+        /// public AsyncFluentCommand OkCommand => Do(Ok);
         /// 
         /// private Task Ok(CancellationToken cancellationToken) { }
         /// </code>
@@ -326,10 +326,10 @@
         /// <remarks>Use generic version for type safety.</remarks>
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
-        /// <returns>A new <see cref="AsyncCommand"/> instance.</returns>
+        /// <returns>A new <see cref="AsyncFluentCommand"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
         /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
-        protected AsyncCommand Do(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected AsyncFluentCommand Do(global::System.Func<object?, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
@@ -340,13 +340,13 @@
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
-                command = AsyncCommand.Do(execute, this);
+                command = AsyncFluentCommand.Do(execute, this);
                 _commandStore.Add(propertyName, command);
             }
             else
                 command.MarkAsBuilt();
 
-            return (AsyncCommand)command;
+            return (AsyncFluentCommand)command;
         }
 
         protected override void DisposeInternal()
