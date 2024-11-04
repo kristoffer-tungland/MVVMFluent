@@ -18,7 +18,7 @@ internal class MainViewModel : ValidationViewModelBase
         set => When(value).Required().Notify(AsyncCommand, OkCommand).Set();
     }
 
-    public Command OkCommand => Do(() => ShowDialog(Input)).IfValid(nameof(Input));
+    public FluentCommand OkCommand => Do(() => ShowDialog(Input)).IfValid(nameof(Input));
 
     private bool CanExecute()
     {
@@ -27,7 +27,7 @@ internal class MainViewModel : ValidationViewModelBase
 
     public bool ThrowException { get => Get(false); set => Set(value); }
 
-    public AsyncCommand AsyncCommand => Do(ShowDialogAsync).If(CanExecute).Handle(HandleException).ConfigureAwait(false);
+    public AsyncFluentCommand AsyncCommand => Do(ShowDialogAsync).If(CanExecute).Handle(HandleException).ConfigureAwait(false);
 
     private void HandleException(Exception exception)
     {
@@ -54,7 +54,7 @@ internal class MainViewModel : ValidationViewModelBase
         ShowDialog(Input);
     }
 
-    public Command<string> HelpCommand => Do<string>(ShowDialog);
+    public FluentCommand<string> HelpCommand => Do<string>(ShowDialog);
 
     private void ShowDialog(string? input)
     {
