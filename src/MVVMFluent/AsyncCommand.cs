@@ -28,7 +28,7 @@
         /// <summary>
         /// Gets the command to cancel the current operation.
         /// </summary>
-        Command CancelCommand { get; }
+        FluentCommand CancelCommand { get; }
 
         /// <summary>
         /// Indicates whether the command is requested to be cancelled.
@@ -61,9 +61,9 @@
     /// public bool CanOk { get => Get(true); set => Set(value); }
     /// </code>
     /// <code lang="xaml">
-    /// &lt;Button Content=&quot;Run&quot; Command=&quot;{Binding AsyncCommand}&quot; /&gt;
+    /// &lt;Button Content=&quot;Run&quot; FluentCommand=&quot;{Binding AsyncCommand}&quot; /&gt;
     /// &lt;ProgressBar Visibility = &quot;{Binding AsyncCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}&quot; /&gt;
-    /// &lt;Button Content=&quot;Cancel&quot; Command=&quot;{Binding AsyncCommand.CancelCommand}&quot; /&gt;
+    /// &lt;Button Content=&quot;Cancel&quot; FluentCommand=&quot;{Binding AsyncCommand.CancelCommand}&quot; /&gt;
     /// </code>
     /// </example>
     /// </summary>
@@ -76,7 +76,7 @@
         private global::System.Action<global::System.Exception>? _onException;
         private bool _continueOnCapturedContext = true;
         private bool _disposed;
-        private Command? _cancelCommand;
+        private FluentCommand? _cancelCommand;
         private int _progress = 0;
         public IFluentSetterViewModel? Owner { get; private set; }
 
@@ -105,13 +105,13 @@
         /// <summary>
         /// Gets the command to cancel the current operation.
         /// </summary>
-        public Command CancelCommand
+        public FluentCommand CancelCommand
         {
             get
             {
                 if (_cancelCommand == null)
                 {
-                    _cancelCommand = Command.Do(() => Cancel(), Owner).If(() => IsRunning && _cts?.IsCancellationRequested == false);
+                    _cancelCommand = FluentCommand.Do(() => Cancel(), Owner).If(() => IsRunning && _cts?.IsCancellationRequested == false);
                     PropertyChanged += (s, e) => _cancelCommand.RaiseCanExecuteChanged();
                 }
                 return _cancelCommand;
@@ -400,9 +400,9 @@
     /// public bool CanOk { get => Get(true); set => Set(value); }
     /// </code>
     /// <code lang="xaml">
-    /// &lt;Button Content=&quot;Run&quot; Command=&quot;{Binding AsyncCommand}&quot; /&gt;
+    /// &lt;Button Content=&quot;Run&quot; FluentCommand=&quot;{Binding AsyncCommand}&quot; /&gt;
     /// &lt;ProgressBar Visibility = &quot;{Binding AsyncCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}&quot; /&gt;
-    /// &lt;Button Content=&quot;Cancel&quot; Command=&quot;{Binding AsyncCommand.CancelCommand}&quot; /&gt;
+    /// &lt;Button Content=&quot;Cancel&quot; FluentCommand=&quot;{Binding AsyncCommand.CancelCommand}&quot; /&gt;
     /// </code>
     /// </example>
     /// </summary>
@@ -415,7 +415,7 @@
         private global::System.Action<global::System.Exception>? _onException;
         private bool _continueOnCapturedContext = true;
         private bool _disposed;
-        private Command? _cancelCommand;
+        private FluentCommand? _cancelCommand;
         private int _progress = 0;
         public IFluentSetterViewModel? Owner { get; private set; }
 
@@ -444,13 +444,13 @@
         /// <summary>
         /// Gets the command to cancel the current operation.
         /// </summary>
-        public Command CancelCommand
+        public FluentCommand CancelCommand
         {
             get
             {
                 if (_cancelCommand == null)
                 {
-                    _cancelCommand = Command.Do(() => Cancel(), Owner).If(() => IsRunning && _cts?.IsCancellationRequested == false);
+                    _cancelCommand = FluentCommand.Do(() => Cancel(), Owner).If(() => IsRunning && _cts?.IsCancellationRequested == false);
                     PropertyChanged += (s, e) => _cancelCommand.RaiseCanExecuteChanged();
                 }
                 return _cancelCommand;

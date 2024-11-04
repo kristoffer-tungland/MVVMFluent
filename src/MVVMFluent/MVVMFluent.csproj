@@ -6,7 +6,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NuSpecFile>MVVMFluent.nuspec</NuSpecFile>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <NuspecProperties>version=$(Version)</NuspecProperties>
   </PropertyGroup>
     

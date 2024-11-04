@@ -98,7 +98,7 @@
         /// Creates a command that can execute the specified action.
         /// <example>
         /// <code lang="csharp">
-        /// public Command OkCommand => Do(() => MessageBox.Show("OK")).If(() => CanOk);
+        /// public FluentCommand OkCommand => Do(() => MessageBox.Show("OK")).If(() => CanOk);
         /// 
         /// public bool CanOk { get => Get(true); set => Set(value); }
         /// </code>
@@ -106,10 +106,10 @@
         /// </summary>
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
-        /// <returns>A new <see cref="Command"/> instance.</returns>
+        /// <returns>A new <see cref="FluentCommand"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
         /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
-        protected Command Do(global::System.Action execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected FluentCommand Do(global::System.Action execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             return Do(_ => execute(), propertyName);
         }
@@ -118,7 +118,7 @@
         /// Creates a command that can execute the specified action with a parameter.
         /// <example>
         /// <code lang="csharp">
-        /// public Command OkCommand => Do&lt;string&gt;(str => MessageBox.Show(str)).If(str => CanOk(str));
+        /// public FluentCommand OkCommand => Do&lt;string&gt;(str => MessageBox.Show(str)).If(str => CanOk(str));
         /// 
         /// public bool CanOk(string str) => !string.IsNullOrWhiteSpace(str);
         /// </code>
@@ -127,61 +127,61 @@
         /// <typeparam name="TValue">The type of the parameter for the command.</typeparam>
         /// <param name="execute">The action to execute.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
-        /// <returns>Returns a new <see cref="Command{TValue}"/> instance.</returns>
+        /// <returns>Returns a new <see cref="FluentCommand{TValue}"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
         /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
-        protected Command<TValue> Do<TValue>(global::System.Action<TValue> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected FluentCommand<TValue> Do<TValue>(global::System.Action<TValue> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
 
             // Error handling when property name is .ctor
             if (propertyName == ".ctor")
-                throw new global::System.ArgumentException(nameof(propertyName), "Command name must be provided when it is created in the constructor.");
+                throw new global::System.ArgumentException(nameof(propertyName), "FluentCommand name must be provided when it is created in the constructor.");
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
-                command = Command<TValue>.Do(execute, this);
+                command = FluentCommand<TValue>.Do(execute, this);
                 _commandStore.Add(propertyName, command);
             }
             else
                 command.MarkAsBuilt();
 
-            return (Command<TValue>)command;
+            return (FluentCommand<TValue>)command;
         }
 
         /// <summary>
         /// Creates a command that can execute the specified action with a parameter.
         /// <example>
         /// <code lang="csharp">
-        /// public Command OkCommand => Do(obj => MessageBox.Show(obj.ToString()));
+        /// public FluentCommand OkCommand => Do(obj => MessageBox.Show(obj.ToString()));
         /// </code>
         /// </example>
         /// </summary>
         /// <remarks>Use generic version for type safety.</remarks>
         /// <param name="execute">The action to execute. The parameter is of type object.</param>
         /// <param name="propertyName">The name of the property associated with the command.</param>
-        /// <returns>Returns a new <see cref="Command"/> instance.</returns>
+        /// <returns>Returns a new <see cref="FluentCommand"/> instance.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
         /// <exception cref="global::System.ArgumentException">Thrown when the property name is .ctor.</exception>
-        protected Command Do(global::System.Action<object?> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        protected FluentCommand Do(global::System.Action<object?> execute, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
 
             // Error handling when property name is .ctor
             if (propertyName == ".ctor")
-                throw new global::System.ArgumentException(nameof(propertyName), "Command name must be provided when it is created in the constructor.");
+                throw new global::System.ArgumentException(nameof(propertyName), "FluentCommand name must be provided when it is created in the constructor.");
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
-                command = Command.Do(execute, this);
+                command = FluentCommand.Do(execute, this);
                 _commandStore.Add(propertyName, command);
             }
             else
                 command.MarkAsBuilt();
 
-            return (Command)command;
+            return (FluentCommand)command;
         }
 
         /// <summary>
@@ -193,9 +193,9 @@
         /// public bool CanOk { get => Get(true); set => Set(value); }
         /// </code>
         /// <code lang="xaml">
-        /// &lt;Button Content=&quot;Run&quot; Command=&quot;{Binding AsyncCommand}&quot; /&gt;
+        /// &lt;Button Content=&quot;Run&quot; FluentCommand=&quot;{Binding AsyncCommand}&quot; /&gt;
         /// &lt;ProgressBar Visibility = &quot;{Binding AsyncCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}&quot; /&gt;
-        /// &lt;Button Content=&quot;Cancel&quot; Command=&quot;{Binding AsyncCommand.CancelCommand}&quot; /&gt;
+        /// &lt;Button Content=&quot;Cancel&quot; FluentCommand=&quot;{Binding AsyncCommand.CancelCommand}&quot; /&gt;
         /// </code>
         /// </example>
         /// </summary>
@@ -242,7 +242,7 @@
         /// public AsyncCommand OkCommand => Do(async () => await Task.Delay(1000)).If(() => CanOk);
         /// </code>
         /// <code lang="csharp">
-        /// // Command with all options
+        /// // FluentCommand with all options
         /// public AsyncCommand&lt;string&gt; OkCommand => Do&lt;string&gt;(str => Task.Delay(1000).ContinueWith(_ => MessageBox.Show(str))).If(str => CanOk(str)).Handle(ex => MessageBox.Show(ex.Message)).ConfigureAwait(false);
         /// </code>
         /// </example>
@@ -281,7 +281,7 @@
 
             // Error handling when property name is .ctor
             if (propertyName == ".ctor")
-                throw new global::System.ArgumentException(nameof(propertyName), "Command name must be provided when it is created in the constructor.");
+                throw new global::System.ArgumentException(nameof(propertyName), "FluentCommand name must be provided when it is created in the constructor.");
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {
@@ -336,7 +336,7 @@
 
             // Error handling when property name is .ctor
             if (propertyName == ".ctor")
-                throw new global::System.ArgumentException(nameof(propertyName), "Command name must be provided when it is created in the constructor.");
+                throw new global::System.ArgumentException(nameof(propertyName), "FluentCommand name must be provided when it is created in the constructor.");
 
             if (!_commandStore.TryGetValue(propertyName, out var command))
             {

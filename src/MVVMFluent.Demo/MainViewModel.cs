@@ -18,7 +18,7 @@ internal class MainViewModel : ValidationViewModelBase
         set => When(value).Required().Notify(AsyncCommand, OkCommand).Set();
     }
 
-    public Command OkCommand => Do(() => ShowDialog(Input)).IfValid(nameof(Input));
+    public FluentCommand OkCommand => Do(() => ShowDialog(Input)).IfValid(nameof(Input));
 
     private bool CanExecute()
     {
@@ -54,7 +54,7 @@ internal class MainViewModel : ValidationViewModelBase
         ShowDialog(Input);
     }
 
-    public Command<string> HelpCommand => Do<string>(ShowDialog);
+    public FluentCommand<string> HelpCommand => Do<string>(ShowDialog);
 
     private void ShowDialog(string? input)
     {
