@@ -129,20 +129,20 @@ public class MyViewModel : ViewModelBase
 ```
 In this example, if the `Counter` property hasn’t been set before, the Get(10) will return 10 as the default value.
 
-### Asynchronous FluentCommand (`AsyncCommand`)
-The AsyncCommand in the MVVMFluent library is designed to simplify asynchronous command execution with built-in support for cancellation, progress reporting, and exception handling. It allows you to execute long-running tasks without blocking the UI thread, while maintaining full control over the command's lifecycle.
+### Asynchronous FluentCommand (`AsyncFluentCommand`)
+The AsyncFluentCommand in the MVVMFluent library is designed to simplify asynchronous command execution with built-in support for cancellation, progress reporting, and exception handling. It allows you to execute long-running tasks without blocking the UI thread, while maintaining full control over the command's lifecycle.
 
 **Key Features:**
 - **Cancellation Support:** The `CancelCommand` property allows users to stop an ongoing asynchronous operation, making it ideal for tasks that may take a significant amount of time or need to be interrupted.
 - **Execution State Tracking:** The command exposes an `IsRunning` property to indicate whether the command is currently executing, which can be bound to UI elements like progress bars or buttons to reflect the task status dynamically.
 - **Progress Reporting:** The `Progress` property enables reporting task completion status, which can be updated via the ReportProgress method. This is especially useful when performing iterative tasks or tasks with multiple stages.
-- **Fluent Configuration:** Similar to the rest of the MVVMFluent library, the `AsyncCommand` can be configured fluently, allowing you to chain conditions (`If()`), exception handling (`Handle()`), and cancellation logic seamlessly.
+- **Fluent Configuration:** Similar to the rest of the MVVMFluent library, the `AsyncFluentCommand` can be configured fluently, allowing you to chain conditions (`If()`), exception handling (`Handle()`), and cancellation logic seamlessly.
 
 Example Usage
 In your view model:
 
 ```csharp
-public AsyncCommand LoadCommand => 
+public AsyncFluentCommand LoadCommand => 
                  Do(LoadData)
                 .If(() => CanLoad)
                 .Handle(ex => HandleError(ex));
@@ -173,10 +173,10 @@ In XAML:
 <Button Content="Cancel" FluentCommand="{Binding LoadCommand.CancelCommand}" />
 ```
 
-This example demonstrates how AsyncCommand integrates with both your view model and XAML, providing a responsive and user-friendly interface for long-running or cancellable operations.
+This example demonstrates how AsyncFluentCommand integrates with both your view model and XAML, providing a responsive and user-friendly interface for long-running or cancellable operations.
 
-### Asynchronous FluentCommand with Parameter (`AsyncCommand<T>`)
-The `AsyncCommand<T>` extends the functionality of AsyncCommand by allowing you to pass a parameter of type `T` to the asynchronous execution logic. This makes it ideal for scenarios where the command needs to act on dynamic data or context-specific parameters. Like `AsyncCommand`, it supports cancellation, progress reporting, and exception handling, while maintaining the same fluent API for configuration.
+### Asynchronous FluentCommand with Parameter (`AsyncFluentCommand<T>`)
+The `AsyncFluentCommand<T>` extends the functionality of AsyncFluentCommand by allowing you to pass a parameter of type `T` to the asynchronous execution logic. This makes it ideal for scenarios where the command needs to act on dynamic data or context-specific parameters. Like `AsyncFluentCommand`, it supports cancellation, progress reporting, and exception handling, while maintaining the same fluent API for configuration.
 
 ### Validation Fluent Setter (`ValidationFluentSetter<TValue>`)
 The `ValidationFluentSetter<TValue>` class in the `MVVMFluent.WPF` library provides a flexible framework for implementing validation in your MVVM applications. It supports three distinct validation methods: Built-in Validation Rules allow the use of WPF’s standard validation rules, which can be added to the setter using the `Validate(params ValidationRule[] rules)` method. For example:
@@ -356,7 +356,7 @@ namespace MVVMFluent.Demo
             return !string.IsNullOrWhiteSpace(value);
         }
 
-        public AsyncCommand LoadCommand =>
+        public AsyncFluentCommand LoadCommand =>
                 Do(LoadData)
                 .If(() => Comments?.Contains("Load") == true)
                 .Handle(HandleError);

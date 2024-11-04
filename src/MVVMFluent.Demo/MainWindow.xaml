@@ -40,11 +40,11 @@
         </TextBox>
 
         <ProgressBar Grid.Row="2" VerticalAlignment="Center" Padding="10" Margin="10"
-                     Value="{Binding AsyncCommand.Progress}" Minimum="0" Maximum="100" Height="10">
+                     Value="{Binding AsyncFluentCommand.Progress}" Minimum="0" Maximum="100" Height="10">
             <ProgressBar.Style>
                 <Style TargetType="ProgressBar">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding AsyncCommand.IsRunning}" Value="False">
+                        <DataTrigger Binding="{Binding AsyncFluentCommand.IsRunning}" Value="False">
                             <Setter Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
                     </Style.Triggers>
@@ -59,11 +59,11 @@
 
             <Button DockPanel.Dock="Right" Padding="15,0" Margin="10"
                     Content="Async"
-                    Command="{Binding AsyncCommand}" />
+                    Command="{Binding AsyncFluentCommand}" />
 
             <Button DockPanel.Dock="Right" Padding="15,0" Margin="10"
                     Content="Cancel"
-                    Command="{Binding AsyncCommand.CancelCommand}" />
+                    Command="{Binding AsyncFluentCommand.CancelCommand}" />
 
             <CheckBox DockPanel.Dock="Left" Padding="10" Margin="10,5"
                       VerticalAlignment="Center" VerticalContentAlignment="Center"

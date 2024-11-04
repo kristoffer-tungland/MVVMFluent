@@ -15,7 +15,7 @@ internal class MainViewModel : ValidationViewModelBase
     public string? Input
     {
         get => Get<string?>();
-        set => When(value).Required().Notify(AsyncCommand, OkCommand).Set();
+        set => When(value).Required().Notify(AsyncFluentCommand, OkCommand).Set();
     }
 
     public FluentCommand OkCommand => Do(() => ShowDialog(Input)).IfValid(nameof(Input));
@@ -27,7 +27,7 @@ internal class MainViewModel : ValidationViewModelBase
 
     public bool ThrowException { get => Get(false); set => Set(value); }
 
-    public AsyncCommand AsyncCommand => Do(ShowDialogAsync).If(CanExecute).Handle(HandleException).ConfigureAwait(false);
+    public AsyncFluentCommand AsyncFluentCommand => Do(ShowDialogAsync).If(CanExecute).Handle(HandleException).ConfigureAwait(false);
 
     private void HandleException(Exception exception)
     {
@@ -45,9 +45,9 @@ internal class MainViewModel : ValidationViewModelBase
                 throw new TaskCanceledException();
 
             await Task.Delay(50, cancellationToken);
-            AsyncCommand.ReportProgress(i+1, 100);
+            AsyncFluentCommand.ReportProgress(i+1, 100);
 
-            if (AsyncCommand.Progress == 50 && ThrowException)
+            if (AsyncFluentCommand.Progress == 50 && ThrowException)
                 throw new Exception("Something went wrong");
 
         }
