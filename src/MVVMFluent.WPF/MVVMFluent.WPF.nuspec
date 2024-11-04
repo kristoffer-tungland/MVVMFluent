@@ -11,7 +11,7 @@
     <projectUrl>https://github.com/kristoffer-tungland/MVVMFluent</projectUrl>
     <description>MVVMFluent WPF is a lightweight, source-only .NET library designed to simplify the MVVM pattern through fluent command and property setter APIs. It reduces boilerplate code in view models, making your codebase cleaner, more readable, and easier to maintain.</description>
     <tags>MVVM source-only Fluent</tags>
-
+    <readme>docs\README.md</readme>
     <dependencies>
         <dependency id="MVVMFluent" version="$version$" include="contentFiles, build" />
     </dependencies>
@@ -22,5 +22,6 @@
     <file src="*.cs" target="contentFiles/cs/net48/MVVMFluent.WPF/"/>
     <!-- 👇 Hide content files from Visual Studio solution explorer  -->
     <file src="MVVMFluent.WPF.props" target="build/MVVMFluent.WPF.props" />
+    <file src="..\..\README.md" target="docs/" />
   </files>
 </package>

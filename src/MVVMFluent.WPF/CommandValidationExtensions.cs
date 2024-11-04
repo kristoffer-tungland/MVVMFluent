@@ -9,7 +9,7 @@
         /// <param name="propertyName">The name of the property to check for errors.</param>
         /// <returns>The command with the condition added.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
-        public static Command IfValid(this Command command, params string[] propertyName)
+        public static FluentCommand IfValid(this FluentCommand command, params string[] propertyName)
         {
             if (command.IsBuilt)
                 return command;
@@ -28,7 +28,7 @@
         /// <param name="propertyName">The name of the property to check for errors.</param>
         /// <returns>The command with the condition added.</returns>
         /// <exception cref="global::System.ArgumentNullException">Thrown when the property name is null or empty.</exception>
-        public static Command<T> IfValid<T>(this Command<T> command, params string[] propertyName)
+        public static FluentCommand<T> IfValid<T>(this FluentCommand<T> command, params string[] propertyName)
         {
             if (command.IsBuilt)
                 return command;

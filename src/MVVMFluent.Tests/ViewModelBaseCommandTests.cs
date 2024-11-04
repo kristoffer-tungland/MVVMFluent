@@ -6,14 +6,14 @@ public class ViewModelBaseCommandTests
 {
     class CommandTestViewModel(Action execute) : ViewModelBase
     {
-        public ICommand Command => Do(execute);
+        public ICommand FluentCommand => Do(execute);
     }
 
     [Fact]
     internal void Do_CreatesCommand()
     {
         var viewModel = new CommandTestViewModel(() => { });
-        var command = viewModel.Command;
+        var command = viewModel.FluentCommand;
         Assert.NotNull(command);
     }
 
@@ -23,13 +23,13 @@ public class ViewModelBaseCommandTests
         var didExecute = false;
         void execute() => didExecute = true;
         var viewModel = new CommandTestViewModel(execute);
-        viewModel.Command.Execute(null);
+        viewModel.FluentCommand.Execute(null);
         Assert.True(didExecute);
     }
 
     class CommandParameterTestViewModel(Action<object?> execute) : ViewModelBase
     {
-        public ICommand Command => Do(execute);
+        public ICommand FluentCommand => Do(execute);
     }
 
     [Fact]
@@ -41,13 +41,13 @@ public class ViewModelBaseCommandTests
             parameter = obj;
         }
         var viewModel = new CommandParameterTestViewModel(execute);
-        viewModel.Command.Execute("Test");
+        viewModel.FluentCommand.Execute("Test");
         Assert.Equal("Test", parameter);
     }
 
     class CommandIfTestViewModel(Action execute, Func<bool> canExecute) : ViewModelBase
     {
-        public ICommand Command => Do(execute).If(canExecute);
+        public ICommand FluentCommand => Do(execute).If(canExecute);
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public class ViewModelBaseCommandTests
         void execute() => didExecute = true;
         var viewModel = new CommandIfTestViewModel(execute, () => true);
 
-        viewModel.Command.Execute(null);
+        viewModel.FluentCommand.Execute(null);
 
         Assert.True(didExecute);
     }
@@ -69,7 +69,7 @@ public class ViewModelBaseCommandTests
         void execute() { }
         var viewModel = new CommandIfTestViewModel(execute, canExecute);
 
-        var result = viewModel.Command.CanExecute(null);
+        var result = viewModel.FluentCommand.CanExecute(null);
 
         Assert.False(result);
     }
@@ -82,14 +82,14 @@ public class ViewModelBaseCommandTests
         void execute() => didExecute = true;
         var viewModel = new CommandIfTestViewModel(execute, canExecute);
 
-        viewModel.Command.Execute(null);
+        viewModel.FluentCommand.Execute(null);
 
         Assert.False(didExecute);
     }
 
     class CommandIfParameterTestViewModel(Action<object?> execute, Func<object, bool> canExecute) : ViewModelBase
     {
-        public ICommand Command => Do(execute).If(canExecute);
+        public ICommand FluentCommand => Do(execute).If(canExecute);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class ViewModelBaseCommandTests
         object? parameter = null;
         void execute(object? obj) => parameter = obj;
         var viewModel = new CommandIfParameterTestViewModel(execute, _ => true);
-        viewModel.Command.Execute("Test");
+        viewModel.FluentCommand.Execute("Test");
         Assert.Equal("Test", parameter);
     }
 
@@ -108,7 +108,7 @@ public class ViewModelBaseCommandTests
         bool canExecute(object obj) => false;
         void execute(object? obj) { }
         var viewModel = new CommandIfParameterTestViewModel(execute, canExecute);
-        var result = viewModel.Command.CanExecute(null);
+        var result = viewModel.FluentCommand.CanExecute(null);
         Assert.False(result);
     }
 
@@ -119,7 +119,7 @@ public class ViewModelBaseCommandTests
         var didExecute = false;
         void execute(object? obj) => didExecute = true;
         var viewModel = new CommandIfParameterTestViewModel(execute, canExecute);
-        viewModel.Command.Execute("Test");
+        viewModel.FluentCommand.Execute("Test");
         Assert.False(didExecute);
     }
 
@@ -128,9 +128,9 @@ public class ViewModelBaseCommandTests
         public int Property
         {
             get => Get<int>();
-            set => When(value).Notify(Command).Set();
+            set => When(value).Notify(FluentCommand).Set();
         }
-        public IFluentCommand Command => Do(() => { }).If(canExecute);
+        public IFluentCommand FluentCommand => Do(() => { }).If(canExecute);
     }
 
     [Fact]
@@ -144,9 +144,9 @@ public class ViewModelBaseCommandTests
 
         var viewModel = new CommandPropertyNotifyTestViewModel(canExecute);
 
-        viewModel.Command.CanExecuteChanged += (sender, args) =>
+        viewModel.FluentCommand.CanExecuteChanged += (sender, args) =>
         {
-            viewModel.Command.CanExecute(null);
+            viewModel.FluentCommand.CanExecute(null);
         };
 
         viewModel.Property = 1;
@@ -158,7 +158,7 @@ public class ViewModelBaseCommandTests
     {
         private readonly Action _execute = execute;
 
-        public ICommand Command => Do(_execute);
+        public ICommand FluentCommand => Do(_execute);
     }
 
     [Fact]
@@ -167,7 +167,7 @@ public class ViewModelBaseCommandTests
         var didExecute = false;
         void execute() => didExecute = true;
         var viewModel = new CommandIfCanUseLocalVariableTestViewModel(execute);
-        viewModel.Command.Execute(null);
+        viewModel.FluentCommand.Execute(null);
         Assert.True(didExecute);
     }
 }

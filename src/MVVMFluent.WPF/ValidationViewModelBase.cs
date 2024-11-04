@@ -15,8 +15,8 @@ namespace MVVMFluent.WPF
     ///         set => When(value).Required().Set();
     ///     }
     ///     
-    ///     // Command
-    ///     public Command Ok => Do(() => MessageBox.Show(Input)).If(() => !string.IsNullOrWhiteSpace(Input));
+    ///     // FluentCommand
+    ///     public FluentCommand Ok => Do(() => MessageBox.Show(Input)).If(() => !string.IsNullOrWhiteSpace(Input));
     /// }
     /// </code>
     /// </example>

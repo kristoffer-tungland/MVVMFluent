@@ -3,9 +3,9 @@ MVVMFluent is a lightweight, source-only .NET library designed to simplify the M
 
 ## Features
 - Fluent Property Setters: Easily chain property setters with `Changed`, `Changing`, command reevaluation, and property change notifications.
-- Fluent Command Setup: Define commands with `Do` methods and conditional execution via `If`.
-- Generic `Command<T>`: Define commands with parameterized actions using a strongly-typed approach.
-- Implements `ICommand`: Both `Command` and `Command<T>` implement the `ICommand` interface, enabling full compatibility with WPF and other MVVM frameworks.
+- Fluent FluentCommand Setup: Define commands with `Do` methods and conditional execution via `If`.
+- Generic `FluentCommand<T>`: Define commands with parameterized actions using a strongly-typed approach.
+- Implements `ICommand`: Both `FluentCommand` and `FluentCommand<T>` implement the `ICommand` interface, enabling full compatibility with WPF and other MVVM frameworks.
 - Source-Only Package: Integrates directly into your project as source code, minimizing dependencies.
 - Global Namespace Integration: Fully qualified `global::` namespaces for all system types and dependencies.
 - Disposal Management: Manage and clean up resources with built-in `Dispose` functionality.
@@ -51,13 +51,13 @@ public class MyViewModel : ViewModelBase
 ```
 Here, the `Set` method is used directly to assign the new value to the property without needing any additional configuration like `Changing` or `Changed`.
 
-### Fluent `Command` Setup
+### Fluent `FluentCommand` Setup
 Commands in MVVMFluent can be easily defined with `Do` methods, and you can add conditional execution using `If`.
 
 ```csharp
 public class MyViewModel : ViewModelBase
 {
-    public Command SaveCommand => Do(Save)
+    public FluentCommand SaveCommand => Do(Save)
                                   .If(CanSave);
 
     private void Save()
@@ -69,13 +69,13 @@ public class MyViewModel : ViewModelBase
 }
 ```
 
-### Using `Command<T>` for Generic Commands
-In cases where you need commands that accept a parameter, you can use the generic `Command<T>`. Both `Command` and `Command<T>` implement the `ICommand` interface, making them compatible with WPF or any other MVVM framework that supports `ICommand`.
+### Using `FluentCommand<T>` for Generic Commands
+In cases where you need commands that accept a parameter, you can use the generic `FluentCommand<T>`. Both `FluentCommand` and `FluentCommand<T>` implement the `ICommand` interface, making them compatible with WPF or any other MVVM framework that supports `ICommand`.
 
 ```csharp
 public class MyViewModel : ViewModelBase
 {
-    public Command<string> SaveWithMessageCommand => Do<string>(message => Save(message))
+    public FluentCommand<string> SaveWithMessageCommand => Do<string>(message => Save(message))
                                                      .If(message => !string.IsNullOrEmpty(message));
 
     private void Save(string message)
@@ -85,7 +85,7 @@ public class MyViewModel : ViewModelBase
     }
 }
 ```
-This example demonstrates how `Command<T>` can be used to handle parameterized commands with strongly-typed arguments.
+This example demonstrates how `FluentCommand<T>` can be used to handle parameterized commands with strongly-typed arguments.
 
 ### Using `Notify(nameof(...))` for Property Change Notifications
 You can also notify multiple properties when setting a value. This is useful when other properties are derived from or depend on the value being set.
@@ -129,7 +129,7 @@ public class MyViewModel : ViewModelBase
 ```
 In this example, if the `Counter` property hasn’t been set before, the Get(10) will return 10 as the default value.
 
-### Asynchronous Command (`AsyncCommand`)
+### Asynchronous FluentCommand (`AsyncCommand`)
 The AsyncCommand in the MVVMFluent library is designed to simplify asynchronous command execution with built-in support for cancellation, progress reporting, and exception handling. It allows you to execute long-running tasks without blocking the UI thread, while maintaining full control over the command's lifecycle.
 
 **Key Features:**
@@ -168,14 +168,14 @@ public bool CanLoad { get => Get(true); set => Set(value); }
 
 In XAML:
 ```xml
-<Button Content="Load" Command="{Binding LoadCommand}" />
+<Button Content="Load" FluentCommand="{Binding LoadCommand}" />
 <ProgressBar Visibility="{Binding LoadCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}" />
-<Button Content="Cancel" Command="{Binding LoadCommand.CancelCommand}" />
+<Button Content="Cancel" FluentCommand="{Binding LoadCommand.CancelCommand}" />
 ```
 
 This example demonstrates how AsyncCommand integrates with both your view model and XAML, providing a responsive and user-friendly interface for long-running or cancellable operations.
 
-### Asynchronous Command with Parameter (`AsyncCommand<T>`)
+### Asynchronous FluentCommand with Parameter (`AsyncCommand<T>`)
 The `AsyncCommand<T>` extends the functionality of AsyncCommand by allowing you to pass a parameter of type `T` to the asynchronous execution logic. This makes it ideal for scenarios where the command needs to act on dynamic data or context-specific parameters. Like `AsyncCommand`, it supports cancellation, progress reporting, and exception handling, while maintaining the same fluent API for configuration.
 
 ### Validation Fluent Setter (`ValidationFluentSetter<TValue>`)
@@ -211,7 +211,7 @@ private bool IsCommentValid(string? value)
 **Conditional Validation** allows for validation checks to occur only when certain conditions are met, using the `When(value)` method. Additionally, the command can be set to execute only if the validation passes by using the `IfValid()` method, ensuring that the command is invoked only with valid input. For example:
 
 ```csharp
-// Remember to use .Notify(Command) on the setter
+// Remember to use .Notify(FluentCommand) on the setter
 public string? Comments
 {
     get => Get<string?>();
@@ -227,7 +227,7 @@ private bool IsCommentValid(string? value)
 }
 
 // Example command that executes only if the Comments property is valid
-public Command OkCommand => Do(() => ShowDialog(Comments)).IfValid(nameof(Comments));
+public FluentCommand OkCommand => Do(() => ShowDialog(Comments)).IfValid(nameof(Comments));
 ```
 Together, these methods enhance the user experience by providing responsive, context-sensitive validation feedback while ensuring adherence to application requirements.
 
@@ -298,7 +298,7 @@ public class MyDialogViewModel : IClosableViewModel, IResultViewModel<string>
 
     public Action? RequestCloseView { get; set; }
     public bool CanCloseView() => !string.IsNullOrEmpty(Result);
-    public Command CloseCommand => Do(Close);
+    public FluentCommand CloseCommand => Do(Close);
 
     public void Close()
     {
@@ -361,12 +361,12 @@ namespace MVVMFluent.Demo
                 .If(() => Comments?.Contains("Load") == true)
                 .Handle(HandleError);
 
-        public Command SaveCommand =>
+        public FluentCommand SaveCommand =>
                 Do(Save)
                 .IfValid(nameof(Name))
                 .If(() => !string.IsNullOrEmpty(Name));
 
-        public Command CloseCommand => Do(() => RequestCloseView?.Invoke()).If(CanCloseView);
+        public FluentCommand CloseCommand => Do(() => RequestCloseView?.Invoke()).If(CanCloseView);
         public Action? RequestCloseView { get; set; }
         public bool CanCloseView()
         {
@@ -413,7 +413,7 @@ namespace MVVMFluent.Demo
 In this complete example:
 - The `Name` property triggers the `SaveCommand` and notifies the `FullName` property on change.
 - The `Counter` property has a default value of `10`.
-- The `SaveWithMessageCommand` is a generic command (`Command<string>`) that accepts a string parameter.
+- The `SaveWithMessageCommand` is a generic command (`FluentCommand<string>`) that accepts a string parameter.
 - The `Close()` method is provided to dispose of resources when the view model is no longer needed.
 
 ## License

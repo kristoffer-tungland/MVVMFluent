@@ -114,7 +114,7 @@ internal class PropertyTestViewModel : ViewModelBase
     {
         get => Get<string?>();
         set => When(value)
-            .OnChanged(newValue => OnChangedAction?.Invoke(newValue))
+            .Changed(newValue => OnChangedAction?.Invoke(newValue))
             .Set();
     }
 
@@ -122,7 +122,7 @@ internal class PropertyTestViewModel : ViewModelBase
     {
         get => Get<string?>();
         set => When(value)
-            .OnChanging(newValue => OnChangingAction?.Invoke(newValue))
+            .Changing(newValue => OnChangingAction?.Invoke(newValue))
             .Set();
     }
 

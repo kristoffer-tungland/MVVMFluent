@@ -1,13 +1,19 @@
 ﻿namespace MVVMFluent.Tests
 {
+    public class CommandViewModel : ViewModelBase
+    {
+    }
+
     public class ViewModelBaseGenericsCommandTests
     {
+        private readonly CommandViewModel _viewModel = new();
+
         [Fact]
         public void Execute_WhenCanExecuteIsTrue_CallsExecuteAction()
         {
             // Arrange
             var executeCalled = false;
-            var command = Command<string>.Do(param => executeCalled = true)
+            var command = FluentCommand<string>.Do(param => executeCalled = true, _viewModel)
                 .If(param => true); // CanExecute always returns true
 
             // Act
@@ -22,7 +28,7 @@
         {
             // Arrange
             var executeCalled = false;
-            var command = Command<string>.Do(param => executeCalled = true)
+            var command = FluentCommand<string>.Do(param => executeCalled = true, _viewModel)
                 .If(param => false); // CanExecute always returns false
 
             // Act
@@ -36,7 +42,7 @@
         public void CanExecute_WhenConditionIsTrue_ReturnsTrue()
         {
             // Arrange
-            var command = Command<string>.Do(param => { })
+            var command = FluentCommand<string>.Do(param => { }, _viewModel)
                 .If(param => true); // CanExecute always returns true
 
             // Act
@@ -50,7 +56,7 @@
         public void CanExecute_WhenConditionIsFalse_ReturnsFalse()
         {
             // Arrange
-            var command = Command<string>.Do(param => { })
+            var command = FluentCommand<string>.Do(param => { }, _viewModel)
                 .If(param => false); // CanExecute always returns false
 
             // Act
@@ -64,7 +70,7 @@
         public void CanExecute_WhenNotSet_ReturnsTrue()
         {
             // Arrange
-            var command = Command<string>.Do(param => { });
+            var command = FluentCommand<string>.Do(param => { }, _viewModel);
 
             // Act
             var result = command.CanExecute("test");

@@ -12,8 +12,8 @@
     ///     // Property that notifies the Ok command when changed
     ///     public string? Input { get => Get&lt;string?&gt;(); set => When(value).Notify(Ok).Set(); }
     ///     
-    ///     // Command
-    ///     public Command Ok => Do(() => MessageBox.Show(Input)).If(() => !string.IsNullOrWhiteSpace(Input));
+    ///     // FluentCommand
+    ///     public FluentCommand Ok => Do(() => MessageBox.Show(Input)).If(() => !string.IsNullOrWhiteSpace(Input));
     /// }
     /// </code>
     /// </example>
