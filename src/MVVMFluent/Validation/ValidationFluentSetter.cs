@@ -1,27 +1,28 @@
-﻿namespace MVVMFluent.WPF
+namespace MVVMFluent
 {
     internal class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidationFluentSetter<TValue>
     {
-        private global::System.Collections.Generic.List<global::System.Windows.Controls.ValidationRule> _rules = new();
-        public bool HasErrors { get; private set; }
+        private readonly global::System.Collections.Generic.List<IValidationRule> _rules = new();
         private readonly global::System.EventHandler<global::System.ComponentModel.DataErrorsChangedEventArgs>? _errorsChanged;
         private global::System.Func<TValue?, bool>? _validationFunction;
         private string? _errorMessage;
 
-        public ValidationFluentSetter(IValidationFluentSetterViewModel viewModel, string? propertyName, global::System.EventHandler<global::System.ComponentModel.DataErrorsChangedEventArgs>? errorsChanged) :
-            base(viewModel, propertyName)
+        public ValidationFluentSetter(IValidationFluentSetterViewModel viewModel, string? propertyName, global::System.EventHandler<global::System.ComponentModel.DataErrorsChangedEventArgs>? errorsChanged)
+            : base(viewModel, propertyName)
         {
             _errorsChanged = errorsChanged;
         }
 
         public global::System.Collections.ObjectModel.ObservableCollection<string> Errors { get; } = new();
 
+        public bool HasErrors { get; private set; }
+
         public global::System.Collections.IEnumerable GetErrors()
         {
             return Errors;
         }
 
-        internal ValidationFluentSetter<TValue> Validate(params global::System.Windows.Controls.ValidationRule[] rules)
+        internal ValidationFluentSetter<TValue> Validate(params IValidationRule[] rules)
         {
             foreach (var rule in rules)
             {
@@ -30,6 +31,7 @@
 
                 _rules.Add(rule);
             }
+
             return this;
         }
 
@@ -40,7 +42,7 @@
             return this;
         }
 
-        internal ValidationFluentSetter<TValue> AddRule(global::System.Windows.Controls.ValidationRule rule)
+        internal ValidationFluentSetter<TValue> AddRule(IValidationRule rule)
         {
             if (_rules.Contains(rule))
                 return this;
@@ -80,16 +82,16 @@
             {
                 var validationResult = rule.Validate(valueToSet, global::System.Globalization.CultureInfo.CurrentCulture);
 
-                if (!validationResult.IsValid)
-                {
-                    var errorMessage = validationResult.ErrorContent?.ToString();
+                if (validationResult is null || validationResult == global::System.ComponentModel.DataAnnotations.ValidationResult.Success)
+                    continue;
 
-                    if (errorMessage is null || string.IsNullOrWhiteSpace(errorMessage))
-                        throw new global::System.InvalidOperationException("Validation rule did not return an error message.");
+                var errorMessage = validationResult.ErrorMessage;
 
-                    Errors.Add(errorMessage);
-                    HasErrors = true;
-                }
+                if (errorMessage is null || string.IsNullOrWhiteSpace(errorMessage))
+                    throw new global::System.InvalidOperationException("Validation rule did not return an error message.");
+
+                Errors.Add(errorMessage);
+                HasErrors = true;
             }
 
             if (_validationFunction is not null && !_validationFunction.Invoke((TValue?)valueToSet))

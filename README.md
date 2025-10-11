@@ -179,14 +179,14 @@ This example demonstrates how AsyncFluentCommand integrates with both your view 
 The `AsyncFluentCommand<T>` extends the functionality of AsyncFluentCommand by allowing you to pass a parameter of type `T` to the asynchronous execution logic. This makes it ideal for scenarios where the command needs to act on dynamic data or context-specific parameters. Like `AsyncFluentCommand`, it supports cancellation, progress reporting, and exception handling, while maintaining the same fluent API for configuration.
 
 ### Validation Fluent Setter (`ValidationFluentSetter<TValue>`)
-The `ValidationFluentSetter<TValue>` class in the `MVVMFluent.WPF` library provides a flexible framework for implementing validation in your MVVM applications. It supports three distinct validation methods: Built-in Validation Rules allow the use of WPF’s standard validation rules, which can be added to the setter using the `Validate(params ValidationRule[] rules)` method. For example:
+The `ValidationFluentSetter<TValue>` class in the core `MVVMFluent` library provides a flexible framework for implementing validation in your MVVM applications. It supports three distinct validation methods: Built-in validation rules leverage the new platform-agnostic `ValidationRule` type and can be added to the setter using the `Validate(params IValidationRule[] rules)` method. For example:
 
 ```csharp
 public string? Input
 {
     get => Get<string?>();
     set => When(value)
-                .Validate(new RequiredFieldRule())
+                .Validate(new RequiredValidationRule())
                 .Notify(OkCommand)
                 .Set();
 }

@@ -1,25 +1,9 @@
 using global::System.Linq;
 
-namespace MVVMFluent.WPF
+namespace MVVMFluent
 {
     /// <summary>
-    /// Represents a base class for view models that provides property change notification command creation, and validation.
-    /// <example>
-    /// <code lang="csharp">
-    /// public class MainViewModel : ViewModelBase
-    /// {
-    ///     // Property with notification and default value
-    ///     public string? Input 
-    ///     { 
-    ///         get => Get<string?>(); 
-    ///         set => When(value).Required().Set();
-    ///     }
-    ///     
-    ///     // FluentCommand
-    ///     public FluentCommand Ok => Do(() => MessageBox.Show(Input)).If(() => !string.IsNullOrWhiteSpace(Input));
-    /// }
-    /// </code>
-    /// </example>
+    /// Represents a base class for view models that provides property change notification, command creation, and validation.
     /// </summary>
     public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IValidationFluentSetterViewModel
     {
@@ -78,19 +62,7 @@ namespace MVVMFluent.WPF
             if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
                 throw new global::System.ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
 
-            //var property = GetType().GetProperty(propertyName);
-            //var value = property?.GetValue(this);
-
-            //if (property == null)
-            //    throw new global::System.ArgumentException($"Property {propertyName} not found on {GetType().Name}");
-
             var validationFluentSetter = GetFluentSetterBuilder(propertyName) as IValidationFluentSetterBuilder;
-
-            //if (validationFluentSetter == null)
-            //{
-            //    property.SetValue(this, value);
-            //    return;
-            //}
 
             if (validationFluentSetter == null)
                 return;
@@ -108,24 +80,7 @@ namespace MVVMFluent.WPF
 
         /// <summary>
         /// Creates a fluent setter for a property with validation.
-        /// <example>
-        /// <code lang="csharp">
-        /// public string? Input
-        /// {
-        ///     get => Get&lt;string?&gt;();
-        ///     set => When(value).Required().Set();
-        /// }
-        /// </code>
-        /// <code lang="csharp">
-        /// public string? Input
-        /// {
-        ///     get => Get&lt;string?&gt;();
-        ///     set => When(value).ValidateAsync(new RequiredValidator(), new MinLengthValidator(5)).Set();
-        /// }
-        /// </code>
-        /// </example>
         /// </summary>
-        /// <remarks>The ValidateAsync method is used to add a custom validator to the property, the validator must inherit from <see cref="global::System.Windows.Controls.ValidationRule"/>.</remarks>
         /// <typeparam name="TValue">The type of the property.</typeparam>
         /// <param name="value">The new value to set.</param>
         /// <param name="propertyName">The name of the property being set.</param>

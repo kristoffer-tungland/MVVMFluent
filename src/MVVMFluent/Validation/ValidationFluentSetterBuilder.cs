@@ -1,4 +1,4 @@
-﻿namespace MVVMFluent.WPF
+namespace MVVMFluent
 {
     public class ValidationFluentSetterBuilder<TValue> : FluentSetterBuilder<TValue>, IValidationFluentSetterBuilder
     {
@@ -22,7 +22,7 @@
             return (ValidationFluentSetter<TValue>)FluentSetter;
         }
 
-        public ValidationFluentSetterBuilder<TValue> Validate(params global::System.Windows.Controls.ValidationRule[] rules)
+        public ValidationFluentSetterBuilder<TValue> Validate(params IValidationRule[] rules)
         {
             if (IsBuilt)
                 return this;

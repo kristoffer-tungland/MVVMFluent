@@ -9,6 +9,10 @@
     <Version>0.0.2</Version>
     <NuspecProperties>version=$(Version)</NuspecProperties>
   </PropertyGroup>
-    
-      
+
+  <ItemGroup>
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
+  </ItemGroup>
+
+
 </Project>

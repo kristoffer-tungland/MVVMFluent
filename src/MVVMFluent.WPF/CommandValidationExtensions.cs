@@ -1,4 +1,6 @@
-﻿namespace MVVMFluent.WPF
+﻿using MVVMFluent;
+
+namespace MVVMFluent.WPF
 {
     public static class CommandValidationExtensions
     {
