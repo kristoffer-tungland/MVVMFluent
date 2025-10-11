@@ -1,11 +1,12 @@
-namespace MVVMFluent
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+
+namespace MVVMFluent;
+
+/// <summary>
+/// Represents a base class for creating validation rules.
+/// </summary>
+public abstract class ValidationRule : IValidationRule
 {
-    /// <summary>
-    /// Represents a base class for creating validation rules.
-    /// </summary>
-    public abstract class ValidationRule : IValidationRule
-    {
-        /// <inheritdoc />
-        public abstract global::System.ComponentModel.DataAnnotations.ValidationResult? Validate(object? value, global::System.Globalization.CultureInfo cultureInfo);
-    }
+    public abstract ValidationResult? Validate(object? value, CultureInfo cultureInfo);
 }

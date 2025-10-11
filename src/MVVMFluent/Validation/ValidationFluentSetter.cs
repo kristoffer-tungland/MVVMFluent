@@ -1,110 +1,121 @@
-namespace MVVMFluent
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+
+namespace MVVMFluent;
+
+internal class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidationFluentSetter<TValue>
 {
-    internal class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidationFluentSetter<TValue>
+    private readonly List<IValidationRule> _rules = new();
+    private readonly EventHandler<DataErrorsChangedEventArgs>? _errorsChanged;
+    private Func<TValue?, bool>? _validationFunction;
+    private string? _errorMessage;
+
+    public ValidationFluentSetter(IValidationFluentSetterViewModel viewModel, string? propertyName, EventHandler<DataErrorsChangedEventArgs>? errorsChanged)
+        : base(viewModel, propertyName)
     {
-        private readonly global::System.Collections.Generic.List<IValidationRule> _rules = new();
-        private readonly global::System.EventHandler<global::System.ComponentModel.DataErrorsChangedEventArgs>? _errorsChanged;
-        private global::System.Func<TValue?, bool>? _validationFunction;
-        private string? _errorMessage;
+        _errorsChanged = errorsChanged;
+    }
 
-        public ValidationFluentSetter(IValidationFluentSetterViewModel viewModel, string? propertyName, global::System.EventHandler<global::System.ComponentModel.DataErrorsChangedEventArgs>? errorsChanged)
-            : base(viewModel, propertyName)
+    public ObservableCollection<string> Errors { get; } = new();
+
+    public bool HasErrors { get; private set; }
+
+    public IEnumerable GetErrors() => Errors;
+
+    internal ValidationFluentSetter<TValue> Validate(params IValidationRule[] rules)
+    {
+        if (rules == null)
         {
-            _errorsChanged = errorsChanged;
+            throw new ArgumentNullException(nameof(rules));
         }
 
-        public global::System.Collections.ObjectModel.ObservableCollection<string> Errors { get; } = new();
-
-        public bool HasErrors { get; private set; }
-
-        public global::System.Collections.IEnumerable GetErrors()
+        foreach (var rule in rules)
         {
-            return Errors;
+            AddRule(rule);
         }
 
-        internal ValidationFluentSetter<TValue> Validate(params IValidationRule[] rules)
+        return this;
+    }
+
+    internal ValidationFluentSetter<TValue> Validate(Func<TValue?, bool> validationFunction, string? errorMessage)
+    {
+        if (validationFunction == null)
         {
-            foreach (var rule in rules)
-            {
-                if (_rules.Contains(rule))
-                    continue;
+            throw new ArgumentNullException(nameof(validationFunction));
+        }
 
-                _rules.Add(rule);
-            }
+        _validationFunction = validationFunction;
+        _errorMessage = errorMessage;
+        return this;
+    }
 
+    internal ValidationFluentSetter<TValue> AddRule(IValidationRule rule)
+    {
+        if (rule == null)
+        {
+            throw new ArgumentNullException(nameof(rule));
+        }
+
+        if (_rules.Contains(rule))
+        {
             return this;
         }
 
-        internal ValidationFluentSetter<TValue> Validate(global::System.Func<TValue?, bool> validationFuntion, string? errorMessage)
+        _rules.Add(rule);
+        return this;
+    }
+
+    public override void Set(TValue? value)
+    {
+        CheckForErrors(value);
+        base.Set(value);
+    }
+
+    public void CheckForErrors(TValue? valueToSet)
+    {
+        CheckForErrors((object?)valueToSet);
+    }
+
+    public void CheckForErrors(object? valueToSet)
+    {
+        var hadErrors = HasErrors;
+        Errors.Clear();
+        HasErrors = false;
+
+        foreach (var rule in _rules)
         {
-            _validationFunction = validationFuntion;
-            _errorMessage = errorMessage;
-            return this;
-        }
+            var validationResult = rule.Validate(valueToSet, CultureInfo.CurrentCulture);
 
-        internal ValidationFluentSetter<TValue> AddRule(IValidationRule rule)
-        {
-            if (_rules.Contains(rule))
-                return this;
-
-            _rules.Add(rule);
-            return this;
-        }
-
-        public override void Set(TValue? value)
-        {
-            CheckForErrors(value);
-            base.Set(value);
-        }
-
-        /// <summary>
-        /// Checks for errors based on the validation rules.
-        /// </summary>
-        /// <param name="valueToSet">Type of value to set.</param>
-        /// <exception cref="global::System.InvalidOperationException">Thrown when the validation rule does not return an error message.</exception>
-        public void CheckForErrors(TValue? valueToSet)
-        {
-            CheckForErrors((object?)valueToSet);
-        }
-
-        /// <summary>
-        /// Checks for errors based on the validation rules.
-        /// </summary>
-        /// <param name="valueToSet">Value to set.</param>
-        /// <exception cref="global::System.InvalidOperationException">Thrown when the validation rule does not return an error message.</exception>
-        public void CheckForErrors(object? valueToSet)
-        {
-            var hadErrors = HasErrors;
-            Errors.Clear();
-            HasErrors = false;
-
-            foreach (var rule in _rules)
+            if (validationResult == null || validationResult == ValidationResult.Success)
             {
-                var validationResult = rule.Validate(valueToSet, global::System.Globalization.CultureInfo.CurrentCulture);
-
-                if (validationResult is null || validationResult == global::System.ComponentModel.DataAnnotations.ValidationResult.Success)
-                    continue;
-
-                var errorMessage = validationResult.ErrorMessage;
-
-                if (errorMessage is null || string.IsNullOrWhiteSpace(errorMessage))
-                    throw new global::System.InvalidOperationException("Validation rule did not return an error message.");
-
-                Errors.Add(errorMessage);
-                HasErrors = true;
+                continue;
             }
 
-            if (_validationFunction is not null && !_validationFunction.Invoke((TValue?)valueToSet))
+            var errorMessage = validationResult.ErrorMessage;
+            if (string.IsNullOrWhiteSpace(errorMessage))
             {
-                if (_errorMessage is null || string.IsNullOrWhiteSpace(_errorMessage))
-                    _errorMessage = "Value is not valid.";
-
-                Errors.Add(_errorMessage);
-                HasErrors = true;
+                throw new InvalidOperationException("Validation rule did not return an error message.");
             }
 
-            if (hadErrors != HasErrors)
-                _errorsChanged?.Invoke(this, new global::System.ComponentModel.DataErrorsChangedEventArgs(PropertyName));
+            Errors.Add(errorMessage);
+            HasErrors = true;
+        }
+
+        if (_validationFunction != null && !_validationFunction.Invoke((TValue?)valueToSet))
+        {
+            var message = string.IsNullOrWhiteSpace(_errorMessage) ? "Value is not valid." : _errorMessage;
+            Errors.Add(message!);
+            HasErrors = true;
+        }
+
+        if (hadErrors != HasErrors)
+        {
+            _errorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(PropertyName));
         }
     }
 }

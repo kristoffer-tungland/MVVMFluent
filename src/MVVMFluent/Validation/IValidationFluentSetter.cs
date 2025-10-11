@@ -1,9 +1,10 @@
-namespace MVVMFluent
-{
-    public interface IValidationFluentSetter<TValue> : IFluentSetter<TValue>
-    {
-        global::System.Collections.IEnumerable GetErrors();
+using System.Collections;
 
-        bool HasErrors { get; }
-    }
+namespace MVVMFluent;
+
+public interface IValidationFluentSetter<TValue> : IFluentSetter<TValue>
+{
+    IEnumerable GetErrors();
+
+    bool HasErrors { get; }
 }
