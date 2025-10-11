@@ -1,4 +1,3 @@
-﻿using MVVMFluent.WPF;
 using System.Windows;
 
 namespace MVVMFluent.Demo;
