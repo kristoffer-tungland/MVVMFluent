@@ -1,62 +1,63 @@
-namespace MVVMFluent
+using System;
+using System.Collections;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
+namespace MVVMFluent;
+
+public class ValidationFluentSetterBuilder<TValue> : FluentSetterBuilder<TValue>, IValidationFluentSetterBuilder
 {
-    public class ValidationFluentSetterBuilder<TValue> : FluentSetterBuilder<TValue>, IValidationFluentSetterBuilder
+    private readonly EventHandler<DataErrorsChangedEventArgs>? _errorsChanged;
+
+    public ValidationFluentSetterBuilder(TValue value, IValidationFluentSetterViewModel fluentSetterViewModel, [CallerMemberName] string? propertyName = null, EventHandler<DataErrorsChangedEventArgs>? errorsChanged = null)
+        : base(value, fluentSetterViewModel, propertyName)
     {
-        protected override IFluentSetter<TValue> FluentSetter { get; set; }
+        _errorsChanged = errorsChanged;
+    }
 
-        public bool HasErrors => GetFluentSetter().HasErrors;
+    protected override FluentSetter<TValue> CreateFluentSetter(IFluentSetterViewModel fluentSetterViewModel, string? propertyName)
+    {
+        return new ValidationFluentSetter<TValue>((IValidationFluentSetterViewModel)fluentSetterViewModel, propertyName, _errorsChanged);
+    }
 
-        public global::System.Collections.IEnumerable GetErrors()
+    private ValidationFluentSetter<TValue> ValidationSetter => (ValidationFluentSetter<TValue>)FluentSetterInstance;
+
+    public bool HasErrors => ValidationSetter.HasErrors;
+
+    public IEnumerable GetErrors() => ValidationSetter.GetErrors();
+
+    public ValidationFluentSetterBuilder<TValue> Validate(params IValidationRule[] rules)
+    {
+        if (!IsBuilt)
         {
-            return GetFluentSetter().GetErrors();
+            ValidationSetter.Validate(rules);
         }
 
-        public ValidationFluentSetterBuilder(TValue value, IValidationFluentSetterViewModel fluentSetterViewModel, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null, global::System.EventHandler<global::System.ComponentModel.DataErrorsChangedEventArgs>? errorsChanged = null)
-            : base(value, fluentSetterViewModel)
+        return this;
+    }
+
+    public ValidationFluentSetterBuilder<TValue> Validate(Func<TValue?, bool> validationFunction, string? errorMessage)
+    {
+        if (!IsBuilt)
         {
-            FluentSetter = new ValidationFluentSetter<TValue>(fluentSetterViewModel, propertyName, errorsChanged);
+            ValidationSetter.Validate(validationFunction, errorMessage);
         }
 
-        private ValidationFluentSetter<TValue> GetFluentSetter()
-        {
-            return (ValidationFluentSetter<TValue>)FluentSetter;
-        }
+        return this;
+    }
 
-        public ValidationFluentSetterBuilder<TValue> Validate(params IValidationRule[] rules)
-        {
-            if (IsBuilt)
-                return this;
+    public ValidationFluentSetterBuilder<TValue> Required(string? errorMessage = default)
+    {
+        return Validate(new RequiredValidationRule(errorMessage));
+    }
 
-            GetFluentSetter().Validate(rules);
-            return this;
-        }
+    public override void Set()
+    {
+        base.Set();
+    }
 
-        public ValidationFluentSetterBuilder<TValue> Validate(global::System.Func<TValue?, bool> validationFuntion, string? errorMessage)
-        {
-            if (IsBuilt)
-                return this;
-
-            GetFluentSetter().Validate(validationFuntion, errorMessage);
-            return this;
-        }
-
-        public ValidationFluentSetterBuilder<TValue> Required(string? errorMessage = default)
-        {
-            return Validate(new RequiredValidationRule(errorMessage));
-        }
-
-        /// <summary>
-        /// Sets the value. This method is required to be called at the end of the fluent setter configuration.
-        /// </summary>
-        /// <remarks>This method runs the set action and checks for errors.</remarks>
-        public override void Set()
-        {
-            base.Set();
-        }
-
-        public void CheckForErrors(object? value)
-        {
-            GetFluentSetter().CheckForErrors(value);
-        }
+    public void CheckForErrors(object? value)
+    {
+        ValidationSetter.CheckForErrors(value);
     }
 }
