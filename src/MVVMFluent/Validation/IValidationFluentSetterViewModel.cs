@@ -1,7 +1,8 @@
-namespace MVVMFluent
+using System.ComponentModel;
+
+namespace MVVMFluent;
+
+public interface IValidationFluentSetterViewModel : IFluentSetterViewModel, INotifyDataErrorInfo
 {
-    public interface IValidationFluentSetterViewModel : IFluentSetterViewModel, global::System.ComponentModel.INotifyDataErrorInfo
-    {
-        void CheckErrorsFor(string? propertyName);
-    }
+    void CheckErrorsFor(string? propertyName);
 }
