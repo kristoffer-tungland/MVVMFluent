@@ -1,11 +1,12 @@
-namespace MVVMFluent
+using System.Collections;
+
+namespace MVVMFluent;
+
+public interface IValidationFluentSetterBuilder : IFluentSetterBuilder
 {
-    public interface IValidationFluentSetterBuilder : IFluentSetterBuilder
-    {
-        bool HasErrors { get; }
+    bool HasErrors { get; }
 
-        void CheckForErrors(object? value);
+    void CheckForErrors(object? value);
 
-        global::System.Collections.IEnumerable GetErrors();
-    }
+    IEnumerable GetErrors();
 }
