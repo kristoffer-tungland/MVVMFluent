@@ -1,23 +1,29 @@
-namespace MVVMFluent
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+
+namespace MVVMFluent;
+
+public class RequiredValidationRule : ValidationRule
 {
-    public class RequiredValidationRule : ValidationRule
+    private readonly string? _errorMessage;
+
+    public RequiredValidationRule(string? errorMessage = null)
     {
-        private readonly string? _errorMessage;
+        _errorMessage = errorMessage;
+    }
 
-        public RequiredValidationRule(string? errorMessage = default)
+    public override ValidationResult? Validate(object? value, CultureInfo cultureInfo)
+    {
+        if (value == null)
         {
-            _errorMessage = errorMessage;
+            return new ValidationResult(_errorMessage ?? "Value is required");
         }
 
-        public override global::System.ComponentModel.DataAnnotations.ValidationResult? Validate(object? value, global::System.Globalization.CultureInfo cultureInfo)
+        if (value is string str && string.IsNullOrWhiteSpace(str))
         {
-            if (value is null)
-                return new global::System.ComponentModel.DataAnnotations.ValidationResult(_errorMessage ?? "Value is required");
-
-            if (value is string str && string.IsNullOrWhiteSpace(str))
-                return new global::System.ComponentModel.DataAnnotations.ValidationResult(_errorMessage ?? "Value is required");
-
-            return global::System.ComponentModel.DataAnnotations.ValidationResult.Success;
+            return new ValidationResult(_errorMessage ?? "Value is required");
         }
+
+        return ValidationResult.Success;
     }
 }

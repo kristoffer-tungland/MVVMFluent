@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MVVMFluent\MVVMFluent.csproj" />
+    <ProjectReference Include="..\MVVMFluent.ValidationExtensions\MVVMFluent.ValidationExtensions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

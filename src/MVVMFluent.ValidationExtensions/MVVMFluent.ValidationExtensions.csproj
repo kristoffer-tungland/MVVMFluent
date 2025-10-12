@@ -1,24 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net48;net6.0-windows</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>10.0</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <UseWPF>true</UseWPF>
-    <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <Version>0.0.2</Version>
-    <AssemblyName>MVVMFluent.WPF.$(Version)</AssemblyName>
+    <AssemblyName>MVVMFluent.ValidationExtensions.$(Version)</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>MVVMFluent.WPF</PackageId>
+    <PackageId>MVVMFluent.ValidationExtensions</PackageId>
     <Authors>Kristoffer Tungland</Authors>
     <Company>MVVMFluent</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/kristoffer-tungland/MVVMFluent</PackageProjectUrl>
     <RepositoryUrl>https://github.com/kristoffer-tungland/MVVMFluent</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>MVVM;WPF;Fluent</PackageTags>
-    <Description>MVVMFluent.WPF extends MVVMFluent with windowing helpers and dialog view-model contracts for WPF applications.</Description>
+    <PackageTags>MVVM;Validation;Fluent</PackageTags>
+    <Description>Additional fluent validation helpers for MVVMFluent view models.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

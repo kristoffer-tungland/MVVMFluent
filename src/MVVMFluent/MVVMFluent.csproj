@@ -1,18 +1,32 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <langversion>9</langversion>
+    <LangVersion>10.0</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <NuSpecFile>MVVMFluent.nuspec</NuSpecFile>
     <Version>0.0.2</Version>
-    <NuspecProperties>version=$(Version)</NuspecProperties>
+    <AssemblyName>MVVMFluent.$(Version)</AssemblyName>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>MVVMFluent</PackageId>
+    <Authors>Kristoffer Tungland</Authors>
+    <Company>MVVMFluent</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/kristoffer-tungland/MVVMFluent</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kristoffer-tungland/MVVMFluent</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>MVVM;WPF;Fluent</PackageTags>
+    <Description>MVVMFluent is a lightweight library that simplifies MVVM view models with fluent setters and commands.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
   </ItemGroup>
 
-
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="" />
+    <None Include="../../LICENSE.txt" Pack="true" PackagePath="" />
+  </ItemGroup>
 </Project>
