@@ -1,4 +1,3 @@
-﻿using MVVMFluent.WPF;
 using System.Windows;
 
 namespace MVVMFluent.NugetDemo;
@@ -15,7 +14,7 @@ internal class MainViewModel : ValidationViewModelBase
     public string? Input
     {
         get => Get<string?>();
-        set => When(value).Required().Notify(AsyncCommand, OkCommand).Set();
+        set => When(value).HasValue().Notify(AsyncCommand, OkCommand).Set();
     }
 
     public FluentCommand OkCommand => Do(() => ShowDialog(Input)).IfValid(nameof(Input));
