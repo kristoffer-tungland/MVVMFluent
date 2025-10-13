@@ -110,25 +110,26 @@ public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IVali
 
     /// <summary>
     /// Creates a validation fluent setter builder for configuring property change behavior with validation rules.
+    /// <example>
+    /// <code>
+    /// public string Email
+    /// {
+    ///     get =&gt; Get&lt;string&gt;();
+    ///     set =&gt; When(value)
+    ///         .HasValue("Email is required")
+    ///         .Validate(v =&gt; v?.Contains('@') == true, "Email must contain '@'")
+    ///         .Notify(SaveCommand)
+    ///         .Set();
+    /// }
+    /// </code>
+    /// </example>
     /// </summary>
     /// <typeparam name="TValue">The type of the property value.</typeparam>
     /// <param name="value">The new value to set for the property.</param>
     /// <param name="propertyName">The name of the property. Automatically captured from the caller member name.</param>
     /// <returns>An <see cref="IValidationFluentSetter{TValue}"/> that allows configuring validation rules, change callbacks, and notifications before committing the value.</returns>
     /// <exception cref="ArgumentNullException">Thrown when the property name cannot be determined.</exception>
-    /// <example>
-    /// <code>
-    /// public string Email
-    /// {
-    ///     get => Get&lt;string&gt;();
-    ///     set => When(value)
-    ///         .HasValue("Email is required")
-    ///         .Validate(v => v?.Contains('@') == true, "Email must contain '@'")
-    ///         .Notify(SaveCommand)
-    ///         .Set();
-    /// }
-    /// </code>
-    /// </example>
+
     protected IValidationFluentSetter<TValue> When<TValue>(TValue value, [CallerMemberName] string? propertyName = null)
     {
         if (propertyName == null)

@@ -4,6 +4,7 @@
     <LangVersion>10.0</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Version>0.0.2</Version>
     <AssemblyName>MVVMFluent.$(Version)</AssemblyName>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
