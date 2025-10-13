@@ -22,15 +22,27 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
     private bool _isRunning;
     private int _progress;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AsyncFluentCommand"/> class.
+    /// </summary>
     public AsyncFluentCommand()
     {
         PropertyChanged += OnSelfPropertyChanged;
     }
 
+    /// <summary>
+    /// Occurs when changes affecting the ability of the command to execute should be re-evaluated.
+    /// </summary>
     public event EventHandler? CanExecuteChanged;
 
+    /// <summary>
+    /// Occurs when a property value on the command changes.
+    /// </summary>
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    /// <summary>
+    /// Gets a value indicating whether the command is currently running.
+    /// </summary>
     public bool IsRunning
     {
         get => _isRunning;
@@ -47,6 +59,9 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         }
     }
 
+    /// <summary>
+    /// Gets or sets the progress of the command execution as a percentage between 0 and 100.
+    /// </summary>
     public int Progress
     {
         get => _progress;
@@ -62,10 +77,19 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         }
     }
 
+    /// <summary>
+    /// Gets the view model that owns this command, if any.
+    /// </summary>
     public IFluentSetterViewModel? Owner { get; private set; }
 
+    /// <summary>
+    /// Gets a value indicating whether the command has been fully configured and built.
+    /// </summary>
     public bool IsBuilt { get; private set; }
 
+    /// <summary>
+    /// Gets a command that can be used to cancel the currently running operation.
+    /// </summary>
     public IFluentCommand CancelCommand
     {
         get
@@ -81,12 +105,26 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         }
     }
 
+    /// <summary>
+    /// Gets the <see cref="CancellationTokenSource"/> that controls cancellation for the current execution, or <see langword="null"/> if the command is idle.
+    /// </summary>
     public CancellationTokenSource? CancellationTokenSource => _cts;
 
+    /// <summary>
+    /// Gets a value indicating whether cancellation has been requested for the current execution.
+    /// </summary>
     public bool IsCancellationRequested => _cts?.IsCancellationRequested ?? false;
 
+    /// <summary>
+    /// Marks the command as built, preventing further configuration changes.
+    /// </summary>
     public void MarkAsBuilt() => IsBuilt = true;
 
+    /// <summary>
+    /// Sets the delegate that will be executed when the command runs.
+    /// </summary>
+    /// <param name="execute">The delegate to execute. Must not be <see langword="null"/>.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="execute"/> is <see langword="null"/>.</exception>
     protected void SetExecute(Func<object?, CancellationToken, Task> execute)
     {
         if (execute == null)
@@ -96,6 +134,13 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         _execute = execute;
     }
 
+    /// <summary>
+    /// Creates a new asynchronous command that executes the specified delegate without a parameter or cancellation token.
+    /// </summary>
+    /// <param name="execute">The delegate to execute.</param>
+    /// <param name="owner">The owning view model, if any.</param>
+    /// <returns>A configured <see cref="AsyncFluentCommand"/> instance.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="execute"/> is <see langword="null"/>.</exception>
     public static AsyncFluentCommand Do(Func<Task> execute, IFluentSetterViewModel? owner)
     {
         if (execute == null)
@@ -108,6 +153,13 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         return command;
     }
 
+    /// <summary>
+    /// Creates a new asynchronous command that executes the specified delegate with a parameter but without a cancellation token.
+    /// </summary>
+    /// <param name="execute">The delegate to execute.</param>
+    /// <param name="owner">The owning view model, if any.</param>
+    /// <returns>A configured <see cref="AsyncFluentCommand"/> instance.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="execute"/> is <see langword="null"/>.</exception>
     public static AsyncFluentCommand Do(Func<object?, Task> execute, IFluentSetterViewModel? owner)
     {
         if (execute == null)
@@ -120,6 +172,13 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         return command;
     }
 
+    /// <summary>
+    /// Creates a new asynchronous command that executes the specified delegate with a parameter and cancellation token.
+    /// </summary>
+    /// <param name="execute">The delegate to execute.</param>
+    /// <param name="owner">The owning view model, if any.</param>
+    /// <returns>A configured <see cref="AsyncFluentCommand"/> instance.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="execute"/> is <see langword="null"/>.</exception>
     public static AsyncFluentCommand Do(Func<object?, CancellationToken, Task> execute, IFluentSetterViewModel? owner)
     {
         if (execute == null)
@@ -132,8 +191,19 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         return command;
     }
 
+    /// <summary>
+    /// Configures the command to only execute when the supplied predicate evaluates to <see langword="true"/>.
+    /// </summary>
+    /// <param name="canExecute">The predicate that determines whether the command can execute.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand"/> instance.</returns>
     public AsyncFluentCommand If(Func<bool> canExecute) => If(_ => canExecute());
 
+    /// <summary>
+    /// Configures the command to only execute when the supplied predicate evaluates to <see langword="true"/> for the given parameter.
+    /// </summary>
+    /// <param name="canExecute">The predicate that determines whether the command can execute.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand"/> instance.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="canExecute"/> is <see langword="null"/>.</exception>
     public AsyncFluentCommand If(Func<object?, bool> canExecute)
     {
         if (IsBuilt)
@@ -149,6 +219,11 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         return this;
     }
 
+    /// <summary>
+    /// Configures the command to only execute when the specified properties are free of validation errors.
+    /// </summary>
+    /// <param name="propertyNames">The property names that must be valid before the command can execute.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand"/> instance.</returns>
     public AsyncFluentCommand IfValid(params string[] propertyNames)
     {
         EnsurePropertyNames(propertyNames);
@@ -161,6 +236,12 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         return If(() => HasNoErrors(propertyNames));
     }
 
+    /// <summary>
+    /// Registers an exception handler that is invoked when the asynchronous execution fails.
+    /// </summary>
+    /// <param name="handle">The exception handler to invoke.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand"/> instance.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="handle"/> is <see langword="null"/>.</exception>
     public AsyncFluentCommand Handle(Action<Exception> handle)
     {
         if (IsBuilt)
@@ -176,6 +257,11 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         return this;
     }
 
+    /// <summary>
+    /// Configures whether continuations should capture the current synchronization context.
+    /// </summary>
+    /// <param name="continueOnCapturedContext">A value indicating whether to resume on the captured context.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand"/> instance.</returns>
     public AsyncFluentCommand ConfigureAwait(bool continueOnCapturedContext)
     {
         if (IsBuilt)
@@ -187,9 +273,20 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         return this;
     }
 
+    /// <summary>
+    /// Determines whether the command can execute using the supplied parameter.
+    /// </summary>
+    /// <param name="parameter">The parameter to evaluate.</param>
+    /// <returns><see langword="true"/> if the command can execute; otherwise, <see langword="false"/>.</returns>
     public bool CanExecute(object? parameter)
         => !IsRunning && (_canExecute?.Invoke(parameter) ?? true);
 
+    /// <summary>
+    /// Executes the command asynchronously using the supplied parameter.
+    /// </summary>
+    /// <param name="parameter">The parameter to pass to the execution delegate.</param>
+    /// <returns>A task that represents the asynchronous execution.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when no execution delegate has been configured.</exception>
     public async Task ExecuteAsync(object? parameter)
     {
         if (_execute == null)
@@ -220,11 +317,18 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         }
     }
 
+    /// <summary>
+    /// Executes the command asynchronously and observes exceptions using the configured handler.
+    /// </summary>
+    /// <param name="parameter">The parameter to pass to the execution delegate.</param>
     public void Execute(object? parameter)
     {
         ExecuteAsync(parameter).RunWithExceptionHandling(ex => _onException?.Invoke(ex), _continueOnCapturedContext);
     }
 
+    /// <summary>
+    /// Requests cancellation of the current operation, if one is running.
+    /// </summary>
     public void Cancel()
     {
         if (IsRunning && _cts is { IsCancellationRequested: false })
@@ -233,11 +337,20 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         }
     }
 
+    /// <summary>
+    /// Reports progress by setting the <see cref="Progress"/> property directly.
+    /// </summary>
+    /// <param name="progress">The progress percentage between 0 and 100.</param>
     public void ReportProgress(int progress)
     {
         Progress = progress;
     }
 
+    /// <summary>
+    /// Reports progress by calculating the completion percentage from the supplied values.
+    /// </summary>
+    /// <param name="current">The current progress value.</param>
+    /// <param name="total">The total progress value.</param>
     public void ReportProgress(int current, int total)
     {
         if (total <= 0)
@@ -250,8 +363,16 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         ReportProgress((int)(ratio * 100));
     }
 
+    /// <summary>
+    /// Raises the <see cref="CanExecuteChanged"/> event to notify listeners that the command's execution state may have changed.
+    /// </summary>
     public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 
+    /// <summary>
+    /// Raises the <see cref="PropertyChanged"/> event for the specified property.
+    /// </summary>
+    /// <param name="propertyName">The name of the property that changed.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="propertyName"/> is <see langword="null"/>.</exception>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         if (propertyName == null)
@@ -308,12 +429,19 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         }
     }
 
+    /// <summary>
+    /// Releases the resources used by the command.
+    /// </summary>
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// Releases the unmanaged resources used by the command and optionally disposes of managed resources.
+    /// </summary>
+    /// <param name="disposing">A value indicating whether to dispose managed resources.</param>
     protected virtual void Dispose(bool disposing)
     {
         if (_disposed)
@@ -353,15 +481,27 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
     private bool _isRunning;
     private int _progress;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AsyncFluentCommand{T}"/> class.
+    /// </summary>
     public AsyncFluentCommand()
     {
         PropertyChanged += OnSelfPropertyChanged;
     }
 
+    /// <summary>
+    /// Occurs when changes affecting the ability of the command to execute should be re-evaluated.
+    /// </summary>
     public event EventHandler? CanExecuteChanged;
 
+    /// <summary>
+    /// Occurs when a property value on the command changes.
+    /// </summary>
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    /// <summary>
+    /// Gets a value indicating whether the command is currently running.
+    /// </summary>
     public bool IsRunning
     {
         get => _isRunning;
@@ -378,6 +518,9 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         }
     }
 
+    /// <summary>
+    /// Gets or sets the progress of the command execution as a percentage between 0 and 100.
+    /// </summary>
     public int Progress
     {
         get => _progress;
@@ -393,10 +536,19 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         }
     }
 
+    /// <summary>
+    /// Gets the view model that owns this command, if any.
+    /// </summary>
     public IFluentSetterViewModel? Owner { get; private set; }
 
+    /// <summary>
+    /// Gets a value indicating whether the command has been fully configured and built.
+    /// </summary>
     public bool IsBuilt { get; private set; }
 
+    /// <summary>
+    /// Gets a command that can be used to cancel the currently running operation.
+    /// </summary>
     public IFluentCommand CancelCommand
     {
         get
@@ -412,12 +564,26 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         }
     }
 
+    /// <summary>
+    /// Gets the <see cref="CancellationTokenSource"/> that controls cancellation for the current execution, or <see langword="null"/> if the command is idle.
+    /// </summary>
     public CancellationTokenSource? CancellationTokenSource => _cts;
 
+    /// <summary>
+    /// Gets a value indicating whether cancellation has been requested for the current execution.
+    /// </summary>
     public bool IsCancellationRequested => _cts?.IsCancellationRequested ?? false;
 
+    /// <summary>
+    /// Marks the command as built, preventing further configuration changes.
+    /// </summary>
     public void MarkAsBuilt() => IsBuilt = true;
 
+    /// <summary>
+    /// Sets the delegate that will be executed when the command runs.
+    /// </summary>
+    /// <param name="execute">The delegate to execute.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="execute"/> is <see langword="null"/>.</exception>
     protected void SetExecute(Func<T?, CancellationToken, Task> execute)
     {
         if (execute == null)
@@ -427,6 +593,13 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         _execute = execute;
     }
 
+    /// <summary>
+    /// Creates a new asynchronous command that executes the specified delegate.
+    /// </summary>
+    /// <param name="execute">The delegate to execute.</param>
+    /// <param name="owner">The owning view model, if any.</param>
+    /// <returns>A configured <see cref="AsyncFluentCommand{T}"/> instance.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="execute"/> is <see langword="null"/>.</exception>
     public static AsyncFluentCommand<T> Do(Func<T?, Task> execute, IFluentSetterViewModel? owner)
     {
         if (execute == null)
@@ -435,10 +608,17 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         }
 
         var command = new AsyncFluentCommand<T> { Owner = owner };
-        command.SetExecute((value, _) => execute(value));
+        command.SetExecute((o, _) => execute(o));
         return command;
     }
 
+    /// <summary>
+    /// Creates a new asynchronous command that executes the specified delegate with cancellation support.
+    /// </summary>
+    /// <param name="execute">The delegate to execute.</param>
+    /// <param name="owner">The owning view model, if any.</param>
+    /// <returns>A configured <see cref="AsyncFluentCommand{T}"/> instance.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="execute"/> is <see langword="null"/>.</exception>
     public static AsyncFluentCommand<T> Do(Func<T?, CancellationToken, Task> execute, IFluentSetterViewModel? owner)
     {
         if (execute == null)
@@ -451,8 +631,19 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         return command;
     }
 
+    /// <summary>
+    /// Configures the command to only execute when the supplied predicate evaluates to <see langword="true"/>.
+    /// </summary>
+    /// <param name="canExecute">The predicate that determines whether the command can execute.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand{T}"/> instance.</returns>
     public AsyncFluentCommand<T> If(Func<bool> canExecute) => If(_ => canExecute());
 
+    /// <summary>
+    /// Configures the command to only execute when the supplied predicate evaluates to <see langword="true"/> for the given parameter.
+    /// </summary>
+    /// <param name="canExecute">The predicate that determines whether the command can execute.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand{T}"/> instance.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="canExecute"/> is <see langword="null"/>.</exception>
     public AsyncFluentCommand<T> If(Func<T?, bool> canExecute)
     {
         if (IsBuilt)
@@ -468,6 +659,11 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         return this;
     }
 
+    /// <summary>
+    /// Configures the command to only execute when the specified properties are free of validation errors.
+    /// </summary>
+    /// <param name="propertyNames">The property names that must be valid before the command can execute.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand{T}"/> instance.</returns>
     public AsyncFluentCommand<T> IfValid(params string[] propertyNames)
     {
         EnsurePropertyNames(propertyNames);
@@ -480,6 +676,12 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         return If(() => HasNoErrors(propertyNames));
     }
 
+    /// <summary>
+    /// Registers an exception handler that is invoked when the asynchronous execution fails.
+    /// </summary>
+    /// <param name="handle">The exception handler to invoke.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand{T}"/> instance.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="handle"/> is <see langword="null"/>.</exception>
     public AsyncFluentCommand<T> Handle(Action<Exception> handle)
     {
         if (IsBuilt)
@@ -495,6 +697,11 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         return this;
     }
 
+    /// <summary>
+    /// Configures whether continuations should capture the current synchronization context.
+    /// </summary>
+    /// <param name="continueOnCapturedContext">A value indicating whether to resume on the captured context.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand{T}"/> instance.</returns>
     public AsyncFluentCommand<T> ConfigureAwait(bool continueOnCapturedContext)
     {
         if (IsBuilt)
@@ -506,17 +713,33 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         return this;
     }
 
+    /// <summary>
+    /// Determines whether the command can execute using the supplied parameter.
+    /// </summary>
+    /// <param name="parameter">The parameter to evaluate.</param>
+    /// <returns><see langword="true"/> if the command can execute; otherwise, <see langword="false"/>.</returns>
     public bool CanExecute(object? parameter)
     {
         var typedParameter = parameter is T value ? value : default;
         return !IsRunning && (_canExecute?.Invoke(typedParameter) ?? true);
     }
 
+    /// <summary>
+    /// Executes the command asynchronously using the supplied parameter, converting it to the expected type when possible.
+    /// </summary>
+    /// <param name="parameter">The parameter to pass to the execution delegate.</param>
+    /// <returns>A task that represents the asynchronous execution.</returns>
     public Task ExecuteAsync(object? parameter)
     {
         return ExecuteAsync(parameter is T value ? value : default);
     }
 
+    /// <summary>
+    /// Executes the command asynchronously using the supplied strongly-typed parameter.
+    /// </summary>
+    /// <param name="parameter">The strongly-typed parameter to pass to the execution delegate.</param>
+    /// <returns>A task that represents the asynchronous execution.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when no execution delegate has been configured.</exception>
     public async Task ExecuteAsync(T? parameter)
     {
         if (_execute == null)
@@ -547,11 +770,18 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         }
     }
 
+    /// <summary>
+    /// Executes the command asynchronously and observes exceptions using the configured handler.
+    /// </summary>
+    /// <param name="parameter">The parameter to pass to the execution delegate.</param>
     public void Execute(object? parameter)
     {
         ExecuteAsync(parameter).RunWithExceptionHandling(ex => _onException?.Invoke(ex), _continueOnCapturedContext);
     }
 
+    /// <summary>
+    /// Requests cancellation of the current operation, if one is running.
+    /// </summary>
     public void Cancel()
     {
         if (IsRunning && _cts is { IsCancellationRequested: false })
@@ -560,11 +790,20 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         }
     }
 
+    /// <summary>
+    /// Reports progress by setting the <see cref="Progress"/> property directly.
+    /// </summary>
+    /// <param name="progress">The progress percentage between 0 and 100.</param>
     public void ReportProgress(int progress)
     {
         Progress = progress;
     }
 
+    /// <summary>
+    /// Reports progress by calculating the completion percentage from the supplied values.
+    /// </summary>
+    /// <param name="current">The current progress value.</param>
+    /// <param name="total">The total progress value.</param>
     public void ReportProgress(int current, int total)
     {
         if (total <= 0)
@@ -577,8 +816,16 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         ReportProgress((int)(ratio * 100));
     }
 
+    /// <summary>
+    /// Raises the <see cref="CanExecuteChanged"/> event to notify listeners that the command's execution state may have changed.
+    /// </summary>
     public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 
+    /// <summary>
+    /// Raises the <see cref="PropertyChanged"/> event for the specified property.
+    /// </summary>
+    /// <param name="propertyName">The name of the property that changed.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="propertyName"/> is <see langword="null"/>.</exception>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         if (propertyName == null)
@@ -635,12 +882,19 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
         }
     }
 
+    /// <summary>
+    /// Releases the resources used by the command.
+    /// </summary>
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// Releases the unmanaged resources used by the command and optionally disposes of managed resources.
+    /// </summary>
+    /// <param name="disposing">A value indicating whether to dispose managed resources.</param>
     protected virtual void Dispose(bool disposing)
     {
         if (_disposed)
