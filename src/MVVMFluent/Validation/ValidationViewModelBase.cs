@@ -44,6 +44,11 @@ public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IVali
         HasErrors = builders.Any(x => x.HasErrors);
     }
 
+    public void RaiseErrorsChanged(string? propertyName)
+    {
+        ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+    }
+
     public IEnumerable GetErrors(string? propertyName)
     {
         if (string.IsNullOrWhiteSpace(propertyName))
@@ -51,9 +56,7 @@ public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IVali
             return GetAllErrors();
         }
 
-        var resolvedPropertyName = propertyName!;
-
-        return GetFluentSetterBuilder(resolvedPropertyName) is IValidationFluentSetterBuilder validationBuilder
+        return GetFluentSetterBuilder(propertyName!) is IValidationFluentSetterBuilder validationBuilder
             ? validationBuilder.GetErrors()
             : Array.Empty<string>();
     }
@@ -65,14 +68,12 @@ public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IVali
             throw new ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
         }
 
-        var resolvedPropertyName = propertyName!;
-
-        if (GetFluentSetterBuilder(resolvedPropertyName) is not IValidationFluentSetterBuilder validationBuilder)
+        if (GetFluentSetterBuilder(propertyName!) is not IValidationFluentSetterBuilder validationBuilder)
         {
             return;
         }
 
-        var property = GetType().GetProperty(resolvedPropertyName);
+        var property = GetType().GetProperty(propertyName!);
         var value = property?.GetValue(this);
 
         validationBuilder.CheckForErrors(value);
@@ -91,14 +92,14 @@ public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IVali
             return existingBuilder;
         }
 
-        return new ValidationFluentSetterBuilder<TValue>(value, this, propertyName, ErrorsChanged);
+        return new ValidationFluentSetterBuilder<TValue>(value, this, propertyName);
     }
 
     private IEnumerable GetAllErrors()
     {
         return _builderStore.Values
             .OfType<IValidationFluentSetterBuilder>()
-            .Select(builder => builder.GetErrors());
+            .SelectMany(builder => builder.GetErrors().OfType<string>());
     }
 
     protected override void DisposeInternal()

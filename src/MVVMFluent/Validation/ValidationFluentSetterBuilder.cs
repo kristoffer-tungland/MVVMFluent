@@ -1,23 +1,19 @@
 using System;
 using System.Collections;
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace MVVMFluent;
 
 public class ValidationFluentSetterBuilder<TValue> : FluentSetterBuilder<TValue>, IValidationFluentSetterBuilder
 {
-    private readonly EventHandler<DataErrorsChangedEventArgs>? _errorsChanged;
-
-    public ValidationFluentSetterBuilder(TValue value, IValidationFluentSetterViewModel fluentSetterViewModel, [CallerMemberName] string? propertyName = null, EventHandler<DataErrorsChangedEventArgs>? errorsChanged = null)
+    public ValidationFluentSetterBuilder(TValue value, IValidationFluentSetterViewModel fluentSetterViewModel, [CallerMemberName] string? propertyName = null)
         : base(value, fluentSetterViewModel, propertyName)
     {
-        _errorsChanged = errorsChanged;
     }
 
     protected override FluentSetter<TValue> CreateFluentSetter(IFluentSetterViewModel fluentSetterViewModel, string? propertyName)
     {
-        return new ValidationFluentSetter<TValue>((IValidationFluentSetterViewModel)fluentSetterViewModel, propertyName, _errorsChanged);
+        return new ValidationFluentSetter<TValue>((IValidationFluentSetterViewModel)fluentSetterViewModel, propertyName);
     }
 
     private ValidationFluentSetter<TValue> ValidationSetter => (ValidationFluentSetter<TValue>)FluentSetterInstance;
@@ -46,14 +42,9 @@ public class ValidationFluentSetterBuilder<TValue> : FluentSetterBuilder<TValue>
         return this;
     }
 
-    public ValidationFluentSetterBuilder<TValue> HasValue(string? errorMessage = default)
+    public ValidationFluentSetterBuilder<TValue> HasValue(string? errorMessage = null)
     {
         return Validate(new RequiredValidationRule(errorMessage));
-    }
-
-    public override void Set()
-    {
-        base.Set();
     }
 
     public void CheckForErrors(object? value)

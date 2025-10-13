@@ -26,7 +26,7 @@ internal class MainViewModel : ValidationViewModelBase
 
     public bool ThrowException { get => Get(false); set => Set(value); }
 
-    public AsyncFluentCommand AsyncFluentCommand => Do(ShowDialogAsync).If(CanExecute).Handle(HandleException).ConfigureAwait(false);
+    public AsyncFluentCommand AsyncFluentCommand => Do(ShowDialogAsync).If(CanExecute).Handle(HandleException);
 
     private void HandleException(Exception exception)
     {
