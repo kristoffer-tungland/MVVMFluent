@@ -47,6 +47,12 @@ public class ValidationFluentSetterBuilder<TValue> : FluentSetterBuilder<TValue>
         return Validate(new RequiredValidationRule(errorMessage));
     }
 
+    [Obsolete("Use HasValue instead.")]
+    public ValidationFluentSetterBuilder<TValue> Required(string? errorMessage = null)
+    {
+        return HasValue(errorMessage);
+    }
+
     public void CheckForErrors(object? value)
     {
         ValidationSetter.CheckForErrors(value);
