@@ -7,6 +7,10 @@ on:
   pull_request:
     branches: [ "master" ]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
 
@@ -32,6 +36,9 @@ jobs:
     
     - name: Authenticate GitHub Packages
       run: dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --name "github" --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" --store-password-in-clear-text
+
+    - name: Set API key for GitHub NuGet source
+      run: dotnet nuget setapikey "${{ secrets.GITHUB_TOKEN }}" --source "github"
 
     - name: Restore dependencies
       run: dotnet restore
