@@ -36,7 +36,7 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Authenticate GitHub Packages
-      run: dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --name "github" --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" --store-password-in-clear-text
+      run: dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --name "github" --username "${{ github.actor }}" --password "${{ secrets.Token }}" --store-password-in-clear-text
 
     - name: Restore dependencies
       run: dotnet restore
@@ -54,7 +54,7 @@ jobs:
       name: "Automatic Release"
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        repo_token: "${{ secrets.Token }}"
         automatic_release_tag: "v${{ steps.version.outputs.version }}"
         prerelease: false
         title: "Release ${{ steps.version.outputs.version }}"
@@ -64,4 +64,4 @@ jobs:
           **/*.nupkg
 
     - name: Push Package to GitHub
-      run: dotnet nuget push **/*.nupkg --source github --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate
+      run: dotnet nuget push **/*.nupkg --source github --api-key "${{ secrets.Token }}" --skip-duplicate
