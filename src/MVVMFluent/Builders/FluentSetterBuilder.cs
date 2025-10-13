@@ -1,12 +1,14 @@
+using MVVMFluent.Interfaces;
 using System;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
-namespace MVVMFluent;
+namespace MVVMFluent.Builders;
 
 /// <summary>
 /// Represents a builder for a fluent setter, see <see cref="FluentSetter{TValue}"/>.
 /// </summary>
-public class FluentSetterBuilder<TValue> : FluentSetterBuilderBase<TValue>, IFluentSetterBuilder
+public class FluentSetterBuilder<TValue> : FluentSetterBuilderBase<TValue>, IFluentSetterBuilder, IFluentSetter<TValue>
 {
     private readonly FluentSetter<TValue> _fluentSetter;
 
@@ -25,7 +27,9 @@ public class FluentSetterBuilder<TValue> : FluentSetterBuilderBase<TValue>, IFlu
 
     protected FluentSetter<TValue> FluentSetterInstance => _fluentSetter;
 
-    public FluentSetterBuilder<TValue> Changing(Action action)
+    public string PropertyName => FluentSetterInstance.PropertyName;
+
+    public IFluentSetter<TValue> Changing(Action action)
     {
         if (!IsBuilt)
         {
@@ -35,7 +39,7 @@ public class FluentSetterBuilder<TValue> : FluentSetterBuilderBase<TValue>, IFlu
         return this;
     }
 
-    public FluentSetterBuilder<TValue> Changing(Action<TValue?> action)
+    public IFluentSetter<TValue> Changing(Action<TValue?> action)
     {
         if (!IsBuilt)
         {
@@ -45,7 +49,7 @@ public class FluentSetterBuilder<TValue> : FluentSetterBuilderBase<TValue>, IFlu
         return this;
     }
 
-    public FluentSetterBuilder<TValue> Changing(Action<TValue?, TValue?> action)
+    public IFluentSetter<TValue> Changing(Action<TValue?, TValue?> action)
     {
         if (!IsBuilt)
         {
@@ -55,7 +59,7 @@ public class FluentSetterBuilder<TValue> : FluentSetterBuilderBase<TValue>, IFlu
         return this;
     }
 
-    public FluentSetterBuilder<TValue> Changed(Action<TValue?> action)
+    public IFluentSetter<TValue> Changed(Action<TValue?> action)
     {
         if (!IsBuilt)
         {
@@ -65,7 +69,7 @@ public class FluentSetterBuilder<TValue> : FluentSetterBuilderBase<TValue>, IFlu
         return this;
     }
 
-    public FluentSetterBuilder<TValue> Changed(Action action)
+    public IFluentSetter<TValue> Changed(Action action)
     {
         if (!IsBuilt)
         {
@@ -75,7 +79,7 @@ public class FluentSetterBuilder<TValue> : FluentSetterBuilderBase<TValue>, IFlu
         return this;
     }
 
-    public FluentSetterBuilder<TValue> Changed(Action<TValue?, TValue?> action)
+    public IFluentSetter<TValue> Changed(Action<TValue?, TValue?> action)
     {
         if (!IsBuilt)
         {
@@ -85,7 +89,7 @@ public class FluentSetterBuilder<TValue> : FluentSetterBuilderBase<TValue>, IFlu
         return this;
     }
 
-    public FluentSetterBuilder<TValue> Notify(params IFluentCommand[] commands)
+    public IFluentSetter<TValue> Notify(params ICommand[] commands)
     {
         if (!IsBuilt)
         {
@@ -95,7 +99,7 @@ public class FluentSetterBuilder<TValue> : FluentSetterBuilderBase<TValue>, IFlu
         return this;
     }
 
-    public FluentSetterBuilder<TValue> Notify(params string[] propertyNames)
+    public IFluentSetter<TValue> Notify(params string[] propertyNames)
     {
         if (!IsBuilt)
         {
@@ -103,5 +107,11 @@ public class FluentSetterBuilder<TValue> : FluentSetterBuilderBase<TValue>, IFlu
         }
 
         return this;
+    }
+
+    public override void Set()
+    {
+        FluentSetterInstance.SetValue(_valueToSet);
+        base.Set();
     }
 }

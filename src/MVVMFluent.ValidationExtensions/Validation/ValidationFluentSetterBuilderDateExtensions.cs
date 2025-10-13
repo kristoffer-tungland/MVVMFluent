@@ -1,3 +1,4 @@
+using MVVMFluent.Interfaces;
 using System;
 
 namespace MVVMFluent;
@@ -10,8 +11,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="builder">The validation builder.</param>
     /// <param name="errorMessage">An optional error message to display when the date is not in the past.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<DateTime?> IsDateInPast(
-        this ValidationFluentSetterBuilder<DateTime?> builder,
+    public static IValidationFluentSetter<DateTime?> IsDateInPast(
+        this IValidationFluentSetter<DateTime?> builder,
         string? errorMessage = null)
     {
         EnsureBuilder(builder, nameof(builder));
@@ -27,8 +28,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="builder">The validation builder.</param>
     /// <param name="errorMessage">An optional error message to display when the date is not in the future.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<DateTime?> IsDateInFuture(
-        this ValidationFluentSetterBuilder<DateTime?> builder,
+    public static IValidationFluentSetter<DateTime?> IsDateInFuture(
+        this IValidationFluentSetter<DateTime?> builder,
         string? errorMessage = null)
     {
         EnsureBuilder(builder, nameof(builder));
@@ -46,8 +47,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="maximum">The inclusive maximum date.</param>
     /// <param name="errorMessage">An optional error message to display when the date is outside the range.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<DateTime?> IsDateBetween(
-        this ValidationFluentSetterBuilder<DateTime?> builder,
+    public static IValidationFluentSetter<DateTime?> IsDateBetween(
+        this IValidationFluentSetter<DateTime?> builder,
         DateTime minimum,
         DateTime maximum,
         string? errorMessage = null)
@@ -74,8 +75,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="minimum">The inclusive minimum date.</param>
     /// <param name="errorMessage">An optional error message to display when the date is too early.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<DateTime?> IsOnOrAfter(
-        this ValidationFluentSetterBuilder<DateTime?> builder,
+    public static IValidationFluentSetter<DateTime?> IsOnOrAfter(
+        this IValidationFluentSetter<DateTime?> builder,
         DateTime minimum,
         string? errorMessage = null)
     {
@@ -94,8 +95,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="maximum">The inclusive maximum date.</param>
     /// <param name="errorMessage">An optional error message to display when the date is too late.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<DateTime?> IsOnOrBefore(
-        this ValidationFluentSetterBuilder<DateTime?> builder,
+    public static IValidationFluentSetter<DateTime?> IsOnOrBefore(
+        this IValidationFluentSetter<DateTime?> builder,
         DateTime maximum,
         string? errorMessage = null)
     {

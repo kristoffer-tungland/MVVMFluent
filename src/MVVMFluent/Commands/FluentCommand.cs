@@ -1,18 +1,7 @@
+using MVVMFluent.Interfaces;
 using System;
-using System.Windows.Input;
 
-namespace MVVMFluent;
-
-public interface IFluentCommand : ICommand, IDisposable
-{
-    void MarkAsBuilt();
-
-    bool IsBuilt { get; }
-
-    IFluentSetterViewModel? Owner { get; }
-
-    void RaiseCanExecuteChanged();
-}
+namespace MVVMFluent.Commands;
 
 /// <summary>
 /// Represents a command that can be executed and has an associated execution condition.
@@ -81,6 +70,18 @@ public class FluentCommand : IFluentCommand
         return this;
     }
 
+    public FluentCommand IfValid(params string[] propertyNames)
+    {
+        EnsurePropertyNames(propertyNames);
+
+        if (IsBuilt)
+        {
+            return this;
+        }
+
+        return If(() => HasNoErrors(propertyNames));
+    }
+
     public bool CanExecute(object? parameter) => _canExecute?.Invoke(parameter) ?? true;
 
     public void Execute(object? parameter)
@@ -103,6 +104,47 @@ public class FluentCommand : IFluentCommand
 
     public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 
+    private bool HasNoErrors(string[] propertyNames)
+    {
+        if (Owner is not IValidationFluentSetterViewModel viewModel)
+        {
+            throw new InvalidOperationException(
+                "Validation commands require a view model derived from ValidationViewModelBase.");
+        }
+
+        foreach (var propertyName in propertyNames)
+        {
+            var builder = viewModel.GetFluentSetterBuilder(propertyName) as IValidationFluentSetterBuilder;
+            if (builder?.HasErrors == true)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static void EnsurePropertyNames(string[] propertyNames)
+    {
+        if (propertyNames == null)
+        {
+            throw new ArgumentNullException(nameof(propertyNames));
+        }
+
+        if (propertyNames.Length == 0)
+        {
+            throw new ArgumentException("At least one property name must be provided.", nameof(propertyNames));
+        }
+
+        foreach (var propertyName in propertyNames)
+        {
+            if (string.IsNullOrWhiteSpace(propertyName))
+            {
+                throw new ArgumentException("Property names cannot be null or whitespace.", nameof(propertyNames));
+            }
+        }
+    }
+
     public virtual void Dispose()
     {
         if (_disposed)
@@ -122,7 +164,7 @@ public class FluentCommand : IFluentCommand
 /// Represents a command that can be executed with a parameter of type <typeparamref name="T"/>.
 /// </summary>
 /// <typeparam name="T">The type of the parameter used by the command.</typeparam>
-public class FluentCommand<T> : IFluentCommand
+public class FluentCommand<T> : IFluentCommand<T>
 {
     private Action<T?>? _execute;
     private Func<T?, bool>? _canExecute;
@@ -174,6 +216,18 @@ public class FluentCommand<T> : IFluentCommand
         return this;
     }
 
+    public FluentCommand<T> IfValid(params string[] propertyNames)
+    {
+        EnsurePropertyNames(propertyNames);
+
+        if (IsBuilt)
+        {
+            return this;
+        }
+
+        return If(() => HasNoErrors(propertyNames));
+    }
+
     public bool CanExecute(object? parameter)
     {
         return _canExecute?.Invoke(parameter is T typed ? typed : default) ?? true;
@@ -195,6 +249,47 @@ public class FluentCommand<T> : IFluentCommand
     }
 
     public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+
+    private bool HasNoErrors(string[] propertyNames)
+    {
+        if (Owner is not IValidationFluentSetterViewModel viewModel)
+        {
+            throw new InvalidOperationException(
+                "Validation commands require a view model derived from ValidationViewModelBase.");
+        }
+
+        foreach (var propertyName in propertyNames)
+        {
+            var builder = viewModel.GetFluentSetterBuilder(propertyName) as IValidationFluentSetterBuilder;
+            if (builder?.HasErrors == true)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static void EnsurePropertyNames(string[] propertyNames)
+    {
+        if (propertyNames == null)
+        {
+            throw new ArgumentNullException(nameof(propertyNames));
+        }
+
+        if (propertyNames.Length == 0)
+        {
+            throw new ArgumentException("At least one property name must be provided.", nameof(propertyNames));
+        }
+
+        foreach (var propertyName in propertyNames)
+        {
+            if (string.IsNullOrWhiteSpace(propertyName))
+            {
+                throw new ArgumentException("Property names cannot be null or whitespace.", nameof(propertyNames));
+            }
+        }
+    }
 
     public virtual void Dispose()
     {

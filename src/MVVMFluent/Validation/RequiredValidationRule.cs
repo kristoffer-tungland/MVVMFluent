@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 
-namespace MVVMFluent;
+namespace MVVMFluent.Validation;
 
 public class RequiredValidationRule : ValidationRule
 {

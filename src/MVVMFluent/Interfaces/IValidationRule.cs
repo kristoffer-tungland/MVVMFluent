@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 
-namespace MVVMFluent;
+namespace MVVMFluent.Interfaces;
 
 /// <summary>
 /// Defines a reusable validation rule that can be applied to a value.

@@ -1,3 +1,4 @@
+using MVVMFluent.Interfaces;
 using System;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
@@ -12,8 +13,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="builder">The validation builder.</param>
     /// <param name="errorMessage">An optional error message to surface when the value is not a valid email.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<string?> IsEmail(
-        this ValidationFluentSetterBuilder<string?> builder,
+    public static IValidationFluentSetter<string?> IsEmail(
+        this IValidationFluentSetter<string?> builder,
         string? errorMessage = null)
     {
         EnsureBuilder(builder, nameof(builder));
@@ -29,8 +30,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="builder">The validation builder.</param>
     /// <param name="errorMessage">An optional error message to surface when the value is not a URL.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<string?> IsUrl(
-        this ValidationFluentSetterBuilder<string?> builder,
+    public static IValidationFluentSetter<string?> IsUrl(
+        this IValidationFluentSetter<string?> builder,
         string? errorMessage = null)
     {
         EnsureBuilder(builder, nameof(builder));
@@ -47,8 +48,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="minimumLength">The minimum number of characters required.</param>
     /// <param name="errorMessage">An optional error message to display when the value is too short.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<string?> HasMinLength(
-        this ValidationFluentSetterBuilder<string?> builder,
+    public static IValidationFluentSetter<string?> HasMinLength(
+        this IValidationFluentSetter<string?> builder,
         int minimumLength,
         string? errorMessage = null)
     {
@@ -71,8 +72,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="maximumLength">The maximum number of allowed characters.</param>
     /// <param name="errorMessage">An optional error message to display when the value is too long.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<string?> HasMaxLength(
-        this ValidationFluentSetterBuilder<string?> builder,
+    public static IValidationFluentSetter<string?> HasMaxLength(
+        this IValidationFluentSetter<string?> builder,
         int maximumLength,
         string? errorMessage = null)
     {
@@ -96,8 +97,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="maximumLength">The inclusive maximum length.</param>
     /// <param name="errorMessage">An optional error message to display when the value falls outside the range.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<string?> HasLengthBetween(
-        this ValidationFluentSetterBuilder<string?> builder,
+    public static IValidationFluentSetter<string?> HasLengthBetween(
+        this IValidationFluentSetter<string?> builder,
         int minimumLength,
         int maximumLength,
         string? errorMessage = null)
@@ -127,8 +128,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="options">Regex options applied to the pattern.</param>
     /// <param name="errorMessage">An optional error message to display when the value fails to match.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<string?> MatchesPattern(
-        this ValidationFluentSetterBuilder<string?> builder,
+    public static IValidationFluentSetter<string?> MatchesPattern(
+        this IValidationFluentSetter<string?> builder,
         string pattern,
         RegexOptions options = RegexOptions.None,
         string? errorMessage = null)

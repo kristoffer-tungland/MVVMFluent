@@ -1,3 +1,5 @@
+using MVVMFluent.Interfaces;
+using MVVMFluent.Validation;
 using System;
 using System.Collections;
 using System.Collections.ObjectModel;
@@ -12,12 +14,25 @@ namespace MVVMFluent;
 /// </summary>
 public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IValidationFluentSetterViewModel
 {
+    /// <summary>
+    /// Gets a value indicating whether any properties in this view model have validation errors.
+    /// </summary>
     public bool HasErrors { get; private set; }
 
+    /// <summary>
+    /// Gets a collection of formatted validation error messages for all properties that have errors.
+    /// Each error is formatted as "PropertyName: error message".
+    /// </summary>
     public ObservableCollection<string> Errors { get; } = new();
 
+    /// <summary>
+    /// Occurs when the validation errors have changed for a property or for the entire entity.
+    /// </summary>
     public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidationViewModelBase"/> class.
+    /// </summary>
     protected ValidationViewModelBase()
     {
         ErrorsChanged += ErrorsChangedHandler;
@@ -44,11 +59,20 @@ public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IVali
         HasErrors = builders.Any(x => x.HasErrors);
     }
 
+    /// <summary>
+    /// Raises the <see cref="ErrorsChanged"/> event for the specified property.
+    /// </summary>
+    /// <param name="propertyName">The name of the property whose errors have changed.</param>
     public void RaiseErrorsChanged(string? propertyName)
     {
         ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
     }
 
+    /// <summary>
+    /// Gets the validation errors for the specified property.
+    /// </summary>
+    /// <param name="propertyName">The name of the property to retrieve errors for, or null to get all errors.</param>
+    /// <returns>An enumerable collection of error messages for the specified property.</returns>
     public IEnumerable GetErrors(string? propertyName)
     {
         if (string.IsNullOrWhiteSpace(propertyName))
@@ -61,6 +85,11 @@ public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IVali
             : Array.Empty<string>();
     }
 
+    /// <summary>
+    /// Manually triggers validation for the specified property using its current value.
+    /// </summary>
+    /// <param name="propertyName">The name of the property to validate.</param>
+    /// <exception cref="ArgumentNullException">Thrown when propertyName is null or empty.</exception>
     public void CheckErrorsFor(string? propertyName)
     {
         if (string.IsNullOrWhiteSpace(propertyName))
@@ -79,7 +108,28 @@ public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IVali
         validationBuilder.CheckForErrors(value);
     }
 
-    protected ValidationFluentSetterBuilder<TValue> When<TValue>(TValue value, [CallerMemberName] string? propertyName = null)
+    /// <summary>
+    /// Creates a validation fluent setter builder for configuring property change behavior with validation rules.
+    /// </summary>
+    /// <typeparam name="TValue">The type of the property value.</typeparam>
+    /// <param name="value">The new value to set for the property.</param>
+    /// <param name="propertyName">The name of the property. Automatically captured from the caller member name.</param>
+    /// <returns>An <see cref="IValidationFluentSetter{TValue}"/> that allows configuring validation rules, change callbacks, and notifications before committing the value.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when the property name cannot be determined.</exception>
+    /// <example>
+    /// <code>
+    /// public string Email
+    /// {
+    ///     get => Get&lt;string&gt;();
+    ///     set => When(value)
+    ///         .HasValue("Email is required")
+    ///         .Validate(v => v?.Contains('@') == true, "Email must contain '@'")
+    ///         .Notify(SaveCommand)
+    ///         .Set();
+    /// }
+    /// </code>
+    /// </example>
+    protected IValidationFluentSetter<TValue> When<TValue>(TValue value, [CallerMemberName] string? propertyName = null)
     {
         if (propertyName == null)
         {
@@ -102,6 +152,9 @@ public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IVali
             .SelectMany(builder => builder.GetErrors().OfType<string>());
     }
 
+    /// <summary>
+    /// Disposes resources used by this view model, including unsubscribing from the ErrorsChanged event.
+    /// </summary>
     protected override void DisposeInternal()
     {
         ErrorsChanged -= ErrorsChangedHandler;

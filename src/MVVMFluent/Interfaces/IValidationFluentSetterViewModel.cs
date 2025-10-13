@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace MVVMFluent;
+namespace MVVMFluent.Interfaces;
 
 public interface IValidationFluentSetterViewModel : IFluentSetterViewModel, INotifyDataErrorInfo
 {

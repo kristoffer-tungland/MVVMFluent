@@ -1,31 +1,11 @@
+using MVVMFluent.Interfaces;
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MVVMFluent;
-
-public interface IAsyncFluentCommand : IFluentCommand
-{
-    bool IsRunning { get; }
-
-    int Progress { get; set; }
-
-    void ReportProgress(int progress);
-
-    void ReportProgress(int current, int total);
-
-    FluentCommand CancelCommand { get; }
-
-    bool IsCancellationRequested { get; }
-
-    CancellationTokenSource? CancellationTokenSource { get; }
-
-    Task ExecuteAsync(object? parameter);
-
-    void Cancel();
-}
+namespace MVVMFluent.Commands;
 
 /// <summary>
 /// Represents an asynchronous command that supports cancellation and tracks execution state.
@@ -86,7 +66,7 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
 
     public bool IsBuilt { get; private set; }
 
-    public FluentCommand CancelCommand
+    public IFluentCommand CancelCommand
     {
         get
         {
@@ -167,6 +147,18 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         }
         _canExecute = canExecute;
         return this;
+    }
+
+    public AsyncFluentCommand IfValid(params string[] propertyNames)
+    {
+        EnsurePropertyNames(propertyNames);
+
+        if (IsBuilt)
+        {
+            return this;
+        }
+
+        return If(() => HasNoErrors(propertyNames));
     }
 
     public AsyncFluentCommand Handle(Action<Exception> handle)
@@ -275,6 +267,47 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
         _cancelCommand?.RaiseCanExecuteChanged();
     }
 
+    private bool HasNoErrors(string[] propertyNames)
+    {
+        if (Owner is not IValidationFluentSetterViewModel viewModel)
+        {
+            throw new InvalidOperationException(
+                "Validation commands require a view model derived from ValidationViewModelBase.");
+        }
+
+        foreach (var propertyName in propertyNames)
+        {
+            var builder = viewModel.GetFluentSetterBuilder(propertyName) as IValidationFluentSetterBuilder;
+            if (builder?.HasErrors == true)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static void EnsurePropertyNames(string[] propertyNames)
+    {
+        if (propertyNames == null)
+        {
+            throw new ArgumentNullException(nameof(propertyNames));
+        }
+
+        if (propertyNames.Length == 0)
+        {
+            throw new ArgumentException("At least one property name must be provided.", nameof(propertyNames));
+        }
+
+        foreach (var propertyName in propertyNames)
+        {
+            if (string.IsNullOrWhiteSpace(propertyName))
+            {
+                throw new ArgumentException("Property names cannot be null or whitespace.", nameof(propertyNames));
+            }
+        }
+    }
+
     public void Dispose()
     {
         Dispose(true);
@@ -308,7 +341,7 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
 /// <summary>
 /// Represents an asynchronous command that supports cancellation and tracks execution state, with a generic parameter.
 /// </summary>
-public class AsyncFluentCommand<T> : IAsyncFluentCommand, INotifyPropertyChanged, IDisposable
+public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChanged, IDisposable
 {
     private Func<T?, CancellationToken, Task>? _execute;
     private Func<T?, bool>? _canExecute;
@@ -364,7 +397,7 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand, INotifyPropertyChanged
 
     public bool IsBuilt { get; private set; }
 
-    public FluentCommand CancelCommand
+    public IFluentCommand CancelCommand
     {
         get
         {
@@ -433,6 +466,18 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand, INotifyPropertyChanged
         }
         _canExecute = canExecute;
         return this;
+    }
+
+    public AsyncFluentCommand<T> IfValid(params string[] propertyNames)
+    {
+        EnsurePropertyNames(propertyNames);
+
+        if (IsBuilt)
+        {
+            return this;
+        }
+
+        return If(() => HasNoErrors(propertyNames));
     }
 
     public AsyncFluentCommand<T> Handle(Action<Exception> handle)
@@ -547,6 +592,47 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand, INotifyPropertyChanged
     private void OnSelfPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         _cancelCommand?.RaiseCanExecuteChanged();
+    }
+
+    private bool HasNoErrors(string[] propertyNames)
+    {
+        if (Owner is not IValidationFluentSetterViewModel viewModel)
+        {
+            throw new InvalidOperationException(
+                "Validation commands require a view model derived from ValidationViewModelBase.");
+        }
+
+        foreach (var propertyName in propertyNames)
+        {
+            var builder = viewModel.GetFluentSetterBuilder(propertyName) as IValidationFluentSetterBuilder;
+            if (builder?.HasErrors == true)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static void EnsurePropertyNames(string[] propertyNames)
+    {
+        if (propertyNames == null)
+        {
+            throw new ArgumentNullException(nameof(propertyNames));
+        }
+
+        if (propertyNames.Length == 0)
+        {
+            throw new ArgumentException("At least one property name must be provided.", nameof(propertyNames));
+        }
+
+        foreach (var propertyName in propertyNames)
+        {
+            if (string.IsNullOrWhiteSpace(propertyName))
+            {
+                throw new ArgumentException("Property names cannot be null or whitespace.", nameof(propertyNames));
+            }
+        }
     }
 
     public void Dispose()

@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace MVVMFluent;
+namespace MVVMFluent.Interfaces;
 
 public interface IValidationFluentSetterBuilder : IFluentSetterBuilder
 {

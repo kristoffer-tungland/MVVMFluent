@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Input;
 
 namespace MVVMFluent.Demo;
 
@@ -17,7 +18,7 @@ internal class MainViewModel : ValidationViewModelBase
         set => When(value).HasValue().Notify(AsyncFluentCommand, OkCommand).Set();
     }
 
-    public FluentCommand OkCommand => Do(() => ShowDialog(Input)).IfValid(nameof(Input));
+    public ICommand OkCommand => Do(() => ShowDialog(Input)).IfValid(nameof(Input));
 
     private bool CanExecute()
     {
@@ -26,7 +27,7 @@ internal class MainViewModel : ValidationViewModelBase
 
     public bool ThrowException { get => Get(false); set => Set(value); }
 
-    public AsyncFluentCommand AsyncFluentCommand => Do(ShowDialogAsync).If(CanExecute).Handle(HandleException);
+    public IAsyncFluentCommand AsyncFluentCommand => Do(ShowDialogAsync).If(CanExecute).Handle(HandleException);
 
     private void HandleException(Exception exception)
     {
@@ -53,7 +54,7 @@ internal class MainViewModel : ValidationViewModelBase
         ShowDialog(Input);
     }
 
-    public FluentCommand<string> HelpCommand => Do<string>(ShowDialog);
+    public IFluentCommand<string> HelpCommand => Do<string>(ShowDialog);
 
     private void ShowDialog(string? input)
     {

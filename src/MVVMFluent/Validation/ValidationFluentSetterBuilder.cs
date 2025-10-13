@@ -1,10 +1,12 @@
+using MVVMFluent.Builders;
+using MVVMFluent.Interfaces;
 using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
 
-namespace MVVMFluent;
+namespace MVVMFluent.Validation;
 
-public class ValidationFluentSetterBuilder<TValue> : FluentSetterBuilder<TValue>, IValidationFluentSetterBuilder
+public class ValidationFluentSetterBuilder<TValue> : FluentSetterBuilder<TValue>, IValidationFluentSetterBuilder, IValidationFluentSetter<TValue>
 {
     public ValidationFluentSetterBuilder(TValue value, IValidationFluentSetterViewModel fluentSetterViewModel, [CallerMemberName] string? propertyName = null)
         : base(value, fluentSetterViewModel, propertyName)
@@ -22,7 +24,7 @@ public class ValidationFluentSetterBuilder<TValue> : FluentSetterBuilder<TValue>
 
     public IEnumerable GetErrors() => ValidationSetter.GetErrors();
 
-    public ValidationFluentSetterBuilder<TValue> Validate(params IValidationRule[] rules)
+    public IValidationFluentSetter<TValue> Validate(params IValidationRule[] rules)
     {
         if (!IsBuilt)
         {
@@ -32,7 +34,7 @@ public class ValidationFluentSetterBuilder<TValue> : FluentSetterBuilder<TValue>
         return this;
     }
 
-    public ValidationFluentSetterBuilder<TValue> Validate(Func<TValue?, bool> validationFunction, string? errorMessage)
+    public IValidationFluentSetter<TValue> Validate(Func<TValue?, bool> validationFunction, string? errorMessage)
     {
         if (!IsBuilt)
         {
@@ -42,13 +44,13 @@ public class ValidationFluentSetterBuilder<TValue> : FluentSetterBuilder<TValue>
         return this;
     }
 
-    public ValidationFluentSetterBuilder<TValue> HasValue(string? errorMessage = null)
+    public IValidationFluentSetter<TValue> HasValue(string? errorMessage = null)
     {
         return Validate(new RequiredValidationRule(errorMessage));
     }
 
     [Obsolete("Use HasValue instead.")]
-    public ValidationFluentSetterBuilder<TValue> Required(string? errorMessage = null)
+    public IValidationFluentSetter<TValue> Required(string? errorMessage = null)
     {
         return HasValue(errorMessage);
     }

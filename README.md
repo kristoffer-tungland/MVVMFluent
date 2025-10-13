@@ -1,11 +1,12 @@
 # MVVMFluent
 
-MVVMFluent is a lightweight .NET library that helps you build MVVM view models with fluent property setters, declarative command builders, and optional validation support. The library now ships as a compiled NuGet package (targeting `netstandard2.0`) with a versioned assembly name, so it can be referenced from classic applications that require distinct assembly identities.
+MVVMFluent is a lightweight .NET library that helps you build MVVM view models with fluent property setters, declarative command builders, and optional validation support. The library ships as a compiled NuGet package (targeting `netstandard2.0`) with a clean interface-based API that separates implementation details from the public contract.
 
 ## Features
 - **Fluent property setters** &mdash; Compose `Changing`, `Changed`, and `Notify` behaviors with a fluent API before committing values back to the backing store.
-- **Command builders** &mdash; Generate `FluentCommand` and `FluentCommand<T>` instances directly from your view model, keeping command wiring and `CanExecute` logic close to the properties that depend on them.
-- **Async command support** &mdash; Use `AsyncFluentCommand` / `AsyncFluentCommand<T>` to handle cancellable asynchronous work, expose an auto-wired `CancelCommand`, and surface progress updates through `INotifyPropertyChanged`.
+- **Interface-based design** &mdash; Work with `IFluentSetter<T>` and `IValidationFluentSetter<T>` interfaces instead of concrete implementations, making your code more testable and maintainable.
+- **Command builders** &mdash; Generate `IFluentCommand` and `IFluentCommand<T>` instances directly from your view model, keeping command wiring and `CanExecute` logic close to the properties that depend on them.
+- **Async command support** &mdash; Use `IAsyncFluentCommand` / `IAsyncFluentCommand<T>` to handle cancellable asynchronous work, expose an auto-wired `CancelCommand`, and surface progress updates through `INotifyPropertyChanged`.
 - **Validation pipeline** &mdash; Opt-in to `ValidationViewModelBase` to compose validation rules (such as `HasValue` or custom `Validate` callbacks) that keep the `Errors` collection and `HasErrors` flag in sync with your UI.
 - **Extended validation helpers** &mdash; Reference `MVVMFluent.ValidationExtensions` for ready-to-use rules like `IsEmail`, `IsUrl`, `HasLengthBetween`, and date or range guards.
 - **Deterministic cleanup** &mdash; View model, command, and builder implementations implement `IDisposable` where appropriate to avoid self-referencing leaks when commands are re-evaluated or builders are cached.
@@ -19,9 +20,20 @@ dotnet add package MVVMFluent
 
 The package embeds the project README and license so IDE package managers surface the latest documentation.
 
+## Architecture
+
+The library follows a clean interface-based architecture:
+
+- **Interfaces** (`MVVMFluent.Interfaces`) - Public contracts for fluent setters, commands, and validation
+- **Commands** (`MVVMFluent.Commands`) - Internal implementations of `FluentCommand` and `AsyncFluentCommand`
+- **Builders** (`MVVMFluent.Builders`) - Internal implementations of fluent setter builders
+- **Validation** (`MVVMFluent.Validation`) - Validation-specific builders and rules
+
+When you use `When()` or `Do()` methods, they return interfaces (`IFluentSetter<T>`, `IFluentCommand`, etc.) rather than concrete types, allowing for better testability and encapsulation.
+
 ## Usage
 ### Fluent property setters
-`ViewModelBase` provides the `When` helper to build rich property setters without repetitive boilerplate:
+`ViewModelBase` provides the `When` helper to build rich property setters without repetitive boilerplate. The method returns an `IFluentSetter<T>` interface:
 
 ```csharp
 public class MyViewModel : ViewModelBase
@@ -44,12 +56,12 @@ public class MyViewModel : ViewModelBase
 The builder caches itself per-property, so subsequent setter invocations reuse the configured pipeline while updating the pending value.
 
 ### Commands
-Create commands directly from your view model via the `Do` helpers. Commands are cached per property and automatically expose `RaiseCanExecuteChanged`.
+Create commands directly from your view model via the `Do` helpers. Commands are cached per property and automatically expose `RaiseCanExecuteChanged`. All command methods return interfaces (`IFluentCommand`, `IFluentCommand<T>`, `IAsyncFluentCommand`, or `IAsyncFluentCommand<T>`):
 
 ```csharp
 public class MyViewModel : ViewModelBase
 {
-    public FluentCommand SaveCommand => Do(Save)
+    public IFluentCommand SaveCommand => Do(Save)
         .If(() => !string.IsNullOrEmpty(Name));
 
     private void Save()
@@ -59,15 +71,24 @@ public class MyViewModel : ViewModelBase
 }
 ```
 
-For parameterized scenarios, use `FluentCommand<T>` by calling `Do<T>`.
+For parameterized scenarios, use `IFluentCommand<T>` by calling `Do<T>`:
+
+```csharp
+public IFluentCommand<string> HelpCommand => Do<string>(ShowDialog);
+
+private void ShowDialog(string? input)
+{
+    MessageBox.Show(input);
+}
+```
 
 ### Asynchronous commands
-`AsyncFluentCommand` wraps cancellable asynchronous work and keeps UI bindings informed about execution state:
+`IAsyncFluentCommand` wraps cancellable asynchronous work and keeps UI bindings informed about execution state:
 
 ```csharp
 public class LoaderViewModel : ViewModelBase
 {
-    public AsyncFluentCommand LoadCommand => Do(async token =>
+    public IAsyncFluentCommand LoadCommand => Do(async token =>
         {
             for (var i = 0; i < 10; i++)
             {
@@ -78,14 +99,14 @@ public class LoaderViewModel : ViewModelBase
         })
         .Handle(ex => Console.WriteLine($"Load failed: {ex.Message}"));
 
-    public FluentCommand CancelLoadCommand => LoadCommand.CancelCommand;
+    public IFluentCommand CancelLoadCommand => LoadCommand.CancelCommand;
 }
 ```
 
 Bindings can observe the `IsRunning`, `Progress`, and `CancelCommand` members exposed by the async command.
 
 ### Validation
-Derive from `ValidationViewModelBase` to wire validation rules directly into your setters. `HasValue()` optionally accepts a custom error message so you can surface friendly text when the bound property is empty:
+Derive from `ValidationViewModelBase` to wire validation rules directly into your setters. The `When` method returns an `IValidationFluentSetter<T>` interface. `HasValue()` optionally accepts a custom error message so you can surface friendly text when the bound property is empty:
 
 ```csharp
 public class ContactViewModel : ValidationViewModelBase
@@ -102,7 +123,7 @@ public class ContactViewModel : ValidationViewModelBase
 
     public bool CanSave => !HasErrors;
 
-    public FluentCommand SaveCommand => Do(Save).If(() => CanSave);
+    public IFluentCommand SaveCommand => Do(Save).If(() => CanSave);
 
     private void Save()
     {
@@ -114,7 +135,7 @@ public class ContactViewModel : ValidationViewModelBase
 Validation errors propagate to the `Errors` collection, enabling XAML data binding to display aggregated messages.
 
 #### Extended validation extensions
-Install the optional `MVVMFluent.ValidationExtensions` package to get a catalog of reusable validation helpers that build on top of `ValidationFluentSetterBuilder<T>`:
+Install the optional `MVVMFluent.ValidationExtensions` package to get a catalog of reusable validation helpers that extend `IValidationFluentSetter<T>`:
 
 ```bash
 dotnet add package MVVMFluent.ValidationExtensions
@@ -155,7 +176,7 @@ public class RegistrationViewModel : ValidationViewModelBase
             .Set();
     }
 
-    public FluentCommand RegisterCommand => Do(Register).IfValid(nameof(Email), nameof(Age));
+    public IFluentCommand RegisterCommand => Do(Register).IfValid(nameof(Email), nameof(Age));
 
     private void Register()
     {
@@ -183,7 +204,7 @@ public class ContactViewModel : ValidationViewModelBase
             .Set();
     }
 
-    public FluentCommand SaveCommand => Do(Save).IfValid(nameof(Email));
+    public IFluentCommand SaveCommand => Do(Save).IfValid(nameof(Email));
 
     private void Save()
     {
@@ -194,6 +215,19 @@ public class ContactViewModel : ValidationViewModelBase
 
 The extensions enforce that the owning view model derives from `ValidationViewModelBase` and throw meaningful exceptions when the
 validated properties are missing or contain errors.
+
+## API Design
+
+MVVMFluent follows an interface-based design principle:
+
+- **View Models** work with interfaces: `IFluentSetter<T>`, `IValidationFluentSetter<T>`, `IFluentCommand`, `IAsyncFluentCommand`
+- **Implementations** are internal to the library in specific namespaces:
+  - `MVVMFluent.Commands` - Command implementations
+  - `MVVMFluent.Builders` - Builder implementations
+  - `MVVMFluent.Validation` - Validation-specific implementations
+- **Extensions** operate on interfaces, making them composable and testable
+
+This separation ensures your view models depend on stable contracts rather than implementation details.
 
 ## Contributing
 Contributions are welcome! Feel free to open issues or pull requests to improve this library.

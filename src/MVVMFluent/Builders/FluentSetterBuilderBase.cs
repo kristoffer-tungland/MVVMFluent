@@ -1,6 +1,7 @@
+using MVVMFluent.Interfaces;
 using System;
 
-namespace MVVMFluent;
+namespace MVVMFluent.Builders;
 
 /// <summary>
 /// Base class for fluent setter builders.
@@ -47,7 +48,7 @@ public abstract class FluentSetterBuilderBase<TValue> : IFluentSetterBuilder, ID
             Build();
         }
 
-        FluentSetter.Set(_valueToSet);
+        FluentSetter.Set();
     }
 
     public void Dispose()

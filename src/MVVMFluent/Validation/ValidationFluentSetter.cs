@@ -1,3 +1,5 @@
+using MVVMFluent.Builders;
+using MVVMFluent.Interfaces;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,9 +7,9 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 
-namespace MVVMFluent;
+namespace MVVMFluent.Validation;
 
-internal class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidationFluentSetter<TValue>
+public class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidationFluentSetter<TValue>
 {
     private readonly List<IValidationRule> _rules = new();
     private readonly IValidationFluentSetterViewModel _viewModel;
@@ -26,7 +28,7 @@ internal class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidatio
 
     public IEnumerable GetErrors() => Errors;
 
-    internal ValidationFluentSetter<TValue> Validate(params IValidationRule[] rules)
+    public IValidationFluentSetter<TValue> Validate(params IValidationRule[] rules)
     {
         if (rules == null)
         {
@@ -41,7 +43,7 @@ internal class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidatio
         return this;
     }
 
-    internal ValidationFluentSetter<TValue> Validate(Func<TValue?, bool> validationFunction, string? errorMessage)
+    public IValidationFluentSetter<TValue> Validate(Func<TValue?, bool> validationFunction, string? errorMessage)
     {
         if (validationFunction == null)
         {
@@ -51,6 +53,11 @@ internal class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidatio
         _validationFunction = validationFunction;
         _errorMessage = errorMessage;
         return this;
+    }
+
+    public IValidationFluentSetter<TValue> HasValue(string? errorMessage = null)
+    {
+        return Validate(new RequiredValidationRule(errorMessage));
     }
 
     internal ValidationFluentSetter<TValue> AddRule(IValidationRule rule)
@@ -68,10 +75,10 @@ internal class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidatio
         return this;
     }
 
-    public override void Set(TValue? value)
+    public override void Set()
     {
-        CheckForErrors(value);
-        base.Set(value);
+        CheckForErrors(ValueToSet);
+        base.Set();
     }
 
     public void CheckForErrors(TValue? valueToSet)

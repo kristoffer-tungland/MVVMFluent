@@ -1,3 +1,4 @@
+using MVVMFluent.Interfaces;
 using System;
 
 namespace MVVMFluent;
@@ -12,8 +13,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="maximumAge">The inclusive maximum age.</param>
     /// <param name="errorMessage">An optional error message to display when the value is out of range.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<int> IsAgeBetween(
-        this ValidationFluentSetterBuilder<int> builder,
+    public static IValidationFluentSetter<int> IsAgeBetween(
+        this IValidationFluentSetter<int> builder,
         int minimumAge,
         int maximumAge,
         string? errorMessage = null)
@@ -29,8 +30,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="maximumAge">The inclusive maximum age.</param>
     /// <param name="errorMessage">An optional error message to display when the value is out of range.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<int?> IsAgeBetween(
-        this ValidationFluentSetterBuilder<int?> builder,
+    public static IValidationFluentSetter<int?> IsAgeBetween(
+        this IValidationFluentSetter<int?> builder,
         int minimumAge,
         int maximumAge,
         string? errorMessage = null)
@@ -45,8 +46,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="minimumAge">The inclusive minimum age.</param>
     /// <param name="errorMessage">An optional error message to display when the value is below the minimum.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<int> IsMinimumAge(
-        this ValidationFluentSetterBuilder<int> builder,
+    public static IValidationFluentSetter<int> IsMinimumAge(
+        this IValidationFluentSetter<int> builder,
         int minimumAge,
         string? errorMessage = null)
     {
@@ -60,8 +61,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="minimumAge">The inclusive minimum age.</param>
     /// <param name="errorMessage">An optional error message to display when the value is below the minimum.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<int?> IsMinimumAge(
-        this ValidationFluentSetterBuilder<int?> builder,
+    public static IValidationFluentSetter<int?> IsMinimumAge(
+        this IValidationFluentSetter<int?> builder,
         int minimumAge,
         string? errorMessage = null)
     {
@@ -77,8 +78,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="maximum">The inclusive maximum value.</param>
     /// <param name="errorMessage">An optional error message to display when the value is out of range.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<T?> IsInRange<T>(
-        this ValidationFluentSetterBuilder<T?> builder,
+    public static IValidationFluentSetter<T?> IsInRange<T>(
+        this IValidationFluentSetter<T?> builder,
         T minimum,
         T maximum,
         string? errorMessage = null)
@@ -104,8 +105,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="threshold">The exclusive lower bound.</param>
     /// <param name="errorMessage">An optional error message to display when the value is not greater.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<T?> IsGreaterThan<T>(
-        this ValidationFluentSetterBuilder<T?> builder,
+    public static IValidationFluentSetter<T?> IsGreaterThan<T>(
+        this IValidationFluentSetter<T?> builder,
         T threshold,
         string? errorMessage = null)
         where T : struct, IComparable<T>
@@ -125,8 +126,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="threshold">The inclusive lower bound.</param>
     /// <param name="errorMessage">An optional error message to display when the value is below the threshold.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<T?> IsGreaterThanOrEqualTo<T>(
-        this ValidationFluentSetterBuilder<T?> builder,
+    public static IValidationFluentSetter<T?> IsGreaterThanOrEqualTo<T>(
+        this IValidationFluentSetter<T?> builder,
         T threshold,
         string? errorMessage = null)
         where T : struct, IComparable<T>
@@ -146,8 +147,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="threshold">The exclusive upper bound.</param>
     /// <param name="errorMessage">An optional error message to display when the value is not less.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<T?> IsLessThan<T>(
-        this ValidationFluentSetterBuilder<T?> builder,
+    public static IValidationFluentSetter<T?> IsLessThan<T>(
+        this IValidationFluentSetter<T?> builder,
         T threshold,
         string? errorMessage = null)
         where T : struct, IComparable<T>
@@ -167,8 +168,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
     /// <param name="threshold">The inclusive upper bound.</param>
     /// <param name="errorMessage">An optional error message to display when the value exceeds the threshold.</param>
     /// <returns>The supplied builder for fluent chaining.</returns>
-    public static ValidationFluentSetterBuilder<T?> IsLessThanOrEqualTo<T>(
-        this ValidationFluentSetterBuilder<T?> builder,
+    public static IValidationFluentSetter<T?> IsLessThanOrEqualTo<T>(
+        this IValidationFluentSetter<T?> builder,
         T threshold,
         string? errorMessage = null)
         where T : struct, IComparable<T>
@@ -180,8 +181,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
             ResolveErrorMessage(errorMessage, $"Value must be less than or equal to {threshold}."));
     }
 
-    private static ValidationFluentSetterBuilder<int> ValidateAgeRange(
-        this ValidationFluentSetterBuilder<int> builder,
+    private static IValidationFluentSetter<int> ValidateAgeRange(
+        this IValidationFluentSetter<int> builder,
         int minimumAge,
         int maximumAge,
         string? errorMessage)
@@ -194,8 +195,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
             errorMessage: ResolveErrorMessage(errorMessage, $"Value must represent an age between {minimumAge} and {maximumAge}."));
     }
 
-    private static ValidationFluentSetterBuilder<int?> ValidateAgeRange(
-        this ValidationFluentSetterBuilder<int?> builder,
+    private static IValidationFluentSetter<int?> ValidateAgeRange(
+        this IValidationFluentSetter<int?> builder,
         int minimumAge,
         int maximumAge,
         string? errorMessage)
@@ -208,8 +209,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
             ResolveErrorMessage(errorMessage, $"Value must represent an age between {minimumAge} and {maximumAge}."));
     }
 
-    private static ValidationFluentSetterBuilder<int> ValidateMinimumAge(
-        this ValidationFluentSetterBuilder<int> builder,
+    private static IValidationFluentSetter<int> ValidateMinimumAge(
+        this IValidationFluentSetter<int> builder,
         int minimumAge,
         string? errorMessage)
     {
@@ -221,8 +222,8 @@ public static partial class ValidationFluentSetterBuilderExtensions
             errorMessage: ResolveErrorMessage(errorMessage, $"Value must represent an age of at least {minimumAge}."));
     }
 
-    private static ValidationFluentSetterBuilder<int?> ValidateMinimumAge(
-        this ValidationFluentSetterBuilder<int?> builder,
+    private static IValidationFluentSetter<int?> ValidateMinimumAge(
+        this IValidationFluentSetter<int?> builder,
         int minimumAge,
         string? errorMessage)
     {

@@ -1,7 +1,9 @@
+using MVVMFluent.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Windows.Input;
 
-namespace MVVMFluent;
+namespace MVVMFluent.Builders;
 
 public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
 {
@@ -10,8 +12,9 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
     private Action<TValue?, TValue?>? _onChangingOldNew;
     private Action<TValue?>? _onChanged;
     private Action<TValue?, TValue?>? _onChangedOldNew;
-    private IEnumerable<IFluentCommand>? _commandsToReevaluate;
+    private IEnumerable<ICommand>? _commandsToReevaluate;
     private IEnumerable<string>? _propertiesToNotify;
+    private TValue? _valueToSet;
 
     public FluentSetter(IFluentSetterViewModel viewModel, string? propertyName)
     {
@@ -31,7 +34,11 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
 
     public string PropertyName { get; }
 
-    internal FluentSetter<TValue> Changing(Action action)
+    protected TValue? ValueToSet => _valueToSet;
+
+    internal void SetValue(TValue? value) => _valueToSet = value;
+
+    public IFluentSetter<TValue> Changing(Action action)
     {
         if (action == null)
         {
@@ -41,7 +48,7 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         return this;
     }
 
-    internal FluentSetter<TValue> Changing(Action<TValue?> action)
+    public IFluentSetter<TValue> Changing(Action<TValue?> action)
     {
         if (action == null)
         {
@@ -51,7 +58,7 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         return this;
     }
 
-    internal FluentSetter<TValue> Changing(Action<TValue?, TValue?> action)
+    public IFluentSetter<TValue> Changing(Action<TValue?, TValue?> action)
     {
         if (action == null)
         {
@@ -61,7 +68,7 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         return this;
     }
 
-    internal FluentSetter<TValue> Changed(Action action)
+    public IFluentSetter<TValue> Changed(Action action)
     {
         if (action == null)
         {
@@ -71,7 +78,7 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         return this;
     }
 
-    internal FluentSetter<TValue> Changed(Action<TValue?> action)
+    public IFluentSetter<TValue> Changed(Action<TValue?> action)
     {
         if (action == null)
         {
@@ -81,7 +88,7 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         return this;
     }
 
-    internal FluentSetter<TValue> Changed(Action<TValue?, TValue?> action)
+    public IFluentSetter<TValue> Changed(Action<TValue?, TValue?> action)
     {
         if (action == null)
         {
@@ -91,41 +98,61 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         return this;
     }
 
-    internal FluentSetter<TValue> Notify(params IFluentCommand[] commands)
+    public IFluentSetter<TValue> Notify(params ICommand[] commands)
     {
         _commandsToReevaluate = commands;
         return this;
     }
 
-    internal FluentSetter<TValue> Notify(params string[] propertyNames)
+    public IFluentSetter<TValue> Notify(params string[] propertyNames)
     {
         _propertiesToNotify = propertyNames;
         return this;
     }
 
-    public virtual void Set(TValue? value)
+    public virtual void Set()
     {
         var oldValue = _viewModel.GetFieldValue<TValue>(PropertyName);
-        var hasChanged = !EqualityComparer<TValue?>.Default.Equals(oldValue, value);
+        var hasChanged = !EqualityComparer<TValue?>.Default.Equals(oldValue, _valueToSet);
 
         if (!hasChanged)
         {
             return;
         }
 
-        _onChanging?.Invoke(value);
-        _onChangingOldNew?.Invoke(oldValue, value);
+        _onChanging?.Invoke(_valueToSet);
+        _onChangingOldNew?.Invoke(oldValue, _valueToSet);
 
-        _viewModel.SetFieldValue(PropertyName, value);
+        _viewModel.SetFieldValue(PropertyName, _valueToSet);
 
-        _onChanged?.Invoke(value);
-        _onChangedOldNew?.Invoke(oldValue, value);
+        _onChanged?.Invoke(_valueToSet);
+        _onChangedOldNew?.Invoke(oldValue, _valueToSet);
 
         if (_commandsToReevaluate != null)
         {
             foreach (var command in _commandsToReevaluate)
             {
-                command?.RaiseCanExecuteChanged();
+                if (command is IFluentCommand fluentCommand)
+                {
+                    fluentCommand.RaiseCanExecuteChanged();
+                    continue;
+                }
+
+                if (command is System.Windows.Input.ICommand cmd)
+                {
+                    var eventField = cmd.GetType().GetField("CanExecuteChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                    if (eventField != null)
+                    {
+                        var eventDelegate = eventField.GetValue(cmd) as System.MulticastDelegate;
+                        if (eventDelegate != null)
+                        {
+                            foreach (var handler in eventDelegate.GetInvocationList())
+                            {
+                                handler.Method.Invoke(handler.Target, new object[] { cmd, EventArgs.Empty });
+                            }
+                        }
+                    }
+                }
             }
         }
 
