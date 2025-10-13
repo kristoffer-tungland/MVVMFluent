@@ -9,6 +9,10 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
 
@@ -17,7 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-          fetch-depth: 0
+        fetch-depth: 0
 
     - name: Application Version
       id: version
@@ -31,8 +35,8 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: Authenticate nuget feed
-      run: dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+    - name: Authenticate GitHub Packages
+      run: dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --name "github" --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" --store-password-in-clear-text
 
     - name: Restore dependencies
       run: dotnet restore
@@ -44,7 +48,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal --configuration Release
     
     - name: Push Package to NuGet.org
-      run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}} -SkipDuplicate
+      run: dotnet nuget push **/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key "${{ secrets.NUGET_API_KEY }}" --skip-duplicate
 
     - id: "release"
       name: "Automatic Release"
@@ -57,7 +61,7 @@ jobs:
         files: |
           LICENSE.txt
           README.md
-          **\*.nupkg
+          **/*.nupkg
 
     - name: Push Package to GitHub
-      run: nuget push **\*.nupkg -Source github -SkipDuplicate
+      run: dotnet nuget push **/*.nupkg --source github --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate
