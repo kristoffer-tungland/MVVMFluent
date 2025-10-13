@@ -7,6 +7,10 @@ on:
   pull_request:
     branches: [ "master" ]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
 
@@ -30,8 +34,8 @@ jobs:
       with:
         dotnet-version: 8.0.x
     
-    - name: Authenticate nuget feed
-      run: dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+    - name: Authenticate GitHub Packages
+      run: dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --name "github" --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" --store-password-in-clear-text
 
     - name: Restore dependencies
       run: dotnet restore
@@ -43,4 +47,4 @@ jobs:
       run: dotnet test --no-build --verbosity normal --configuration Release
 
     - name: Push Package to GitHub
-      run: nuget push **\*.nupkg -Source github -SkipDuplicate
+      run: dotnet nuget push **/*.nupkg --source github --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate

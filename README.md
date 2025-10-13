@@ -9,6 +9,7 @@ MVVMFluent is a lightweight .NET library that helps you build MVVM view models w
 - **Async command support** &mdash; Use `IAsyncFluentCommand` / `IAsyncFluentCommand<T>` to handle cancellable asynchronous work, expose an auto-wired `CancelCommand`, and surface progress updates through `INotifyPropertyChanged`.
 - **Validation pipeline** &mdash; Opt-in to `ValidationViewModelBase` to compose validation rules (such as `HasValue` or custom `Validate` callbacks) that keep the `Errors` collection and `HasErrors` flag in sync with your UI.
 - **Extended validation helpers** &mdash; Reference `MVVMFluent.ValidationExtensions` for ready-to-use rules like `IsEmail`, `IsUrl`, `HasLengthBetween`, and date or range guards.
+- **Roslyn analyzer** &mdash; Automatically included analyzer that enforces proper usage of `.Set()` at the end of fluent setter chains to prevent subtle bugs.
 - **Deterministic cleanup** &mdash; View model, command, and builder implementations implement `IDisposable` where appropriate to avoid self-referencing leaks when commands are re-evaluated or builders are cached.
 
 ## Installation
@@ -18,7 +19,7 @@ Install the package from NuGet just like any other binary dependency:
 dotnet add package MVVMFluent
 ```
 
-The package embeds the project README and license so IDE package managers surface the latest documentation.
+The package embeds the project README and license so IDE package managers surface the latest documentation. A Roslyn analyzer is automatically included to help enforce proper usage patterns.
 
 ## Architecture
 
@@ -215,6 +216,40 @@ public class ContactViewModel : ValidationViewModelBase
 
 The extensions enforce that the owning view model derives from `ValidationViewModelBase` and throw meaningful exceptions when the
 validated properties are missing or contain errors.
+
+## Roslyn Analyzer
+
+MVVMFluent includes a Roslyn analyzer that enforces proper usage of fluent property setters. The analyzer ensures that every property setter using `When(value)` ends with a call to `.Set()`, which is crucial for committing values to the backing field and triggering property change notifications.
+
+### MVVMFLUENT001: Fluent setter must end with Set()
+
+**Severity**: Error
+
+**What it does**: Detects property setters that use `When(value)` but don't end with `.Set()`.
+
+**Why it matters**: Without `.Set()`, the value isn't committed to the backing field, and property change notifications aren't triggered, leading to subtle bugs where the UI doesn't update or validation doesn't run.
+
+**Example of violation**:
+```csharp
+public string Name
+{
+    get => Get<string>();
+    set => When(value).Validate(); // ? Error: Missing Set()!
+}
+```
+
+**Correct usage**:
+```csharp
+public string Name
+{
+    get => Get<string>();
+    set => When(value).Validate().Set(); // ? Correct
+}
+```
+
+**Code fix**: The analyzer includes an automatic code fix. Simply press `Ctrl+.` (or `Cmd+.` on Mac) when the error appears and select "Add .Set() to complete fluent setter" to automatically append `.Set()` to your fluent chain.
+
+The analyzer works with both `ViewModelBase` and `ValidationViewModelBase`, and supports both expression-bodied and block-bodied setters.
 
 ## API Design
 
