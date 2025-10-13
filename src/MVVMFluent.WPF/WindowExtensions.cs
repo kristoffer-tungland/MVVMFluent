@@ -1,5 +1,8 @@
 ﻿namespace MVVMFluent.WPF
 {
+    /// <summary>
+    /// Provides helper methods for wiring MVVM fluent view models to WPF windows.
+    /// </summary>
     public static class WindowExtensions
     {
         /// <summary>
@@ -34,7 +37,7 @@
         /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="window">The window to show.</param>
         /// <param name="resultViewModel">The view model that implements <see cref="IResultViewModel{TResult}"/>.</param>
-        /// <returns></returns>
+        /// <returns>The result value returned by the view model when the dialog closes successfully; otherwise, the default value for <typeparamref name="TResult"/>.</returns>
         public static TResult? ShowDialog<TResult>(this global::System.Windows.Window window, IResultViewModel<TResult> resultViewModel)
         {
             try
@@ -67,12 +70,13 @@
         /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="window">Window to get the result from.</param>
         /// <param name="resultViewModel">The view model that implements <see cref="IResultViewModel{TResult}"/>.</param>
-        /// <returns></returns>
+        /// <returns>The result value when the dialog has a positive outcome; otherwise, the default value for <typeparamref name="TResult"/>.</returns>
         public static TResult? GetResult<TResult>(this global::System.Windows.Window window, IResultViewModel<TResult> resultViewModel)
         {
             if (window.DialogResult == true)
             {
                 var result = resultViewModel.GetResult();
+                return result;
             }
 
             return default;

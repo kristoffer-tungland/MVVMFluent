@@ -24,6 +24,9 @@ public abstract class FluentSetterBuilderBase<TValue> : IFluentSetterBuilder, ID
         _valueToSet = valueToSet;
     }
 
+    /// <summary>
+    /// Stores the value that should be applied when the fluent setter runs.
+    /// </summary>
     protected TValue? _valueToSet;
 
     /// <summary>
