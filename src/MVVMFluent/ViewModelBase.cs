@@ -1,44 +1,48 @@
-﻿namespace MVVMFluent
+using MVVMFluent.Builders;
+using MVVMFluent.Interfaces;
+using System;
+using System.Runtime.CompilerServices;
+
+namespace MVVMFluent;
+
+/// <summary>
+/// Represents a base class for view models that provides property change notification and command creation.
+/// </summary>
+public abstract class ViewModelBase : FluentSetterViewModelBase
 {
     /// <summary>
-    /// Represents a base class for view models that provides property change notification and command creation.
+    /// Creates a fluent setter builder for configuring property change behavior.
     /// <example>
-    /// <code lang="csharp">
-    /// public class MainViewModel : ViewModelBase
+    /// <code><![CDATA[
+    /// public string Name
     /// {
-    ///     // Property with notification and default value
-    ///     public bool Enabled { get => Get(true); set => Set(value); }
-    ///     
-    ///     // Property that notifies the Ok command when changed
-    ///     public string? Input { get => Get&lt;string?&gt;(); set => When(value).Notify(Ok).Set(); }
-    ///     
-    ///     // FluentCommand
-    ///     public FluentCommand Ok => Do(() => MessageBox.Show(Input)).If(() => !string.IsNullOrWhiteSpace(Input));
+    ///     get => Get<string>();
+    ///     set => When(value)
+    ///         .Changed(() => Console.WriteLine("Name changed"))
+    ///         .Notify(SaveCommand)
+    ///         .Set();
     /// }
-    /// </code>
+    /// ]]></code>
     /// </example>
     /// </summary>
-    public abstract class ViewModelBase : FluentSetterViewModelBase
+    /// <typeparam name="TValue">The type of the property value.</typeparam>
+    /// <param name="value">The new value to set for the property.</param>
+    /// <param name="propertyName">The name of the property. Automatically captured from the caller member name.</param>
+    /// <returns>An <see cref="IFluentSetter{TValue}"/> that allows configuring change callbacks and notifications before committing the value.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when the property name cannot be determined.</exception>
+    protected IFluentSetter<TValue> When<TValue>(TValue value, [CallerMemberName] string? propertyName = null)
     {
-        /// <summary>
-        /// Creates a fluent setter for a property.
-        /// </summary>
-        /// <typeparam name="TValue">The type of the property.</typeparam>
-        /// <param name="value">The new value to set.</param>
-        /// <param name="propertyName">The name of the property being set.</param>
-        /// <returns>The fluent setter instance.</returns>
-        protected FluentSetterBuilder<TValue> When<TValue>(TValue value, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        if (propertyName == null)
         {
-            if (propertyName == null)
-                throw new global::System.ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
-
-            if (GetFluentSetterBuilder(propertyName) is FluentSetterBuilder<TValue> exsistingBuilder)
-            {
-                exsistingBuilder._intValueToSet(value);
-                return exsistingBuilder;
-            }
-
-            return new FluentSetterBuilder<TValue>(value, this, propertyName);
+            throw new ArgumentNullException(nameof(propertyName), "Not able to determine property name to set.");
         }
+
+        if (GetFluentSetterBuilder(propertyName) is FluentSetterBuilder<TValue> existingBuilder)
+        {
+            existingBuilder.ValueToSet(value);
+            return existingBuilder;
+        }
+
+        return new FluentSetterBuilder<TValue>(value, this, propertyName);
     }
 }

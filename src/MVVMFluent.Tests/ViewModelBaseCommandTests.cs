@@ -87,7 +87,7 @@ public class ViewModelBaseCommandTests
         Assert.False(didExecute);
     }
 
-    class CommandIfParameterTestViewModel(Action<object?> execute, Func<object, bool> canExecute) : ViewModelBase
+    class CommandIfParameterTestViewModel(Action<object?> execute, Func<object?, bool> canExecute) : ViewModelBase
     {
         public ICommand FluentCommand => Do(execute).If(canExecute);
     }
@@ -105,7 +105,7 @@ public class ViewModelBaseCommandTests
     [Fact]
     internal void DoIfWithParameter_WhenCanExecuteIsFalse_CannotExecute()
     {
-        bool canExecute(object obj) => false;
+        bool canExecute(object? obj) => false;
         void execute(object? obj) { }
         var viewModel = new CommandIfParameterTestViewModel(execute, canExecute);
         var result = viewModel.FluentCommand.CanExecute(null);
@@ -115,7 +115,7 @@ public class ViewModelBaseCommandTests
     [Fact]
     internal void DoIfWithParameter_WhenCanExecuteIsFalse_DoesNotExecute()
     {
-        bool canExecute(object obj) => false;
+        bool canExecute(object? obj) => false;
         var didExecute = false;
         void execute(object? obj) => didExecute = true;
         var viewModel = new CommandIfParameterTestViewModel(execute, canExecute);

@@ -1,33 +1,30 @@
-﻿using MVVMFluent.WPF;
 using System.Windows;
+using System.Windows.Input;
 
 namespace MVVMFluent.Demo;
 
 internal class MainViewModel : ValidationViewModelBase
 {
-    public MainViewModel()
-    {
-        Input = "Hello World";
-    }
-
     public bool Enable { get => Get(true); set => Set(value); }
+    public bool ThrowException { get => Get(false); set => Set(value); }
 
     public string? Input
     {
-        get => Get<string?>();
-        set => When(value).Required().Notify(AsyncFluentCommand, OkCommand).Set();
+        get => Get(defaultValue: "Hello World");
+        set => When(value)
+            .HasValue()
+            .HasMinLength(5, "Input must be at least 5 characters long")
+            .Notify(AsyncFluentCommand, OkCommand)
+            .Set();
     }
 
-    public FluentCommand OkCommand => Do(() => ShowDialog(Input)).IfValid(nameof(Input));
+    public ICommand OkCommand => Do(() => ShowDialog(Input)).IfValid(nameof(Input));
+    
+    public IFluentCommand<string> HelpCommand => Do<string>(ShowDialog);
 
-    private bool CanExecute()
-    {
-        return !string.IsNullOrWhiteSpace(Input);
-    }
-
-    public bool ThrowException { get => Get(false); set => Set(value); }
-
-    public AsyncFluentCommand AsyncFluentCommand => Do(ShowDialogAsync).If(CanExecute).Handle(HandleException).ConfigureAwait(false);
+    public IAsyncFluentCommand AsyncFluentCommand => Do(ShowDialogAsync)
+        .If(() => HasErrors == false)
+        .Handle(HandleException);
 
     private void HandleException(Exception exception)
     {
@@ -54,7 +51,6 @@ internal class MainViewModel : ValidationViewModelBase
         ShowDialog(Input);
     }
 
-    public FluentCommand<string> HelpCommand => Do<string>(ShowDialog);
 
     private void ShowDialog(string? input)
     {
