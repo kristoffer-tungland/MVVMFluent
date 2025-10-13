@@ -3,7 +3,6 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
-using Microsoft.CodeAnalysis.Testing.Verifiers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,7 +13,7 @@ public static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     where TCodeFix : CodeFixProvider, new()
 {
     public static DiagnosticResult Diagnostic(string diagnosticId)
-        => CSharpCodeFixVerifier<TAnalyzer, TCodeFix, XUnitVerifier>.Diagnostic(diagnosticId);
+        => new DiagnosticResult(diagnosticId, DiagnosticSeverity.Error);
 
     public static Task VerifyCodeFixAsync(string source, string fixedSource)
         => VerifyCodeFixAsync(source, DiagnosticResult.EmptyDiagnosticResults, fixedSource);
@@ -34,7 +33,7 @@ public static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         return test.RunAsync(CancellationToken.None);
     }
 
-    private class Test : CSharpCodeFixTest<TAnalyzer, TCodeFix, XUnitVerifier>
+    private class Test : CSharpCodeFixTest<TAnalyzer, TCodeFix, Microsoft.CodeAnalysis.Testing.DefaultVerifier>
     {
         public Test()
         {

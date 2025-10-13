@@ -17,7 +17,7 @@ public class TestViewModel : ViewModelBase
     public string Name
     {
         get => Get<string>() ?? string.Empty;
-        set => {|#0:When(value)|};
+        set => When(value);
     }
 }";
 
@@ -35,7 +35,7 @@ public class TestViewModel : ViewModelBase
 
         var expected = CSharpCodeFixVerifier<FluentSetterMustEndWithSetAnalyzer, FluentSetterMustEndWithSetCodeFixProvider>
             .Diagnostic(FluentSetterMustEndWithSetAnalyzer.DiagnosticId)
-            .WithLocation(0)
+            .WithSpan(9, 16, 9, 27)
             .WithMessage("Property setter using 'When(value)' must end with a call to 'Set()' to commit the value");
 
         await CSharpCodeFixVerifier<FluentSetterMustEndWithSetAnalyzer, FluentSetterMustEndWithSetCodeFixProvider>
@@ -53,7 +53,7 @@ public class TestViewModel : ValidationViewModelBase
     public string Email
     {
         get => Get<string>() ?? string.Empty;
-        set => {|#0:When(value).HasValue(""Email is required"")|};
+        set => When(value).HasValue(""Email is required"");
     }
 }";
 
@@ -71,7 +71,7 @@ public class TestViewModel : ValidationViewModelBase
 
         var expected = CSharpCodeFixVerifier<FluentSetterMustEndWithSetAnalyzer, FluentSetterMustEndWithSetCodeFixProvider>
             .Diagnostic(FluentSetterMustEndWithSetAnalyzer.DiagnosticId)
-            .WithLocation(0)
+            .WithSpan(9, 16, 9, 57)
             .WithMessage("Property setter using 'When(value)' must end with a call to 'Set()' to commit the value");
 
         await CSharpCodeFixVerifier<FluentSetterMustEndWithSetAnalyzer, FluentSetterMustEndWithSetCodeFixProvider>
@@ -89,9 +89,9 @@ public class TestViewModel : ViewModelBase
     public string Name
     {
         get => Get<string>() ?? string.Empty;
-        set => {|#0:When(value)
+        set => When(value)
             .Changing(() => System.Console.WriteLine(""Changing""))
-            .Changed(() => System.Console.WriteLine(""Changed""))|};
+            .Changed(() => System.Console.WriteLine(""Changed""));
     }
 }";
 
@@ -111,7 +111,7 @@ public class TestViewModel : ViewModelBase
 
         var expected = CSharpCodeFixVerifier<FluentSetterMustEndWithSetAnalyzer, FluentSetterMustEndWithSetCodeFixProvider>
             .Diagnostic(FluentSetterMustEndWithSetAnalyzer.DiagnosticId)
-            .WithLocation(0)
+            .WithSpan(9, 16, 11, 64)
             .WithMessage("Property setter using 'When(value)' must end with a call to 'Set()' to commit the value");
 
         await CSharpCodeFixVerifier<FluentSetterMustEndWithSetAnalyzer, FluentSetterMustEndWithSetCodeFixProvider>
@@ -131,7 +131,7 @@ public class TestViewModel : ViewModelBase
         get => Get<string>() ?? string.Empty;
         set
         {
-            {|#0:When(value).Changing(() => System.Console.WriteLine(""Changing""))|};
+            When(value).Changing(() => System.Console.WriteLine(""Changing""));
         }
     }
 }";
@@ -153,7 +153,7 @@ public class TestViewModel : ViewModelBase
 
         var expected = CSharpCodeFixVerifier<FluentSetterMustEndWithSetAnalyzer, FluentSetterMustEndWithSetCodeFixProvider>
             .Diagnostic(FluentSetterMustEndWithSetAnalyzer.DiagnosticId)
-            .WithLocation(0)
+            .WithSpan(11, 13, 11, 78)
             .WithMessage("Property setter using 'When(value)' must end with a call to 'Set()' to commit the value");
 
         await CSharpCodeFixVerifier<FluentSetterMustEndWithSetAnalyzer, FluentSetterMustEndWithSetCodeFixProvider>
