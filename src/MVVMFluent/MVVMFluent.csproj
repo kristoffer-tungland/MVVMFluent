@@ -30,4 +30,9 @@
     <None Include="../../README.md" Pack="true" PackagePath="" />
     <None Include="../../LICENSE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- Include the analyzer in the package -->
+    <ProjectReference Include="..\MVVMFluent.Analyzers\MVVMFluent.Analyzers.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+  </ItemGroup>
 </Project>
