@@ -5,6 +5,10 @@ using System.Windows.Input;
 
 namespace MVVMFluent.Builders;
 
+/// <summary>
+/// Provides fluent configuration for setting property values and invoking change notifications.
+/// </summary>
+/// <typeparam name="TValue">The type of the property value.</typeparam>
 public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
 {
     private readonly IFluentSetterViewModel _viewModel;
@@ -16,6 +20,12 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
     private IEnumerable<string>? _propertiesToNotify;
     private TValue? _valueToSet;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FluentSetter{TValue}"/> class.
+    /// </summary>
+    /// <param name="viewModel">The owning view model that stores property values.</param>
+    /// <param name="propertyName">The name of the property to update.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="viewModel"/> or <paramref name="propertyName"/> is <see langword="null"/>.</exception>
     public FluentSetter(IFluentSetterViewModel viewModel, string? propertyName)
     {
         if (propertyName == null)
@@ -32,12 +42,19 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         PropertyName = propertyName;
     }
 
+    /// <summary>
+    /// Gets the name of the property that this setter updates.
+    /// </summary>
     public string PropertyName { get; }
 
+    /// <summary>
+    /// Gets the value that will be assigned to the property when <see cref="Set"/> is called.
+    /// </summary>
     protected TValue? ValueToSet => _valueToSet;
 
     internal void SetValue(TValue? value) => _valueToSet = value;
 
+    /// <inheritdoc />
     public IFluentSetter<TValue> Changing(Action action)
     {
         if (action == null)
@@ -48,6 +65,7 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         return this;
     }
 
+    /// <inheritdoc />
     public IFluentSetter<TValue> Changing(Action<TValue?> action)
     {
         if (action == null)
@@ -58,6 +76,7 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         return this;
     }
 
+    /// <inheritdoc />
     public IFluentSetter<TValue> Changing(Action<TValue?, TValue?> action)
     {
         if (action == null)
@@ -68,6 +87,7 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         return this;
     }
 
+    /// <inheritdoc />
     public IFluentSetter<TValue> Changed(Action action)
     {
         if (action == null)
@@ -78,6 +98,7 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         return this;
     }
 
+    /// <inheritdoc />
     public IFluentSetter<TValue> Changed(Action<TValue?> action)
     {
         if (action == null)
@@ -88,6 +109,7 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         return this;
     }
 
+    /// <inheritdoc />
     public IFluentSetter<TValue> Changed(Action<TValue?, TValue?> action)
     {
         if (action == null)
@@ -98,18 +120,21 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         return this;
     }
 
+    /// <inheritdoc />
     public IFluentSetter<TValue> Notify(params ICommand[] commands)
     {
         _commandsToReevaluate = commands;
         return this;
     }
 
+    /// <inheritdoc />
     public IFluentSetter<TValue> Notify(params string[] propertyNames)
     {
         _propertiesToNotify = propertyNames;
         return this;
     }
 
+    /// <inheritdoc />
     public virtual void Set()
     {
         var oldValue = _viewModel.GetFieldValue<TValue>(PropertyName);
@@ -168,6 +193,9 @@ public class FluentSetter<TValue> : IFluentSetter<TValue>, IDisposable
         }
     }
 
+    /// <summary>
+    /// Releases the resources used by the fluent setter.
+    /// </summary>
     public virtual void Dispose()
     {
         _onChanging = null;

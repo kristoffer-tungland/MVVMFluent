@@ -9,6 +9,10 @@ using System.Globalization;
 
 namespace MVVMFluent.Validation;
 
+/// <summary>
+/// Extends <see cref="FluentSetter{TValue}"/> with validation rule composition for property values.
+/// </summary>
+/// <typeparam name="TValue">The type of the property value.</typeparam>
 public class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidationFluentSetter<TValue>
 {
     private readonly List<IValidationRule> _rules = new();
@@ -16,18 +20,31 @@ public class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidationF
     private Func<TValue?, bool>? _validationFunction;
     private string? _errorMessage;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidationFluentSetter{TValue}"/> class.
+    /// </summary>
+    /// <param name="viewModel">The owning view model that supports validation.</param>
+    /// <param name="propertyName">The name of the property to update.</param>
     public ValidationFluentSetter(IValidationFluentSetterViewModel viewModel, string? propertyName)
         : base(viewModel, propertyName)
     {
         _viewModel = viewModel;
     }
 
+    /// <summary>
+    /// Gets the collection of validation error messages for the property.
+    /// </summary>
     public ObservableCollection<string> Errors { get; } = new();
 
+    /// <summary>
+    /// Gets a value indicating whether validation errors are present.
+    /// </summary>
     public bool HasErrors { get; private set; }
 
+    /// <inheritdoc />
     public IEnumerable GetErrors() => Errors;
 
+    /// <inheritdoc />
     public IValidationFluentSetter<TValue> Validate(params IValidationRule[] rules)
     {
         if (rules == null)
@@ -43,6 +60,7 @@ public class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidationF
         return this;
     }
 
+    /// <inheritdoc />
     public IValidationFluentSetter<TValue> Validate(Func<TValue?, bool> validationFunction, string? errorMessage)
     {
         if (validationFunction == null)
@@ -55,11 +73,17 @@ public class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidationF
         return this;
     }
 
+    /// <inheritdoc />
     public IValidationFluentSetter<TValue> HasValue(string? errorMessage = null)
     {
         return Validate(new RequiredValidationRule(errorMessage));
     }
 
+    /// <summary>
+    /// Adds a validation rule to the current builder.
+    /// </summary>
+    /// <param name="rule">The validation rule to add.</param>
+    /// <returns>The current <see cref="ValidationFluentSetter{TValue}"/> instance.</returns>
     internal ValidationFluentSetter<TValue> AddRule(IValidationRule rule)
     {
         if (rule == null)
@@ -75,17 +99,23 @@ public class ValidationFluentSetter<TValue> : FluentSetter<TValue>, IValidationF
         return this;
     }
 
+    /// <inheritdoc />
     public override void Set()
     {
         CheckForErrors(ValueToSet);
         base.Set();
     }
 
+    /// <summary>
+    /// Executes validation for the specified value.
+    /// </summary>
+    /// <param name="valueToSet">The value to validate.</param>
     public void CheckForErrors(TValue? valueToSet)
     {
         CheckForErrors((object?)valueToSet);
     }
 
+    /// <inheritdoc />
     public void CheckForErrors(object? valueToSet)
     {
         Errors.Clear();
