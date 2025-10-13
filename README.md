@@ -106,6 +106,51 @@ public class LoaderViewModel : ViewModelBase
 
 Bindings can observe the `IsRunning`, `Progress`, and `CancelCommand` members exposed by the async command.
 
+### Query commands
+Derive from `FluentViewModelBase` and call `Send` to dispatch strongly typed queries through an `IQueryDispatcher`. The fluent builder supports the same gating helpers as regular commands, adds query-aware predicates, cancellation control, and typed result handlers:
+
+```csharp
+public class RegistrationViewModel : FluentViewModelBase
+{
+    private readonly IQueryDispatcher _queries;
+
+    public RegistrationViewModel(IQueryDispatcher queries)
+        : base(queries)
+    {
+        _queries = queries;
+    }
+
+    public string? Name
+    {
+        get => Get<string?>();
+        set => Set(value);
+    }
+
+    public string? Email
+    {
+        get => Get<string?>();
+        set => Set(value);
+    }
+
+    public string? WelcomeMessage
+    {
+        get => Get<string?>();
+        private set => Set(value);
+    }
+
+    public IAsyncFluentCommand RegisterCommand =>
+        Send(() => new RegisterQuery(Name ?? string.Empty, Email ?? string.Empty))
+            .IfValid(nameof(Name), nameof(Email))
+            .CancelWithin(TimeSpan.FromSeconds(10))
+            .Then(result => WelcomeMessage = $"Welcome, {result.Name}!")
+            .Handle(ex => LastError = ex.Message);
+
+    public string? LastError { get; private set; }
+}
+```
+
+Queries implement `IQuery<TResult>` and are handled by an `IQueryHandler<TQuery,TResult>`. The dispatcher locates the matching handler and returns the typed result to your `Then` delegate. You can link external tokens via `CancelWith`, specify a timeout via `CancelWithin`, and provide synchronous or asynchronous handlers with `Handle` to centralise error processing.
+
 ### Validation
 Derive from `ValidationViewModelBase` to wire validation rules directly into your setters. The `When` method returns an `IValidationFluentSetter<T>` interface. `HasValue()` optionally accepts a custom error message so you can surface friendly text when the bound property is empty:
 
