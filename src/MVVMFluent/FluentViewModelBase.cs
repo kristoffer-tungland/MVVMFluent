@@ -3,9 +3,9 @@ using MVVMFluent.Queries;
 namespace MVVMFluent;
 
 /// <summary>
-/// Represents a base class for view models that support fluent property setters, validation, and query commands.
+/// Represents a base class for view models that support fluent property setters and query commands.
 /// </summary>
-public abstract class FluentViewModelBase : ValidationViewModelBase
+public abstract class FluentViewModelBase : QueryViewModelBase
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="FluentViewModelBase"/> class.

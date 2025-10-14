@@ -15,7 +15,8 @@ namespace MVVMFluent.Commands;
 public sealed class QueryAsyncCommandBuilder<TResult>
 {
     private readonly AsyncFluentCommand _command;
-    private readonly IValidationFluentSetterViewModel _owner;
+    private readonly IFluentSetterViewModel _owner;
+    private readonly bool _supportsValidation;
     private readonly Func<IQuery<TResult>> _queryFactory;
     private readonly IQueryDispatcher _dispatcher;
     private readonly List<Func<bool>> _predicates = new();
@@ -32,9 +33,10 @@ public sealed class QueryAsyncCommandBuilder<TResult>
     /// <summary>
     /// Initializes a new instance of the <see cref="QueryAsyncCommandBuilder{TResult}"/> class.
     /// </summary>
-    internal QueryAsyncCommandBuilder(IValidationFluentSetterViewModel owner, Func<IQuery<TResult>> queryFactory, IQueryDispatcher dispatcher)
+    internal QueryAsyncCommandBuilder(IFluentSetterViewModel owner, Func<IQuery<TResult>> queryFactory, IQueryDispatcher dispatcher)
     {
         _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        _supportsValidation = owner is IValidationFluentSetterViewModel;
         _queryFactory = queryFactory ?? throw new ArgumentNullException(nameof(queryFactory));
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         _command = AsyncFluentCommand.Do((_, token) => ExecuteInternalAsync(token), owner);
@@ -103,6 +105,11 @@ public sealed class QueryAsyncCommandBuilder<TResult>
         if (_command.IsBuilt)
         {
             return this;
+        }
+
+        if (!_supportsValidation)
+        {
+            throw new InvalidOperationException("Validation gates require the owning view model to implement IValidationFluentSetterViewModel.");
         }
 
         foreach (var propertyName in propertyNames)
@@ -343,6 +350,11 @@ public sealed class QueryAsyncCommandBuilder<TResult>
 
     private bool HasNoErrors(IEnumerable<string> propertyNames)
     {
+        if (!_supportsValidation)
+        {
+            return true;
+        }
+
         foreach (var propertyName in propertyNames)
         {
             if (_owner.GetFluentSetterBuilder(propertyName) is IValidationFluentSetterBuilder builder && builder.HasErrors)
