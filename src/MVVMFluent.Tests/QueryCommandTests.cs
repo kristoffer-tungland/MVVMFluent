@@ -160,7 +160,7 @@ public class QueryCommandTests
             .Then(result => WelcomeMessage = $"Welcome, {result.Name}!");
     }
 
-    private sealed class ValidationHarnessViewModel : ValidationViewModelBase
+    private sealed class ValidationHarnessViewModel : QueryValidationViewModelBase
     {
         private readonly StubValidationBuilder _builder;
 
@@ -237,7 +237,7 @@ public class QueryCommandTests
             .Then(_ => { });
     }
 
-    private sealed class MissingDispatcherViewModel : ValidationViewModelBase
+    private sealed class MissingDispatcherViewModel : QueryValidationViewModelBase
     {
         public IAsyncFluentCommand Command => Send(() => new SimpleQuery()).Then(_ => { });
     }

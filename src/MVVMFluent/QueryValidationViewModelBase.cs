@@ -1,4 +1,5 @@
 using MVVMFluent.Interfaces;
+using MVVMFluent.Queries;
 using MVVMFluent.Validation;
 using System;
 using System.Collections;
@@ -10,9 +11,9 @@ using System.Runtime.CompilerServices;
 namespace MVVMFluent;
 
 /// <summary>
-/// Represents a base class for view models that provides property change notification, command creation, and validation.
+/// Represents a base class for view models that combines query command support with validation helpers.
 /// </summary>
-public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IValidationFluentSetterViewModel
+public abstract class QueryValidationViewModelBase : QueryViewModelBase, IValidationFluentSetterViewModel
 {
     /// <summary>
     /// Gets a value indicating whether any properties in this view model have validation errors.
@@ -31,9 +32,24 @@ public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IVali
     public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ValidationViewModelBase"/> class.
+    /// Initializes a new instance of the <see cref="QueryValidationViewModelBase"/> class.
     /// </summary>
-    protected ValidationViewModelBase()
+    protected QueryValidationViewModelBase()
+    {
+        InitializeValidation();
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="QueryValidationViewModelBase"/> class with the specified query dispatcher.
+    /// </summary>
+    /// <param name="queryDispatcher">The dispatcher responsible for executing queries.</param>
+    protected QueryValidationViewModelBase(IQueryDispatcher queryDispatcher)
+        : base(queryDispatcher)
+    {
+        InitializeValidation();
+    }
+
+    private void InitializeValidation()
     {
         ErrorsChanged += ErrorsChangedHandler;
     }
@@ -129,8 +145,7 @@ public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IVali
     /// <param name="propertyName">The name of the property. Automatically captured from the caller member name.</param>
     /// <returns>An <see cref="IValidationFluentSetter{TValue}"/> that allows configuring validation rules, change callbacks, and notifications before committing the value.</returns>
     /// <exception cref="ArgumentNullException">Thrown when the property name cannot be determined.</exception>
-
-    protected IValidationFluentSetter<TValue> When<TValue>(TValue value, [CallerMemberName] string? propertyName = null)
+    protected new IValidationFluentSetter<TValue> When<TValue>(TValue value, [CallerMemberName] string? propertyName = null)
     {
         if (propertyName == null)
         {
@@ -163,4 +178,16 @@ public abstract class ValidationViewModelBase : FluentSetterViewModelBase, IVali
 
         base.DisposeInternal();
     }
+
+    /// <summary>
+    /// Gets a value that indicates whether the view model has any validation errors.
+    /// </summary>
+    bool INotifyDataErrorInfo.HasErrors => HasErrors;
+
+    /// <summary>
+    /// Returns the validation errors for the specified property.
+    /// </summary>
+    /// <param name="propertyName">The name of the property whose errors are to be retrieved.</param>
+    /// <returns>An <see cref="IEnumerable"/> containing the validation errors for the specified property.</returns>
+    IEnumerable INotifyDataErrorInfo.GetErrors(string? propertyName) => GetErrors(propertyName);
 }

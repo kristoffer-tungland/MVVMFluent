@@ -7,7 +7,7 @@ MVVMFluent is a lightweight .NET library that helps you build MVVM view models w
 - **Interface-based design** &mdash; Work with `IFluentSetter<T>` and `IValidationFluentSetter<T>` interfaces instead of concrete implementations, making your code more testable and maintainable.
 - **Command builders** &mdash; Generate `IFluentCommand` and `IFluentCommand<T>` instances directly from your view model, keeping command wiring and `CanExecute` logic close to the properties that depend on them.
 - **Async command support** &mdash; Use `IAsyncFluentCommand` / `IAsyncFluentCommand<T>` to handle cancellable asynchronous work, expose an auto-wired `CancelCommand`, and surface progress updates through `INotifyPropertyChanged`.
-- **Validation pipeline** &mdash; Opt-in to `ValidationViewModelBase` to compose validation rules (such as `HasValue` or custom `Validate` callbacks) that keep the `Errors` collection and `HasErrors` flag in sync with your UI.
+- **Validation pipeline** &mdash; Opt-in to `ValidationViewModelBase` to compose validation rules (such as `HasValue` or custom `Validate` callbacks) that keep the `Errors` collection and `HasErrors` flag in sync with your UI. Derive from `QueryValidationViewModelBase` when you need the same validation helpers alongside query command support.
 - **Extended validation helpers** &mdash; Reference `MVVMFluent.ValidationExtensions` for ready-to-use rules like `IsEmail`, `IsUrl`, `HasLengthBetween`, and date or range guards.
 - **Roslyn analyzer** &mdash; Automatically included analyzer that enforces proper usage of `.Set()` at the end of fluent setter chains to prevent subtle bugs.
 - **Deterministic cleanup** &mdash; View model, command, and builder implementations implement `IDisposable` where appropriate to avoid self-referencing leaks when commands are re-evaluated or builders are cached.
@@ -107,10 +107,10 @@ public class LoaderViewModel : ViewModelBase
 Bindings can observe the `IsRunning`, `Progress`, and `CancelCommand` members exposed by the async command.
 
 ### Query commands
-Derive from `ValidationViewModelBase` (or `FluentViewModelBase` for compatibility) and call `Send` to dispatch strongly typed queries through an `IQueryDispatcher`. The fluent builder supports the same gating helpers as regular commands, adds query-aware predicates, cancellation control, and typed result handlers:
+Derive from `FluentViewModelBase` to send queries without validation, or use `QueryValidationViewModelBase` when you need both query dispatching and validation gates. The fluent builder supports the same gating helpers as regular commands, adds query-aware predicates, cancellation control, and typed result handlers:
 
 ```csharp
-public class RegistrationViewModel : ValidationViewModelBase
+public class RegistrationViewModel : QueryValidationViewModelBase
 {
     public RegistrationViewModel(IQueryDispatcher queries)
         : base(queries)
