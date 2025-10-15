@@ -107,7 +107,7 @@ public class LoaderViewModel : ViewModelBase
 Bindings can observe the `IsRunning`, `Progress`, and `CancelCommand` members exposed by the async command.
 
 ### Query commands
-Derive from `FluentViewModelBase` to send queries without validation, or use `QueryValidationViewModelBase` when you need both query dispatching and validation gates. The fluent builder supports the same gating helpers as regular commands, adds query-aware predicates, cancellation control, and typed result handlers:
+Derive from `QueryViewModelBase` to send queries without validation, or use `QueryValidationViewModelBase` when you need both query dispatching and validation gates. The fluent builder supports the same gating helpers as regular commands, adds query-aware predicates, cancellation control, and typed result handlers:
 
 ```csharp
 public class RegistrationViewModel : QueryValidationViewModelBase

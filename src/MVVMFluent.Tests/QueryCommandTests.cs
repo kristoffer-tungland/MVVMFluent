@@ -131,7 +131,7 @@ public class QueryCommandTests
         Assert.Throws<InvalidOperationException>(() => viewModel.Command);
     }
 
-    private sealed class RegistrationViewModel : FluentViewModelBase
+    private sealed class RegistrationViewModel : QueryViewModelBase
     {
         public RegistrationViewModel(IQueryDispatcher dispatcher)
             : base(dispatcher)
@@ -187,7 +187,7 @@ public class QueryCommandTests
         }
     }
 
-    private sealed class PredicateViewModel : FluentViewModelBase
+    private sealed class PredicateViewModel : QueryViewModelBase
     {
         private readonly Func<TrackingQuery, bool> _predicate;
 
@@ -202,7 +202,7 @@ public class QueryCommandTests
             .Then(_ => { });
     }
 
-    private sealed class CancellationViewModel : FluentViewModelBase
+    private sealed class CancellationViewModel : QueryViewModelBase
     {
         private readonly Func<QueryAsyncCommandBuilder<string>, QueryAsyncCommandBuilder<string>> _configure;
 
@@ -216,7 +216,7 @@ public class QueryCommandTests
             .Then(_ => { });
     }
 
-    private sealed class ErrorHandlingViewModel : FluentViewModelBase
+    private sealed class ErrorHandlingViewModel : QueryViewModelBase
     {
         public ErrorHandlingViewModel(IQueryDispatcher dispatcher)
             : base(dispatcher)
