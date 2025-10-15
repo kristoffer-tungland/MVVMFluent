@@ -106,6 +106,16 @@ public class LoaderViewModel : ViewModelBase
 
 Bindings can observe the `IsRunning`, `Progress`, and `CancelCommand` members exposed by the async command.
 
+You can also link external cancellation tokens or enforce a timeout directly on the command:
+
+```csharp
+public IAsyncFluentCommand LoadCommand => Do((_, token) => LoadAsync(token), owner: this)
+    .CancelWith(() => _shutdown.Token)
+    .CancelWithin(TimeSpan.FromSeconds(30));
+```
+
+`CancelWith` accepts any `CancellationToken` provider, while `CancelWithin` issues a timeout cancellation when the specified duration elapses.
+
 ### Query commands
 Derive from `QueryViewModelBase` to send queries without validation, or use `QueryValidationViewModelBase` when you need both query dispatching and validation gates. The fluent builder supports the same gating helpers as regular commands, adds query-aware predicates, cancellation control, and typed result handlers:
 
