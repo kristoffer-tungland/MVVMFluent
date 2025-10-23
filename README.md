@@ -114,7 +114,7 @@ public IAsyncFluentCommand LoadCommand => Do((_, token) => LoadAsync(token), own
     .CancelWithin(TimeSpan.FromSeconds(30));
 ```
 
-`CancelWith` accepts any `CancellationToken` provider, while `CancelWithin` issues a timeout cancellation when the specified duration elapses.
+`CancelWith` accepts any `CancellationToken` provider, while `CancelWithin` issues a timeout cancellation when the specified duration elapses. You can also call `Cancel()` from your view model logic to request cancellation directly when you know the work should stop.
 
 ### Query commands
 Derive from `QueryViewModelBase` to send queries without validation, or use `QueryValidationViewModelBase` when you need both query dispatching and validation gates. The fluent builder supports the same gating helpers as regular commands, adds query-aware predicates, cancellation control, and typed result handlers:

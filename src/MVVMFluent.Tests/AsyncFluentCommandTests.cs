@@ -46,6 +46,17 @@ public class AsyncFluentCommandTests
     }
 
     [Fact]
+    public void Cancel_WhenNotRunning_DoesNothing()
+    {
+        var command = AsyncFluentCommand.Do(() => Task.CompletedTask, owner: null);
+
+        command.Cancel();
+
+        Assert.False(command.IsRunning);
+        Assert.False(command.IsCancellationRequested);
+    }
+
+    [Fact]
     public async Task CancelCommand_RaisesCanExecuteChangedWhenRunningStateChanges()
     {
         var tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -102,6 +113,22 @@ public class AsyncFluentCommandTests
         await Assert.ThrowsAsync<TaskCanceledException>(() => execution);
 
         Assert.False(command.IsRunning);
+    }
+
+    [Fact]
+    public async Task Cancel_GenericCommand_CancelsRunningTask()
+    {
+        var command = AsyncFluentCommand<string>.Do((_, token) => Task.Delay(TimeSpan.FromSeconds(10), token), owner: null);
+
+        var execution = command.ExecuteAsync("value");
+        await WaitForConditionAsync(() => command.IsRunning);
+
+        command.Cancel();
+
+        await Assert.ThrowsAsync<TaskCanceledException>(() => execution);
+
+        Assert.False(command.IsRunning);
+        Assert.False(command.IsCancellationRequested);
     }
 
     private static async Task WaitForConditionAsync(Func<bool> condition, TimeSpan? timeout = null)
