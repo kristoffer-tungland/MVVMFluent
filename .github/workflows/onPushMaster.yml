@@ -1,8 +1,9 @@
-# A CI workflow example that:
-# - checks out with full history and tags
-# - uses the tag if the run was triggered by a tag (GITHUB_REF)
-# - otherwise falls back to paulhatch/semantic-version to compute the version
-# - passes the resolved version into dotnet build and the release step
+# GitHub Actions workflow: CI + deterministic versioning using paulhatch/semantic-version
+# - If the run is triggered by a tag (refs/tags/*) the tag is used as the version (leading "v" stripped)
+# - Otherwise the paulhatch/semantic-version action computes the implied version
+# - Build/pack use the resolved version
+# - Publish steps (NuGet.org and GitHub Packages) only run when the tag equals the resolved version
+# NOTE: Add your secrets.NUGET_API_KEY and secrets.GITHUB_PAT (or suitable token) to repository secrets.
 on:
   push:
     branches:
@@ -13,7 +14,11 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
     steps:
       - name: Checkout with history and tags
         uses: actions/checkout@v3
@@ -21,57 +26,118 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
       - name: Determine version from GITHUB_REF (tag) if present
         id: get-version-from-ref
-        shell: bash
+        shell: pwsh
         run: |
-          echo "GITHUB_REF=$GITHUB_REF"
-          if [[ "${GITHUB_REF:-}" == refs/tags/* ]]; then
-            # strip refs/tags/ and optional leading 'v'
-            ver="${GITHUB_REF#refs/tags/}"
-            ver="${ver#v}"
-            echo "Derived version from tag: $ver"
-            echo "version=$ver" >> "$GITHUB_OUTPUT"
-            echo "from_ref=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "No tag on GITHUB_REF"
-            echo "version=" >> "$GITHUB_OUTPUT"
-            echo "from_ref=false" >> "$GITHUB_OUTPUT"
-          fi
+          # Write outputs using $GITHUB_OUTPUT file for compatibility with GitHub Actions
+          $g = $env:GITHUB_REF
+          if ($null -ne $g -and $g -like 'refs/tags/*') {
+            $ver = $g.Substring(10)        # remove 'refs/tags/'
+            if ($ver.StartsWith('v')) { $ver = $ver.Substring(1) } # strip leading 'v'
+            Write-Host "Derived version from tag: $ver"
+            "version=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+            "from_ref=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          } else {
+            Write-Host "No tag on GITHUB_REF; will compute semantic version"
+            "version=" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+            "from_ref=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          }
 
       - name: Calculate semantic version (if not a tag)
         id: semver
         if: steps.get-version-from-ref.outputs.from_ref != 'true'
-        uses: paulhatch/semantic-version@v5.0.2
+        uses: paulhatch/semantic-version@v5.4.0
         with:
           tag_prefix: v
           version_format: '${major}.${minor}.${patch}'
           bump_each_commit: false
           search_commit_body: false
           user_format_type: csv
-        # semantic-version exposes outputs such as 'version' and 'version_tag'
 
       - name: Set final version output
         id: final-version
-        shell: bash
+        shell: pwsh
         run: |
-          if [[ "${{ steps.get-version-from-ref.outputs.from_ref }}" == "true" ]]; then
-            version="${{ steps.get-version-from-ref.outputs.version }}"
-            source="tag"
-          else
-            version="${{ steps.semver.outputs.version }}"
-            source="semantic-version"
-          fi
-          echo "Final version is: $version (source: $source)"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          $fromRef = '${{ steps.get-version-from-ref.outputs.from_ref }}'
+          if ($fromRef -eq 'true') {
+            $version = '${{ steps.get-version-from-ref.outputs.version }}'
+            $source = 'tag'
+          } else {
+            $version = '${{ steps.semver.outputs.version }}'
+            $source = 'semantic-version'
+          }
+          if ([string]::IsNullOrEmpty($version)) {
+            Write-Host "ERROR: Version resolution failed. from_ref=$fromRef"
+            Exit 1
+          }
+          Write-Host "Final version resolved: $version (source: $source)"
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Restore dependencies
+        run: dotnet restore
 
       - name: Build (use resolved version)
-        run: |
-          echo "Using version ${{ steps.final-version.outputs.version }} for build"
-          dotnet build --no-restore --configuration Release -p:Version=${{ steps.final-version.outputs.version }}
+        run: dotnet build --no-restore --configuration Release -p:Version=${{ steps.final-version.outputs.version }}
 
-      - name: Create GitHub Release (softprops) using final version
-        if: ${{ always() }}
+      - name: Pack artifacts
+        run: dotnet pack --no-build --configuration Release -p:Version=${{ steps.final-version.outputs.version }} -o ./artifacts
+
+      - name: Check tag equals final version
+        id: check-tag
+        shell: pwsh
+        run: |
+          $match = 'false'
+          if ($env:GITHUB_REF -and $env:GITHUB_REF -like 'refs/tags/*') {
+            $tag = $env:GITHUB_REF.Substring(10)
+            if ($tag.StartsWith('v')) { $tag = $tag.Substring(1) }
+            $final = '${{ steps.final-version.outputs.version }}'
+            Write-Host "Tag on ref: $tag"
+            Write-Host "Final resolved version: $final"
+            if ($tag -eq $final) { $match = 'true' }
+          }
+          "match=$match" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: List artifacts (debug)
+        run: |
+          echo "Artifacts:"
+          dir ./artifacts
+
+      - name: Push to NuGet.org (only when tag equals final version)
+        if: steps.check-tag.outputs.match == 'true'
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          echo "Pushing to nuget.org"
+          dotnet nuget push ./artifacts/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key "$NUGET_API_KEY" --skip-duplicate
+
+      - name: Authenticate to GitHub Packages (add source)
+        if: steps.check-tag.outputs.match == 'true'
+        shell: pwsh
+        run: |
+          # Configure GitHub Packages source for dotnet (stores credentials in clear text)
+          $token = '${{ secrets.GITHUB_PAT }}'
+          if (-not $token) {
+            Write-Host "No GITHUB_PAT found in secrets; skipping GitHub Packages push"
+            exit 0
+          }
+          dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --name "github" --username "${{ github.repository_owner }}" --password "$token" --store-password-in-clear-text
+
+      - name: Push to GitHub Packages (only when tag equals final version)
+        if: steps.check-tag.outputs.match == 'true'
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+        run: |
+          echo "Pushing to GitHub Packages"
+          dotnet nuget push ./artifacts/*.nupkg --source "github" --api-key "$GITHUB_PAT" --skip-duplicate
+
+      - name: Create GitHub Release (only when tag equals final version)
+        if: steps.check-tag.outputs.match == 'true'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.final-version.outputs.version }}
