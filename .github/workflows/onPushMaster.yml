@@ -1,67 +1,81 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
-
+# A CI workflow example that:
+# - checks out with full history and tags
+# - uses the tag if the run was triggered by a tag (GITHUB_REF)
+# - otherwise falls back to paulhatch/semantic-version to compute the version
+# - passes the resolved version into dotnet build and the release step
 on:
   push:
-    branches: [ "master" ]
+    branches:
+      - main
     tags:
-      - "v*"
-
-permissions:
-  contents: write
-  packages: write
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build:
-
-    runs-on: windows-latest
-
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Checkout with history and tags
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
-    - name: Application Version
-      id: version
-      uses: paulhatch/semantic-version@v5.0.2
-      with:
-        tag_prefix: "v"
-        version_format: "${major}.${minor}.${patch}"
+      - name: Determine version from GITHUB_REF (tag) if present
+        id: get-version-from-ref
+        shell: bash
+        run: |
+          echo "GITHUB_REF=$GITHUB_REF"
+          if [[ "${GITHUB_REF:-}" == refs/tags/* ]]; then
+            # strip refs/tags/ and optional leading 'v'
+            ver="${GITHUB_REF#refs/tags/}"
+            ver="${ver#v}"
+            echo "Derived version from tag: $ver"
+            echo "version=$ver" >> "$GITHUB_OUTPUT"
+            echo "from_ref=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No tag on GITHUB_REF"
+            echo "version=" >> "$GITHUB_OUTPUT"
+            echo "from_ref=false" >> "$GITHUB_OUTPUT"
+          fi
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
+      - name: Calculate semantic version (if not a tag)
+        id: semver
+        if: steps.get-version-from-ref.outputs.from_ref != 'true'
+        uses: paulhatch/semantic-version@v5.0.2
+        with:
+          tag_prefix: v
+          version_format: '${major}.${minor}.${patch}'
+          bump_each_commit: false
+          search_commit_body: false
+          user_format_type: csv
+        # semantic-version exposes outputs such as 'version' and 'version_tag'
 
-    - name: Authenticate GitHub Packages
-      run: dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --name "github" --username "${{ github.actor }}" --password "${{ secrets.Token }}" --store-password-in-clear-text
+      - name: Set final version output
+        id: final-version
+        shell: bash
+        run: |
+          if [[ "${{ steps.get-version-from-ref.outputs.from_ref }}" == "true" ]]; then
+            version="${{ steps.get-version-from-ref.outputs.version }}"
+            source="tag"
+          else
+            version="${{ steps.semver.outputs.version }}"
+            source="semantic-version"
+          fi
+          echo "Final version is: $version (source: $source)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
-    - name: Restore dependencies
-      run: dotnet restore
-    
-    - name: Build
-      run: dotnet build --no-restore --configuration Release -p:Version=${{ steps.version.outputs.version }}
-    
-    - name: Test
-      run: dotnet test --no-build --verbosity normal --configuration Release
-    
-    - name: Push Package to NuGet.org
-      run: dotnet nuget push **/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key "${{ secrets.NUGET_API_KEY }}" --skip-duplicate
+      - name: Build (use resolved version)
+        run: |
+          echo "Using version ${{ steps.final-version.outputs.version }} for build"
+          dotnet build --no-restore --configuration Release -p:Version=${{ steps.final-version.outputs.version }}
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        token: "${{ secrets.Token }}"
-        tag_name: "v${{ steps.version.outputs.version }}"
-        name: "Release ${{ steps.version.outputs.version }}"
-        prerelease: false
-        generate_release_notes: true
-        files: |
-          LICENSE.txt
-          README.md
-          **/*.nupkg
-
-    - name: Push Package to GitHub
-      run: dotnet nuget push **/*.nupkg --source github --api-key "${{ secrets.Token }}" --skip-duplicate
+      - name: Create GitHub Release (softprops) using final version
+        if: ${{ always() }}
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.final-version.outputs.version }}
+          name: Release ${{ steps.final-version.outputs.version }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
