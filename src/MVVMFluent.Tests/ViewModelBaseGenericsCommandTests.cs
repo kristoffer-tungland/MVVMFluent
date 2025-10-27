@@ -1,6 +1,4 @@
-﻿using MVVMFluent.Commands;
-
-namespace MVVMFluent.Tests
+﻿namespace MVVMFluent.Tests
 {
     public class CommandViewModel : ViewModelBase
     {
