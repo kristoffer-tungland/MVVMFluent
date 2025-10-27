@@ -1,8 +1,6 @@
 ﻿namespace MVVMFluent.Tests
 {
-    public class CommandViewModel : ViewModelBase
-    {
-    }
+    public class CommandViewModel : ViewModelBase{ }
 
     public class ViewModelBaseGenericsCommandTests
     {
