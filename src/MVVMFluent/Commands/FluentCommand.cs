@@ -1,7 +1,7 @@
 using MVVMFluent.Interfaces;
 using System;
 
-namespace MVVMFluent.Commands;
+namespace MVVMFluent;
 
 /// <summary>
 /// Represents a command that can be executed and has an associated execution condition.

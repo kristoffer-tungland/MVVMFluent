@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MVVMFluent.Commands;
+namespace MVVMFluent;
 
 /// <summary>
 /// Represents an asynchronous command that supports cancellation and tracks execution state.
