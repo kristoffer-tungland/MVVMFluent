@@ -7,7 +7,7 @@ MVVMFluent is a lightweight .NET library that helps you build MVVM view models w
 - **Interface-based design** &mdash; Work with `IFluentSetter<T>` and `IValidationFluentSetter<T>` interfaces instead of concrete implementations, making your code more testable and maintainable.
 - **Command builders** &mdash; Generate `IFluentCommand` and `IFluentCommand<T>` instances directly from your view model, keeping command wiring and `CanExecute` logic close to the properties that depend on them.
 - **Async command support** &mdash; Use `IAsyncFluentCommand` / `IAsyncFluentCommand<T>` to handle cancellable asynchronous work, expose an auto-wired `CancelCommand`, and surface progress updates through `INotifyPropertyChanged`.
-- **Validation pipeline** &mdash; Opt-in to `ValidationViewModelBase` to compose validation rules (such as `HasValue` or custom `Validate` callbacks) that keep the `Errors` collection and `HasErrors` flag in sync with your UI.
+- **Validation pipeline** &mdash; Opt-in to `ValidationViewModelBase` to compose validation rules (such as `HasValue` or custom `Validate` callbacks) that keep the `Errors` collection and `HasErrors` flag in sync with your UI. Derive from `QueryValidationViewModelBase` when you need the same validation helpers alongside query command support.
 - **Extended validation helpers** &mdash; Reference `MVVMFluent.ValidationExtensions` for ready-to-use rules like `IsEmail`, `IsUrl`, `HasLengthBetween`, and date or range guards.
 - **Roslyn analyzer** &mdash; Automatically included analyzer that enforces proper usage of `.Set()` at the end of fluent setter chains to prevent subtle bugs.
 - **Deterministic cleanup** &mdash; View model, command, and builder implementations implement `IDisposable` where appropriate to avoid self-referencing leaks when commands are re-evaluated or builders are cached.
@@ -105,6 +105,58 @@ public class LoaderViewModel : ViewModelBase
 ```
 
 Bindings can observe the `IsRunning`, `Progress`, and `CancelCommand` members exposed by the async command.
+
+You can also link external cancellation tokens or enforce a timeout directly on the command:
+
+```csharp
+public IAsyncFluentCommand LoadCommand => Do((_, token) => LoadAsync(token), owner: this)
+    .CancelWith(() => _shutdown.Token)
+    .CancelWithin(TimeSpan.FromSeconds(30));
+```
+
+`CancelWith` accepts any `CancellationToken` provider, while `CancelWithin` issues a timeout cancellation when the specified duration elapses. You can also call `Cancel()` from your view model logic to request cancellation directly when you know the work should stop.
+
+### Query commands
+Derive from `QueryViewModelBase` to send queries without validation, or use `QueryValidationViewModelBase` when you need both query dispatching and validation gates. The fluent builder supports the same gating helpers as regular commands, adds query-aware predicates, cancellation control, and typed result handlers:
+
+```csharp
+public class RegistrationViewModel : QueryValidationViewModelBase
+{
+    public RegistrationViewModel(IQueryDispatcher queries)
+        : base(queries)
+    {
+    }
+
+    public string? Name
+    {
+        get => Get<string?>();
+        set => Set(value);
+    }
+
+    public string? Email
+    {
+        get => Get<string?>();
+        set => Set(value);
+    }
+
+    public string? WelcomeMessage
+    {
+        get => Get<string?>();
+        private set => Set(value);
+    }
+
+    public IAsyncFluentCommand RegisterCommand =>
+        Send(() => new RegisterQuery(Name ?? string.Empty, Email ?? string.Empty))
+            .IfValid(nameof(Name), nameof(Email))
+            .CancelWithin(TimeSpan.FromSeconds(10))
+            .Then(result => WelcomeMessage = $"Welcome, {result.Name}!")
+            .Handle(ex => LastError = ex.Message);
+
+    public string? LastError { get; private set; }
+}
+```
+
+Queries implement `IQuery<TResult>` and are handled by an `IQueryHandler<TQuery,TResult>`. The dispatcher locates the matching handler and returns the typed result to your `Then` delegate. You can link external tokens via `CancelWith`, specify a timeout via `CancelWithin`, and provide synchronous or asynchronous handlers with `Handle` to centralise error processing.
 
 ### Validation
 Derive from `ValidationViewModelBase` to wire validation rules directly into your setters. The `When` method returns an `IValidationFluentSetter<T>` interface. `HasValue()` optionally accepts a custom error message so you can surface friendly text when the bound property is empty:

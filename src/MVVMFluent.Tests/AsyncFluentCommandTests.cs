@@ -1,6 +1,7 @@
 using MVVMFluent.Commands;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MVVMFluent.Tests;
@@ -45,6 +46,17 @@ public class AsyncFluentCommandTests
     }
 
     [Fact]
+    public void Cancel_WhenNotRunning_DoesNothing()
+    {
+        var command = AsyncFluentCommand.Do(() => Task.CompletedTask, owner: null);
+
+        command.Cancel();
+
+        Assert.False(command.IsRunning);
+        Assert.False(command.IsCancellationRequested);
+    }
+
+    [Fact]
     public async Task CancelCommand_RaisesCanExecuteChangedWhenRunningStateChanges()
     {
         var tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -68,6 +80,55 @@ public class AsyncFluentCommandTests
 
         await WaitForConditionAsync(() => canExecuteStates.Count >= 2);
         Assert.False(canExecuteStates[^1]);
+    }
+
+    [Fact]
+    public async Task CancelWith_CancelsWhenLinkedTokenCancels()
+    {
+        var externalCts = new CancellationTokenSource();
+        var command = AsyncFluentCommand
+            .Do((_, token) => Task.Delay(TimeSpan.FromSeconds(10), token), owner: null)
+            .CancelWith(() => externalCts.Token);
+
+        var execution = command.ExecuteAsync(null);
+
+        await WaitForConditionAsync(() => command.IsRunning);
+
+        externalCts.Cancel();
+
+        await Assert.ThrowsAsync<TaskCanceledException>(() => execution);
+
+        Assert.False(command.IsRunning);
+    }
+
+    [Fact]
+    public async Task CancelWithin_CancelsAfterTimeout()
+    {
+        var command = AsyncFluentCommand
+            .Do((_, token) => Task.Delay(TimeSpan.FromSeconds(10), token), owner: null)
+            .CancelWithin(TimeSpan.FromMilliseconds(50));
+
+        var execution = command.ExecuteAsync(null);
+
+        await Assert.ThrowsAsync<TaskCanceledException>(() => execution);
+
+        Assert.False(command.IsRunning);
+    }
+
+    [Fact]
+    public async Task Cancel_GenericCommand_CancelsRunningTask()
+    {
+        var command = AsyncFluentCommand<string>.Do((_, token) => Task.Delay(TimeSpan.FromSeconds(10), token), owner: null);
+
+        var execution = command.ExecuteAsync("value");
+        await WaitForConditionAsync(() => command.IsRunning);
+
+        command.Cancel();
+
+        await Assert.ThrowsAsync<TaskCanceledException>(() => execution);
+
+        Assert.False(command.IsRunning);
+        Assert.False(command.IsCancellationRequested);
     }
 
     private static async Task WaitForConditionAsync(Func<bool> condition, TimeSpan? timeout = null)

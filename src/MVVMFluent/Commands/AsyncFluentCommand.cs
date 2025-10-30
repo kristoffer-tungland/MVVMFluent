@@ -1,5 +1,6 @@
 using MVVMFluent.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -21,6 +22,8 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
     private bool _disposed;
     private bool _isRunning;
     private int _progress;
+    private readonly List<Func<CancellationToken>> _tokenProviders = new();
+    private TimeSpan? _timeout;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AsyncFluentCommand"/> class.
@@ -258,6 +261,48 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
     }
 
     /// <summary>
+    /// Links an external cancellation token to the command execution.
+    /// </summary>
+    /// <param name="tokenProvider">The provider that supplies the cancellation token.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand"/> instance.</returns>
+    public AsyncFluentCommand CancelWith(Func<CancellationToken> tokenProvider)
+    {
+        if (IsBuilt)
+        {
+            return this;
+        }
+
+        if (tokenProvider == null)
+        {
+            throw new ArgumentNullException(nameof(tokenProvider));
+        }
+
+        _tokenProviders.Add(tokenProvider);
+        return this;
+    }
+
+    /// <summary>
+    /// Configures the command to cancel automatically when the specified timeout elapses.
+    /// </summary>
+    /// <param name="duration">The timeout duration.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand"/> instance.</returns>
+    public AsyncFluentCommand CancelWithin(TimeSpan duration)
+    {
+        if (IsBuilt)
+        {
+            return this;
+        }
+
+        if (duration <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(duration), "Timeout must be greater than zero.");
+        }
+
+        _timeout = duration;
+        return this;
+    }
+
+    /// <summary>
     /// Configures whether continuations should capture the current synchronization context.
     /// </summary>
     /// <param name="continueOnCapturedContext">A value indicating whether to resume on the captured context.</param>
@@ -299,21 +344,40 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
             return;
         }
 
-        var linkedCts = new CancellationTokenSource();
-        _cts = linkedCts;
+        var tokens = new List<CancellationToken>(_tokenProviders.Count + 1);
+
+        foreach (var provider in _tokenProviders)
+        {
+            tokens.Add(provider());
+        }
+
+        CancellationTokenSource? timeoutCts = null;
+
+        if (_timeout.HasValue)
+        {
+            timeoutCts = new CancellationTokenSource(_timeout.Value);
+            tokens.Add(timeoutCts.Token);
+        }
+
+        var executionCts = tokens.Count > 0
+            ? CancellationTokenSource.CreateLinkedTokenSource(tokens.ToArray())
+            : new CancellationTokenSource();
+
+        _cts = executionCts;
         IsRunning = true;
         Progress = 0;
 
         try
         {
-            await _execute(parameter, linkedCts.Token).ConfigureAwait(_continueOnCapturedContext);
+            await _execute(parameter, executionCts.Token).ConfigureAwait(_continueOnCapturedContext);
         }
         finally
         {
             Progress = 0;
             IsRunning = false;
             _cts = null;
-            linkedCts.Dispose();
+            executionCts.Dispose();
+            timeoutCts?.Dispose();
         }
     }
 
@@ -459,6 +523,8 @@ public class AsyncFluentCommand : IAsyncFluentCommand, INotifyPropertyChanged, I
             _execute = null;
             _canExecute = null;
             _onException = null;
+            _tokenProviders.Clear();
+            _timeout = null;
             CanExecuteChanged = null;
         }
 
@@ -480,6 +546,8 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
     private bool _disposed;
     private bool _isRunning;
     private int _progress;
+    private readonly List<Func<CancellationToken>> _tokenProviders = new();
+    private TimeSpan? _timeout;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AsyncFluentCommand{T}"/> class.
@@ -698,6 +766,48 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
     }
 
     /// <summary>
+    /// Links an external cancellation token to the command execution.
+    /// </summary>
+    /// <param name="tokenProvider">The provider that supplies the cancellation token.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand{T}"/> instance.</returns>
+    public AsyncFluentCommand<T> CancelWith(Func<CancellationToken> tokenProvider)
+    {
+        if (IsBuilt)
+        {
+            return this;
+        }
+
+        if (tokenProvider == null)
+        {
+            throw new ArgumentNullException(nameof(tokenProvider));
+        }
+
+        _tokenProviders.Add(tokenProvider);
+        return this;
+    }
+
+    /// <summary>
+    /// Configures the command to cancel automatically when the specified timeout elapses.
+    /// </summary>
+    /// <param name="duration">The timeout duration.</param>
+    /// <returns>The current <see cref="AsyncFluentCommand{T}"/> instance.</returns>
+    public AsyncFluentCommand<T> CancelWithin(TimeSpan duration)
+    {
+        if (IsBuilt)
+        {
+            return this;
+        }
+
+        if (duration <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(duration), "Timeout must be greater than zero.");
+        }
+
+        _timeout = duration;
+        return this;
+    }
+
+    /// <summary>
     /// Configures whether continuations should capture the current synchronization context.
     /// </summary>
     /// <param name="continueOnCapturedContext">A value indicating whether to resume on the captured context.</param>
@@ -752,21 +862,40 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
             return;
         }
 
-        var linkedCts = new CancellationTokenSource();
-        _cts = linkedCts;
+        var tokens = new List<CancellationToken>(_tokenProviders.Count + 1);
+
+        foreach (var provider in _tokenProviders)
+        {
+            tokens.Add(provider());
+        }
+
+        CancellationTokenSource? timeoutCts = null;
+
+        if (_timeout.HasValue)
+        {
+            timeoutCts = new CancellationTokenSource(_timeout.Value);
+            tokens.Add(timeoutCts.Token);
+        }
+
+        var executionCts = tokens.Count > 0
+            ? CancellationTokenSource.CreateLinkedTokenSource(tokens.ToArray())
+            : new CancellationTokenSource();
+
+        _cts = executionCts;
         IsRunning = true;
         Progress = 0;
 
         try
         {
-            await _execute(parameter, linkedCts.Token).ConfigureAwait(_continueOnCapturedContext);
+            await _execute(parameter, executionCts.Token).ConfigureAwait(_continueOnCapturedContext);
         }
         finally
         {
             Progress = 0;
             IsRunning = false;
             _cts = null;
-            linkedCts.Dispose();
+            executionCts.Dispose();
+            timeoutCts?.Dispose();
         }
     }
 
@@ -912,6 +1041,8 @@ public class AsyncFluentCommand<T> : IAsyncFluentCommand<T>, INotifyPropertyChan
             _execute = null;
             _canExecute = null;
             _onException = null;
+            _tokenProviders.Clear();
+            _timeout = null;
             CanExecuteChanged = null;
         }
 
